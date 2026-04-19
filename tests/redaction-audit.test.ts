@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import {
   auditGrocyPublicArtifacts,
@@ -48,10 +49,10 @@ describe("Grocy public artifact redaction audit", () => {
       path.join("data", "generated-report.json"),
       [
         "{",
-        '  "sourcePath": "D:\\\\workspace\\\\private\\\\grocy.sqlite",',
-        '  "baseUrl": "https://grocy.private.invalid/api",',
-        '  "apiKey": "super-secret-live-key",',
-        '  "notes": ["Stefan household workflow"]',
+        '  "sourcePath": "C:\\\\synthetic\\\\artifacts\\\\grocy.sqlite",',
+        '  "baseUrl": "https://demo.invalid/api",',
+        '  "apiKey": "actual-token-value",',
+        '  "notes": ["household workflow"]',
         "}",
       ].join("\n"),
     );
@@ -71,10 +72,44 @@ describe("Grocy public artifact redaction audit", () => {
       "private_boundary_term",
     ]);
     expect(serializedAudit).toContain("data/generated-report.json");
-    expect(serializedAudit).not.toContain("private\\\\grocy.sqlite");
-    expect(serializedAudit).not.toContain("grocy.private.invalid");
-    expect(serializedAudit).not.toContain("super-secret-live-key");
-    expect(serializedAudit).not.toContain("Stefan household workflow");
+    expect(serializedAudit).not.toContain("synthetic\\\\artifacts\\\\grocy.sqlite");
+    expect(serializedAudit).not.toContain("demo.invalid");
+    expect(serializedAudit).not.toContain("actual-token-value");
+    expect(serializedAudit).not.toContain("household workflow");
+  });
+
+  it("exits non-zero when the CLI audit finds redaction issues", () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-redaction-audit-cli-fail-"));
+    writeFile(
+      baseDir,
+      path.join("data", "generated-report.json"),
+      [
+        "{",
+        '  "sourcePath": "C:\\\\synthetic\\\\artifacts\\\\grocy.sqlite",',
+        '  "baseUrl": "https://demo.invalid/api"',
+        "}",
+      ].join("\n"),
+    );
+
+    const result = spawnSync(
+      process.execPath,
+      [
+        path.resolve("node_modules", "tsx", "dist", "cli.mjs"),
+        path.resolve("src", "cli.ts"),
+        "grocy:artifacts:audit-redaction",
+        "--path",
+        "data",
+        "--output",
+        path.join("data", "audit-result.json"),
+      ],
+      { cwd: baseDir, encoding: "utf8" },
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toBe("");
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      summary: { result: "fail", findingCount: 2 },
+    });
   });
 
   it("ignores paths outside the repository boundary", () => {
