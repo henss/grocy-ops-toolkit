@@ -1,0 +1,36 @@
+{
+  "kind": "grocy_mock_smoke_report",
+  "version": 1,
+  "generatedAt": "2026-04-19T10:20:00.000Z",
+  "summary": {
+    "result": "pass",
+    "checkCount": 4,
+    "failureCount": 0
+  },
+  "checks": [
+    {
+      "id": "health",
+      "status": "pass",
+      "message": "Synthetic Grocy health check passed."
+    },
+    {
+      "id": "export",
+      "status": "pass",
+      "message": "Synthetic Grocy config export produced records."
+    },
+    {
+      "id": "plan",
+      "status": "pass",
+      "message": "Synthetic desired state produced create, update, and noop plan actions."
+    },
+    {
+      "id": "apply_dry_run",
+      "status": "pass",
+      "message": "Synthetic apply dry run summarized the planned non-live writes."
+    }
+  ],
+  "artifacts": {
+    "planPath": "data/grocy-config-sync-plan.json",
+    "dryRunReportPath": "data/grocy-config-apply-dry-run-report.json"
+  }
+}

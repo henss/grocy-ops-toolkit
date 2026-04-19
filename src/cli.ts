@@ -15,6 +15,7 @@ import {
 import { createGrocyBackupSnapshot, verifyGrocyBackupSnapshot } from "./backups.js";
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
+import { recordGrocyMockSmokeReport, runGrocyMockSmokeTest } from "./mock-smoke.js";
 
 function parseFlag(flag: string): string | undefined {
   const index = process.argv.indexOf(flag);
@@ -42,6 +43,15 @@ async function main(): Promise<void> {
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
     printJson({ outputPath, summary: artifact.summary });
+    return;
+  }
+  if (command === "grocy:smoke:mock") {
+    const report = await runGrocyMockSmokeTest(process.cwd());
+    const outputPath = recordGrocyMockSmokeReport(report, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: report.summary });
     return;
   }
   if (command === "grocy:export-config") {
