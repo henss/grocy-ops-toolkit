@@ -1,5 +1,5 @@
 {
-  "sourcePath": "./examples/synthetic-grocy-config",
+  "sourcePath": "./examples/synthetic-grocy-backup-source",
   "backupDir": "./backups/grocy",
   "passphraseEnv": "GROCY_BACKUP_PASSPHRASE",
   "locationLabel": "synthetic-local-encrypted"

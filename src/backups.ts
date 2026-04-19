@@ -52,6 +52,11 @@ function sha256(buffer: Buffer | string): string {
   return crypto.createHash("sha256").update(buffer).digest("hex");
 }
 
+function isPathInside(parentPath: string, candidatePath: string): boolean {
+  const relativePath = path.relative(parentPath, candidatePath);
+  return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
+}
+
 function parseBackupConfig(raw: unknown): GrocyBackupLocalConfig {
   if (!raw || typeof raw !== "object") {
     throw new Error("Grocy backup config must be an object.");
@@ -229,6 +234,9 @@ export function verifyGrocyBackupSnapshot(
   const archive = fs.readFileSync(archivePath);
   const bundle = decryptBundle(archive, passphrase);
   const checksumVerified = sha256(archive) === latest.checksumSha256;
+  if (!checksumVerified) {
+    throw new Error(`Grocy backup checksum verification failed for ${archivePath}.`);
+  }
   for (const file of bundle.files) {
     const content = Buffer.from(file.contentBase64, "base64");
     if (sha256(content) !== file.sha256) {
@@ -244,7 +252,7 @@ export function verifyGrocyBackupSnapshot(
     fs.mkdirSync(restoreDir, { recursive: true });
     for (const file of bundle.files) {
       const target = path.resolve(restoreDir, file.path);
-      if (!target.startsWith(restoreDir)) {
+      if (!isPathInside(restoreDir, target)) {
         throw new Error(`Refusing to restore path outside target directory: ${file.path}`);
       }
       fs.mkdirSync(path.dirname(target), { recursive: true });

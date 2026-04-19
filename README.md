@@ -34,4 +34,7 @@ For backups, create `config/grocy-backup.local.json` from `examples/grocy-backup
 ```bash
 npm run grocy:backup:snapshot
 npm run grocy:backup:verify
+npm run grocy:backup:verify -- --restore-dir restore/grocy-backup-check --confirm-restore-write
 ```
+
+The example backup source under `examples/synthetic-grocy-backup-source` is intentionally synthetic. Use it to test the snapshot, encrypted archive, verification, and restore loop before pointing a local config at private Grocy files.

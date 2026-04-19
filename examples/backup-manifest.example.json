@@ -6,12 +6,12 @@
     {
       "id": "grocy-backup-20260419101000",
       "createdAt": "2026-04-19T10:10:00.000Z",
-      "sourcePath": "./examples/synthetic-grocy-config",
+      "sourcePath": "./examples/synthetic-grocy-backup-source",
       "archivePath": "./backups/grocy/grocy-backup-20260419101000.grocy-backup.enc",
       "locationLabel": "synthetic-local-encrypted",
       "checksumSha256": "example-checksum-placeholder",
-      "fileCount": 1,
-      "totalBytes": 42,
+      "fileCount": 2,
+      "totalBytes": 381,
       "restoreTestStatus": "not_tested",
       "notes": [
         "Synthetic backup metadata only."

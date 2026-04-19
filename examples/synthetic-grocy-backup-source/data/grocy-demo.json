@@ -1,0 +1,14 @@
+{
+  "kind": "synthetic_grocy_backup_fixture",
+  "version": 1,
+  "products": [
+    {
+      "name": "Example oats",
+      "location": "Demo shelf",
+      "quantityUnit": "pack"
+    }
+  ],
+  "notes": [
+    "Synthetic fixture data only."
+  ]
+}
