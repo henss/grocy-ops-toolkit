@@ -52,4 +52,25 @@ describe("Grocy live adapter", () => {
     expect(result.status.reachable).toBe(false);
     expect(result.status.notes.join("\n")).toContain("500 Broken");
   });
+
+  it("allows callers to use a repo-specific config path", async () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-custom-config-"));
+    fs.mkdirSync(path.join(baseDir, "private-config"), { recursive: true });
+    fs.writeFileSync(
+      path.join(baseDir, "private-config", "grocy.local.json"),
+      JSON.stringify({
+        baseUrl: "https://grocy.example.com",
+        apiKey: "test-api-key",
+        timeoutMs: 1000,
+      }),
+      "utf8",
+    );
+    const fetchImpl = vi.fn(async () => new Response("[]", { status: 200 })) as typeof fetch;
+
+    const result = await runGrocyHealthCheck(baseDir, fetchImpl, {
+      configPath: path.join("private-config", "grocy.local.json"),
+    });
+
+    expect(result.status.reachable).toBe(true);
+  });
 });

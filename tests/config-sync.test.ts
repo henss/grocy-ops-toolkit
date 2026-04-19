@@ -171,4 +171,27 @@ describe("Grocy config sync", () => {
 
     await expect(applyGrocyConfigSyncPlan(planPath, baseDir)).rejects.toThrow("confirm-reviewed-write");
   });
+
+  it("uses caller-provided config paths for custom repo layouts", async () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-custom-layout-"));
+    fs.mkdirSync(path.join(baseDir, "private-config"), { recursive: true });
+    fs.writeFileSync(
+      path.join(baseDir, "private-config", "grocy.local.json"),
+      JSON.stringify({
+        baseUrl: "https://grocy.example.com/api",
+        apiKey: "test-api-key",
+        timeoutMs: 1000,
+      }),
+      "utf8",
+    );
+    const fetchImpl = vi.fn(async () => new Response("[]", { status: 200 })) as typeof fetch;
+
+    const exportData = await exportGrocyConfig(baseDir, {
+      fetchImpl,
+      exportedAt: "2026-04-19T10:00:00.000Z",
+      configPath: path.join("private-config", "grocy.local.json"),
+    });
+
+    expect(exportData.source.baseUrl).toBe("https://grocy.example.com/api");
+  });
 });

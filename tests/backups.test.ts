@@ -61,4 +61,35 @@ describe("Grocy backups", () => {
 
     expect(() => verifyGrocyBackupSnapshot(baseDir, { restoreDir: "restore" })).toThrow("confirm-restore-write");
   });
+
+  it("uses caller-provided config and manifest paths for custom repo layouts", () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-backup-custom-layout-"));
+    fs.mkdirSync(path.join(baseDir, "source"), { recursive: true });
+    fs.mkdirSync(path.join(baseDir, "private-config"), { recursive: true });
+    fs.writeFileSync(path.join(baseDir, "source", "config.php"), "<?php return [];\n", "utf8");
+    fs.writeFileSync(
+      path.join(baseDir, "private-config", "grocy-backup.local.json"),
+      JSON.stringify({
+        sourcePath: "source",
+        backupDir: "backups",
+        passphraseEnv: envName,
+      }),
+      "utf8",
+    );
+    process.env[envName] = "synthetic-passphrase";
+
+    const record = createGrocyBackupSnapshot(baseDir, {
+      createdAt: "2026-04-19T10:00:00.000Z",
+      configPath: path.join("private-config", "grocy-backup.local.json"),
+      manifestPath: path.join("manifests", "grocy-backup-manifest.json"),
+    });
+
+    expect(record.manifestPath).toBe(path.join(baseDir, "manifests", "grocy-backup-manifest.json"));
+    expect(
+      verifyGrocyBackupSnapshot(baseDir, {
+        configPath: path.join("private-config", "grocy-backup.local.json"),
+        manifestPath: path.join("manifests", "grocy-backup-manifest.json"),
+      }).checksumVerified,
+    ).toBe(true);
+  });
 });

@@ -219,9 +219,9 @@ export function loadGrocyConfigExport(exportPath: string): GrocyConfigExport {
 
 export async function exportGrocyConfig(
   baseDir: string = process.cwd(),
-  options: { fetchImpl?: typeof fetch; exportedAt?: string } = {},
+  options: { fetchImpl?: typeof fetch; exportedAt?: string; configPath?: string } = {},
 ): Promise<GrocyConfigExport> {
-  const config = loadGrocyLiveConfig(baseDir);
+  const config = loadGrocyLiveConfig(baseDir, options.configPath);
   if (!config) {
     throw new Error("Grocy live config is missing. Run the config status command first.");
   }
@@ -363,12 +363,12 @@ export function loadGrocyConfigSyncPlan(planPath: string): GrocyConfigSyncPlan {
 export async function applyGrocyConfigSyncPlan(
   planPath: string,
   baseDir: string = process.cwd(),
-  options: { confirmReviewedWrite?: boolean; fetchImpl?: typeof fetch } = {},
+  options: { confirmReviewedWrite?: boolean; fetchImpl?: typeof fetch; configPath?: string } = {},
 ): Promise<{ planPath: string; created: number; updated: number; skipped: number; manualReview: number }> {
   if (!options.confirmReviewedWrite) {
     throw new Error("Refusing to apply Grocy config sync without --confirm-reviewed-write.");
   }
-  const config = loadGrocyLiveConfig(baseDir);
+  const config = loadGrocyLiveConfig(baseDir, options.configPath);
   if (!config) {
     throw new Error("Grocy live config is missing. Run the config status command first.");
   }

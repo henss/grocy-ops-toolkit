@@ -67,12 +67,12 @@ function parseBackupConfig(raw: unknown): GrocyBackupLocalConfig {
   return { sourcePath, backupDir, passphraseEnv, locationLabel };
 }
 
-function loadBackupConfig(baseDir: string): GrocyBackupLocalConfig {
-  const configPath = path.resolve(baseDir, GROCY_BACKUP_CONFIG_PATH);
-  if (!fs.existsSync(configPath)) {
-    throw new Error(`Grocy backup config is missing at ${configPath}.`);
+function loadBackupConfig(baseDir: string, configPath = GROCY_BACKUP_CONFIG_PATH): GrocyBackupLocalConfig {
+  const absoluteConfigPath = path.resolve(baseDir, configPath);
+  if (!fs.existsSync(absoluteConfigPath)) {
+    throw new Error(`Grocy backup config is missing at ${absoluteConfigPath}.`);
   }
-  const parsed = parseBackupConfig(readJsonFile(configPath));
+  const parsed = parseBackupConfig(readJsonFile(absoluteConfigPath));
   return {
     ...parsed,
     sourcePath: path.resolve(baseDir, parsed.sourcePath),
@@ -151,25 +151,25 @@ function decryptBundle(archive: Buffer, passphrase: string): BackupBundle {
   return JSON.parse(plaintext.toString("utf8")) as BackupBundle;
 }
 
-function loadBackupManifest(baseDir: string): GrocyBackupManifest {
-  const manifestPath = path.resolve(baseDir, GROCY_BACKUP_MANIFEST_PATH);
-  if (!fs.existsSync(manifestPath)) {
+function loadBackupManifest(baseDir: string, manifestPath = GROCY_BACKUP_MANIFEST_PATH): GrocyBackupManifest {
+  const absoluteManifestPath = path.resolve(baseDir, manifestPath);
+  if (!fs.existsSync(absoluteManifestPath)) {
     return { kind: "grocy_backup_manifest", version: 1, updatedAt: new Date().toISOString(), records: [] };
   }
-  return GrocyBackupManifestSchema.parse(readJsonFile(manifestPath));
+  return GrocyBackupManifestSchema.parse(readJsonFile(absoluteManifestPath));
 }
 
-function recordBackupManifest(baseDir: string, record: GrocyBackupRecord): string {
-  const manifestPath = path.resolve(baseDir, GROCY_BACKUP_MANIFEST_PATH);
-  const current = loadBackupManifest(baseDir);
+function recordBackupManifest(baseDir: string, record: GrocyBackupRecord, manifestPath = GROCY_BACKUP_MANIFEST_PATH): string {
+  const absoluteManifestPath = path.resolve(baseDir, manifestPath);
+  const current = loadBackupManifest(baseDir, manifestPath);
   const updated = GrocyBackupManifestSchema.parse({
     kind: "grocy_backup_manifest",
     version: 1,
     updatedAt: new Date().toISOString(),
     records: [record, ...current.records.filter((item) => item.id !== record.id)],
   });
-  writeJsonFile(manifestPath, updated);
-  return manifestPath;
+  writeJsonFile(absoluteManifestPath, updated);
+  return absoluteManifestPath;
 }
 
 function requirePassphrase(config: GrocyBackupLocalConfig): string {
@@ -183,9 +183,9 @@ function requirePassphrase(config: GrocyBackupLocalConfig): string {
 
 export function createGrocyBackupSnapshot(
   baseDir: string = process.cwd(),
-  options: { createdAt?: string } = {},
+  options: { createdAt?: string; configPath?: string; manifestPath?: string } = {},
 ): GrocyBackupRecord & { manifestPath: string } {
-  const config = loadBackupConfig(baseDir);
+  const config = loadBackupConfig(baseDir, options.configPath);
   const passphrase = requirePassphrase(config);
   if (!fs.existsSync(config.sourcePath)) {
     throw new Error(`Grocy backup source path does not exist: ${config.sourcePath}`);
@@ -209,16 +209,16 @@ export function createGrocyBackupSnapshot(
     restoreTestStatus: "not_tested",
     notes: ["Encrypted full Grocy data/config snapshot. Archive contents are intentionally stored outside Git."],
   });
-  return { ...record, manifestPath: recordBackupManifest(baseDir, record) };
+  return { ...record, manifestPath: recordBackupManifest(baseDir, record, options.manifestPath) };
 }
 
 export function verifyGrocyBackupSnapshot(
   baseDir: string = process.cwd(),
-  options: { archivePath?: string; restoreDir?: string; confirmRestoreWrite?: boolean } = {},
+  options: { archivePath?: string; restoreDir?: string; confirmRestoreWrite?: boolean; configPath?: string; manifestPath?: string } = {},
 ): { archivePath: string; fileCount: number; totalBytes: number; checksumVerified: boolean; restoredTo?: string } {
-  const config = loadBackupConfig(baseDir);
+  const config = loadBackupConfig(baseDir, options.configPath);
   const passphrase = requirePassphrase(config);
-  const manifest = loadBackupManifest(baseDir);
+  const manifest = loadBackupManifest(baseDir, options.manifestPath);
   const latest = options.archivePath
     ? manifest.records.find((record) => path.resolve(record.archivePath) === path.resolve(options.archivePath!))
     : manifest.records[0];

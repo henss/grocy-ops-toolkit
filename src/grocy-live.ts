@@ -22,6 +22,10 @@ export interface GrocyHealthCheckResult {
   productCount?: number;
 }
 
+export interface GrocyHealthCheckOptions {
+  configPath?: string;
+}
+
 export interface GrocyObjectRecord {
   id?: string;
   entity: GrocyConfigEntity;
@@ -269,10 +273,12 @@ export function createGrocyConfigWriteSurface(config: GrocyLiveConfig, fetchImpl
 export async function runGrocyHealthCheck(
   baseDir: string = process.cwd(),
   fetchImpl: typeof fetch = fetch,
+  options: GrocyHealthCheckOptions = {},
 ): Promise<GrocyHealthCheckResult> {
-  const config = loadGrocyLiveConfig(baseDir);
+  const configPath = options.configPath ?? DEFAULT_GROCY_CONFIG_PATH;
+  const config = loadGrocyLiveConfig(baseDir, configPath);
   if (!config) {
-    return { status: getGrocyConfigStatus(baseDir) };
+    return { status: getGrocyConfigStatus(baseDir, configPath) };
   }
 
   try {
