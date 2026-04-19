@@ -37,7 +37,12 @@ export interface GrocyStockRecord {
   productName: string;
   quantity?: string;
   quantityNumeric?: number;
+  location?: string;
   stockState: "in_stock" | "low" | "out" | "unknown";
+  minStockAmount?: number;
+  quantityUnitPurchaseId?: string;
+  quantityUnitStockId?: string;
+  notes?: string[];
 }
 
 export interface GrocyShoppingListRecord {
@@ -46,6 +51,8 @@ export interface GrocyShoppingListRecord {
   productName: string;
   quantity?: string;
   quantityNumeric?: number;
+  quantityUnitId?: string;
+  note?: string;
   done: boolean;
 }
 
@@ -53,6 +60,11 @@ export interface GrocyProductRecord {
   productId: string;
   productName: string;
   minStockAmount?: string;
+  quantityUnitPurchaseId?: string;
+  quantityUnitStockId?: string;
+  defaultBestBeforeDays?: string;
+  dueType?: string;
+  note?: string;
 }
 
 export const DEFAULT_GROCY_CONFIG_PATH = path.join("config", "grocy.local.json");
@@ -184,13 +196,27 @@ function mapGrocyObjectRecord(entity: GrocyConfigEntity, raw: unknown): GrocyObj
 function mapGrocyStockRecord(raw: unknown): GrocyStockRecord {
   const record = (raw ?? {}) as Record<string, unknown>;
   const product = (record.product ?? {}) as Record<string, unknown>;
-  const amount = typeof record.amount_aggregated === "number" ? record.amount_aggregated : undefined;
+  const location = (record.location ?? {}) as Record<string, unknown>;
+  const notes = [asString(record.note), asString(product.description)].filter((value): value is string => Boolean(value));
+  const amount =
+    typeof record.amount_aggregated === "number"
+      ? record.amount_aggregated
+      : typeof record.amount === "number"
+        ? record.amount
+        : typeof record.stock_amount === "number"
+          ? record.stock_amount
+          : undefined;
   return {
     productId: asString(record.product_id) ?? asString(product.id),
-    productName: asString(record.product_name) ?? asString(product.name) ?? "Unknown product",
-    quantity: asString(record.amount_aggregated) ?? asString(record.amount),
+    productName: asString(record.product_name) ?? asString(product.name) ?? asString(record.name) ?? "Unknown product",
+    quantity: asString(record.amount_aggregated) ?? asString(record.amount) ?? asString(record.stock_amount),
     quantityNumeric: amount,
+    location: asString(location.name) ?? asString(record.location_name),
     stockState: amount === undefined ? "unknown" : amount <= 0 ? "out" : amount < 1 ? "low" : "in_stock",
+    minStockAmount: typeof product.min_stock_amount === "number" ? product.min_stock_amount : undefined,
+    quantityUnitPurchaseId: asString(product.qu_id_purchase),
+    quantityUnitStockId: asString(product.qu_id_stock),
+    notes,
   };
 }
 
@@ -204,6 +230,8 @@ function mapGrocyShoppingListRecord(raw: unknown): GrocyShoppingListRecord {
     productName: asString(record.product_name) ?? asString(product.name) ?? asString(record.note) ?? "Unknown item",
     quantity: asString(record.amount),
     quantityNumeric: typeof record.amount === "number" ? record.amount : undefined,
+    quantityUnitId: asString(record.qu_id),
+    note: asString(record.note),
     done: doneValue === true || doneValue === 1 || doneValue === "1",
   };
 }
@@ -214,6 +242,11 @@ function mapGrocyProductRecord(raw: unknown): GrocyProductRecord {
     productId: asString(record.id) ?? "unknown-product",
     productName: asString(record.name) ?? "Unknown product",
     minStockAmount: asString(record.min_stock_amount),
+    quantityUnitPurchaseId: asString(record.qu_id_purchase),
+    quantityUnitStockId: asString(record.qu_id_stock),
+    defaultBestBeforeDays: asString(record.default_best_before_days),
+    dueType: asString(record.due_type),
+    note: asString(record.description),
   };
 }
 
