@@ -4,6 +4,7 @@ coverage/
 .runtime/
 data/
 backups/
+restore/
 config/*.local.json
 package-lock.json
 pnpm-lock.yaml

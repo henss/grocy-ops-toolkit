@@ -37,6 +37,8 @@ The diagnostics command writes an agent-readable failure artifact to `data/grocy
 
 The mock smoke command runs the health, config export, sync-plan, and apply dry-run path against synthetic Grocy responses. It is intended for CI environments that must not depend on live Grocy credentials. By default it writes `data/grocy-mock-smoke-report.json`; use `--output <path>` to write the report somewhere else.
 
+For a clean-checkout walkthrough that combines diagnostics, mock smoke, config diff, apply dry-run, backup verification, and dashboard rendering with synthetic data only, see [Synthetic Grocy Demo Lab](docs/synthetic-demo-lab.md).
+
 The apply dry run reads an existing sync plan and writes a review report to `data/grocy-config-apply-dry-run-report.json` without requiring Grocy credentials or sending live write requests. Use `--output <path>` to write the report somewhere else.
 
 The review dashboard command renders a Markdown summary from existing JSON artifacts, including config sync plans, apply dry-run reports, health diagnostics, backup manifests, and mock smoke reports. By default it writes `data/grocy-review-dashboard.md`; use `--plan`, `--dry-run-report`, `--diagnostics`, `--backup-manifest`, `--smoke-report`, or `--output <path>` to point at specific local artifacts.
