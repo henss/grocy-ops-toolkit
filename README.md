@@ -13,24 +13,24 @@ TypeScript toolkit for safe Grocy GitOps, health checks, and encrypted local bac
 ## Local Setup
 
 ```bash
-pnpm install
-pnpm typecheck
-pnpm test
+npm install
+npm run typecheck
+npm test
 ```
 
 Create `config/grocy.local.json` from `examples/grocy.local.example.json`, then run:
 
 ```bash
-pnpm grocy:config:status
-pnpm grocy:health
-pnpm grocy:export-config
-pnpm grocy:diff-config
-pnpm grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
+npm run grocy:config:status
+npm run grocy:health
+npm run grocy:export-config
+npm run grocy:diff-config
+npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
 ```
 
 For backups, create `config/grocy-backup.local.json` from `examples/grocy-backup.local.example.json`, set the configured passphrase environment variable, then run:
 
 ```bash
-pnpm grocy:backup:snapshot
-pnpm grocy:backup:verify
+npm run grocy:backup:snapshot
+npm run grocy:backup:verify
 ```

@@ -1,12 +1,36 @@
 {
   "name": "grocy-ops-toolkit",
   "version": "0.1.0",
-  "private": true,
   "description": "TypeScript toolkit for safe Grocy GitOps, health checks, and encrypted local backups",
+  "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/henss/grocy-ops-toolkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/henss/grocy-ops-toolkit/issues"
+  },
+  "homepage": "https://github.com/henss/grocy-ops-toolkit#readme",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "bin": {
     "grocy-ops-toolkit": "dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "grocy:config:status": "tsx src/cli.ts grocy:config:status",
     "grocy:health": "tsx src/cli.ts grocy:health",
@@ -15,16 +39,17 @@
     "grocy:apply-config": "tsx src/cli.ts grocy:apply-config",
     "grocy:backup:snapshot": "tsx src/cli.ts grocy:backup:snapshot",
     "grocy:backup:verify": "tsx src/cli.ts grocy:backup:verify",
+    "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
-    "zod": "4.3.6"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@types/node": "25.5.0",
-    "tsx": "4.21.0",
-    "typescript": "6.0.2",
-    "vitest": "4.1.2"
+    "@types/node": "^20.19.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.2"
   }
 }

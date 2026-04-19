@@ -4,6 +4,10 @@ coverage/
 data/
 backups/
 config/*.local.json
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+bun.lockb
 .env
 .env.*
 !.env.example
