@@ -139,9 +139,12 @@ export const GrocyBackupManifestSchema = z.object({
 });
 
 export type GrocyConfigEntity = z.infer<typeof GrocyConfigEntitySchema>;
+export type GrocyConfigOwnership = z.infer<typeof GrocyConfigOwnershipSchema>;
+export type GrocyConfigProvenance = z.infer<typeof GrocyConfigProvenanceSchema>;
 export type GrocyConfigItem = z.infer<typeof GrocyConfigItemSchema>;
 export type GrocyConfigManifest = z.infer<typeof GrocyConfigManifestSchema>;
 export type GrocyConfigExport = z.infer<typeof GrocyConfigExportSchema>;
+export type GrocyConfigPlanAction = z.infer<typeof GrocyConfigPlanActionSchema>;
 export type GrocyConfigPlanChange = z.infer<typeof GrocyConfigPlanChangeSchema>;
 export type GrocyConfigPlanItem = z.infer<typeof GrocyConfigPlanItemSchema>;
 export type GrocyConfigSyncPlan = z.infer<typeof GrocyConfigSyncPlanSchema>;

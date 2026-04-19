@@ -193,6 +193,31 @@ function mapGrocyObjectRecord(entity: GrocyConfigEntity, raw: unknown): GrocyObj
   return { id: asString(fields.id), entity, fields };
 }
 
+function inferStockState(record: Record<string, unknown>): GrocyStockRecord["stockState"] {
+  const raw =
+    asString(record.stock_state) ??
+    asString(record.stock_amount) ??
+    asString(record.amount) ??
+    asString(record.amount_aggregated);
+
+  if ((record.missing_amount ?? 0) !== 0) {
+    return "out";
+  }
+  if (!raw) {
+    return "unknown";
+  }
+
+  const numeric = Number(raw);
+  if (Number.isFinite(numeric)) {
+    if (numeric <= 0) {
+      return "out";
+    }
+    return numeric < 1 ? "low" : "in_stock";
+  }
+
+  return /out|missing|empty/i.test(raw) ? "out" : /low|open/i.test(raw) ? "low" : "in_stock";
+}
+
 function mapGrocyStockRecord(raw: unknown): GrocyStockRecord {
   const record = (raw ?? {}) as Record<string, unknown>;
   const product = (record.product ?? {}) as Record<string, unknown>;
@@ -212,7 +237,7 @@ function mapGrocyStockRecord(raw: unknown): GrocyStockRecord {
     quantity: asString(record.amount_aggregated) ?? asString(record.amount) ?? asString(record.stock_amount),
     quantityNumeric: amount,
     location: asString(location.name) ?? asString(record.location_name),
-    stockState: amount === undefined ? "unknown" : amount <= 0 ? "out" : amount < 1 ? "low" : "in_stock",
+    stockState: inferStockState(record),
     minStockAmount: typeof product.min_stock_amount === "number" ? product.min_stock_amount : undefined,
     quantityUnitPurchaseId: asString(product.qu_id_purchase),
     quantityUnitStockId: asString(product.qu_id_stock),
