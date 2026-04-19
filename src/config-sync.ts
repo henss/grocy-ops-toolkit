@@ -435,6 +435,7 @@ export async function applyGrocyConfigSyncPlan(
 
   const absolutePlanPath = path.resolve(baseDir, planPath);
   const plan = loadGrocyConfigSyncPlan(absolutePlanPath);
+  const readSurface = createGrocyConfigReadSurface(config, options.fetchImpl ?? fetch);
   const writeSurface = createGrocyConfigWriteSurface(config, options.fetchImpl ?? fetch);
   let created = 0;
   let updated = 0;
@@ -452,7 +453,11 @@ export async function applyGrocyConfigSyncPlan(
       await writeSurface.createObject(item.entity, itemPayload(item.desired));
       created += 1;
     } else if (item.action === "update" && item.liveId) {
-      await writeSurface.updateObject(item.entity, item.liveId, itemPayload(item.desired));
+      // GET the full live object first so volatile fields (e.g. amount for shopping_list)
+      // are preserved in the PUT, then overlay only the declared managed fields on top.
+      // Strip id and userfields: Grocy returns them in GET but rejects them in PUT.
+      const { id: _id, userfields: _userfields, ...livePutFields } = await readSurface.getObject(item.entity, item.liveId);
+      await writeSurface.updateObject(item.entity, item.liveId, { ...livePutFields, ...item.desired.fields });
       updated += 1;
     } else {
       manualReview += 1;

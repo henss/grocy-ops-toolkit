@@ -297,6 +297,9 @@ export function createGrocyConfigReadSurface(config: GrocyLiveConfig, fetchImpl:
         mapGrocyObjectRecord(entity, record),
       );
     },
+    async getObject(entity: GrocyConfigEntity, id: string): Promise<Record<string, unknown>> {
+      return await fetchGrocyJson<Record<string, unknown>>(config, `/objects/${entity}/${encodeURIComponent(id)}`, fetchImpl);
+    },
     async getSystemInfo(): Promise<Record<string, unknown> | undefined> {
       try {
         return await fetchGrocyJson<Record<string, unknown>>(config, "/system/info", fetchImpl);
