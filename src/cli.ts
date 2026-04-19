@@ -16,11 +16,16 @@ import { createGrocyBackupSnapshot, verifyGrocyBackupSnapshot } from "./backups.
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
 import { recordGrocyMockSmokeReport, runGrocyMockSmokeTest } from "./mock-smoke.js";
+import { auditGrocyPublicArtifacts, recordGrocyPublicArtifactRedactionAudit } from "./redaction-audit.js";
 import { createGrocyReviewDashboardFromArtifacts, recordGrocyReviewDashboard } from "./review-dashboard.js";
 
 function parseFlag(flag: string): string | undefined {
   const index = process.argv.indexOf(flag);
   return index >= 0 ? process.argv[index + 1] : undefined;
+}
+
+function parseFlags(flag: string): string[] {
+  return process.argv.flatMap((value, index) => value === flag && process.argv[index + 1] ? [process.argv[index + 1]] : []);
 }
 
 function printJson(value: unknown): void {
@@ -128,6 +133,21 @@ async function main(): Promise<void> {
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
     printJson({ outputPath });
+    return;
+  }
+  if (command === "grocy:artifacts:audit-redaction") {
+    const audit = auditGrocyPublicArtifacts({
+      baseDir: process.cwd(),
+      paths: parseFlags("--path"),
+    });
+    const outputPath = recordGrocyPublicArtifactRedactionAudit(audit, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: audit.summary });
+    if (audit.summary.findingCount > 0) {
+      process.exitCode = 1;
+    }
     return;
   }
   throw new Error("Unsupported command.");

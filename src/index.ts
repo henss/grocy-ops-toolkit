@@ -3,5 +3,6 @@ export * from "./config-sync.js";
 export * from "./grocy-live.js";
 export * from "./health-diagnostics.js";
 export * from "./mock-smoke.js";
+export * from "./redaction-audit.js";
 export * from "./review-dashboard.js";
 export * from "./schemas.js";

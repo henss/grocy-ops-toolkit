@@ -14,6 +14,7 @@ It can:
 - Apply only reviewed `repo_managed` creates and updates when explicitly confirmed.
 - Create and verify encrypted local backup bundles.
 - Render a Markdown review dashboard from generated artifacts.
+- Audit generated public artifacts for private-path, URL, credential, and boundary-term leaks.
 
 ## Requirements
 
@@ -153,6 +154,29 @@ Use these options to point at specific local artifacts:
 - `--smoke-report`
 - `--output <path>`
 
+## Public Artifact Redaction Audit
+
+Audit generated JSON and Markdown artifacts before sharing or committing public examples:
+
+```bash
+npm run grocy:artifacts:audit-redaction
+```
+
+By default, the audit scans:
+
+```text
+data
+examples
+```
+
+The audit report is written to:
+
+```text
+data/grocy-public-artifact-redaction-audit.json
+```
+
+The report lists finding codes, line numbers, and repo-relative file paths only. It does not echo matched snippets. Use `--path <path>` one or more times to scan specific repo-local artifact paths, and `--output <path>` to write the report somewhere else.
+
 ## Backup Workflow
 
 Create a local backup config from the example:
@@ -204,4 +228,5 @@ npm run grocy:backup:snapshot
 npm run grocy:backup:verify
 npm run grocy:backup:verify -- --restore-dir restore/grocy-backup-check --confirm-restore-write
 npm run grocy:review:dashboard
+npm run grocy:artifacts:audit-redaction
 ```
