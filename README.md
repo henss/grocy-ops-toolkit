@@ -15,6 +15,7 @@ It can:
 - Create and verify encrypted local backup bundles.
 - Render a Markdown review dashboard from generated artifacts.
 - Audit generated public artifacts for private-path, URL, credential, and boundary-term leaks.
+- Generate a synthetic Grocy API compatibility matrix for fixture-only API-shape review.
 
 ## Requirements
 
@@ -123,6 +124,22 @@ data/grocy-mock-smoke-report.json
 
 Use `--output <path>` to write the report somewhere else.
 
+## API Compatibility Matrix
+
+Generate a fixture-only compatibility matrix for the Grocy API response shapes the toolkit reads:
+
+```bash
+npm run grocy:compatibility:matrix
+```
+
+By default, the matrix is written to:
+
+```text
+data/grocy-api-compatibility-matrix.json
+```
+
+The matrix uses synthetic fixtures only. It is intended to show expected API shapes and gaps, not to make live Grocy version support claims. For details, see [Grocy API Compatibility Matrix](docs/grocy-api-compatibility-matrix.md).
+
 ## Review Dashboard
 
 Render a Markdown dashboard from existing JSON artifacts:
@@ -219,6 +236,7 @@ The demo combines:
 npm run grocy:config:status
 npm run grocy:health
 npm run grocy:health:diagnostics
+npm run grocy:compatibility:matrix
 npm run grocy:smoke:mock
 npm run grocy:export-config
 npm run grocy:diff-config

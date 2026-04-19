@@ -1,0 +1,97 @@
+{
+  "kind": "grocy_api_compatibility_matrix",
+  "version": 1,
+  "generatedAt": "2026-04-19T12:00:00.000Z",
+  "scope": "synthetic_fixture_only",
+  "summary": {
+    "fixtureCount": 3,
+    "supported": 23,
+    "partial": 3,
+    "unsupported": 1
+  },
+  "fixtures": [
+    {
+      "id": "fixture-current-object-api",
+      "label": "Current object API shape",
+      "apiShape": "Synthetic object endpoints include stable ids, names, and shopping-list records.",
+      "notes": [
+        "Models the toolkit's preferred read path without live Grocy credentials."
+      ]
+    },
+    {
+      "id": "fixture-minimal-read-api",
+      "label": "Minimal read API shape",
+      "apiShape": "Synthetic responses keep core object identifiers but omit some convenience fields.",
+      "notes": [
+        "Highlights where the toolkit can continue reading but should avoid stronger automation claims."
+      ]
+    },
+    {
+      "id": "fixture-shopping-list-gap",
+      "label": "Shopping-list gap shape",
+      "apiShape": "Synthetic object API lacks the shopping-list collection endpoint.",
+      "notes": [
+        "Marks the specific surface as unsupported while keeping unrelated config reads scoped."
+      ]
+    }
+  ],
+  "entries": [
+    {
+      "fixtureId": "fixture-current-object-api",
+      "surface": "system_info",
+      "endpoint": "/system/info",
+      "status": "supported",
+      "requiredFields": [
+        "grocy_version"
+      ],
+      "observedFields": [
+        "grocy_version"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "fixtureId": "fixture-minimal-read-api",
+      "surface": "stock",
+      "endpoint": "/stock",
+      "status": "partial",
+      "requiredFields": [
+        "product_id",
+        "product_name",
+        "amount_aggregated"
+      ],
+      "observedFields": [
+        "amount_aggregated",
+        "product_id",
+        "product_name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "Missing optional compatibility fields: product.min_stock_amount."
+      ]
+    },
+    {
+      "fixtureId": "fixture-shopping-list-gap",
+      "surface": "shopping_list",
+      "endpoint": "/objects/shopping_list",
+      "status": "unsupported",
+      "requiredFields": [
+        "id",
+        "product_id",
+        "amount"
+      ],
+      "observedFields": [],
+      "notes": [
+        "Missing required fields: id, product_id, amount.",
+        "Missing optional compatibility fields: product_name, done."
+      ]
+    }
+  ],
+  "reviewNotes": [
+    "This matrix is a fixture-only prototype and is not a live Grocy version support promise.",
+    "Promote any row to a public support claim only after reviewed live adapter evidence exists.",
+    "Keep fixture values synthetic and omit account details or private workflow data."
+  ]
+}

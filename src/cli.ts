@@ -15,6 +15,7 @@ import {
 import { createGrocyBackupSnapshot, verifyGrocyBackupSnapshot } from "./backups.js";
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
+import { createGrocyApiCompatibilityMatrix, recordGrocyApiCompatibilityMatrix } from "./compatibility-matrix.js";
 import { recordGrocyMockSmokeReport, runGrocyMockSmokeTest } from "./mock-smoke.js";
 import { auditGrocyPublicArtifacts, recordGrocyPublicArtifactRedactionAudit } from "./redaction-audit.js";
 import { createGrocyReviewDashboardFromArtifacts, recordGrocyReviewDashboard } from "./review-dashboard.js";
@@ -58,6 +59,15 @@ async function main(): Promise<void> {
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
     printJson({ outputPath, summary: report.summary });
+    return;
+  }
+  if (command === "grocy:compatibility:matrix") {
+    const matrix = createGrocyApiCompatibilityMatrix();
+    const outputPath = recordGrocyApiCompatibilityMatrix(matrix, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: matrix.summary });
     return;
   }
   if (command === "grocy:export-config") {
