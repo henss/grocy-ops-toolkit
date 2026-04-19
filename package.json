@@ -42,8 +42,7 @@
     "grocy:backup:verify": "tsx src/cli.ts grocy:backup:verify",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "check:public-boundary": "node scripts/check-public-boundary.mjs"
+    "test": "vitest run"
   },
   "dependencies": {
     "zod": "^4.3.6"
