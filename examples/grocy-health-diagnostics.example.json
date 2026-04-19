@@ -1,0 +1,34 @@
+{
+  "kind": "grocy_health_diagnostics",
+  "version": 1,
+  "generatedAt": "2026-04-19T10:15:00.000Z",
+  "toolId": "grocy",
+  "summary": {
+    "result": "fail",
+    "failureCount": 1,
+    "warningCount": 0
+  },
+  "checks": [
+    {
+      "id": "config",
+      "status": "pass",
+      "message": "Local Grocy config is present at config/grocy.local.json."
+    },
+    {
+      "id": "live_api",
+      "status": "fail",
+      "message": "Live API read probes did not complete."
+    }
+  ],
+  "diagnostics": [
+    {
+      "severity": "error",
+      "code": "grocy_unreachable",
+      "message": "Grocy live adapter check failed before all read probes completed.",
+      "agentAction": "Verify local config, Grocy availability, and API-key permissions, then rerun npm run grocy:health:diagnostics.",
+      "evidence": [
+        "Grocy request failed: 503 Service Unavailable for /stock"
+      ]
+    }
+  ]
+}

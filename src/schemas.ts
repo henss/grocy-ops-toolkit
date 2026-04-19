@@ -141,6 +141,39 @@ export const GrocyConfigApplyDryRunReportSchema = z.object({
   items: z.array(GrocyConfigApplyDryRunReportItemSchema).default([]),
 });
 
+export const GrocyHealthDiagnosticCodeSchema = z.enum([
+  "config_missing",
+  "config_invalid",
+  "grocy_unreachable",
+  "grocy_reachable",
+]);
+
+export const GrocyHealthDiagnosticSchema = z.object({
+  severity: z.enum(["info", "warning", "error"]),
+  code: GrocyHealthDiagnosticCodeSchema,
+  message: z.string().min(1),
+  agentAction: z.string().min(1),
+  evidence: z.array(z.string().min(1)).default([]),
+});
+
+export const GrocyHealthDiagnosticsArtifactSchema = z.object({
+  kind: z.literal("grocy_health_diagnostics"),
+  version: z.literal(1),
+  generatedAt: z.string().min(1),
+  toolId: z.literal("grocy"),
+  summary: z.object({
+    result: z.enum(["pass", "fail"]),
+    failureCount: z.number().int().nonnegative(),
+    warningCount: z.number().int().nonnegative(),
+  }),
+  checks: z.array(z.object({
+    id: z.enum(["config", "live_api"]),
+    status: z.enum(["pass", "fail", "skipped"]),
+    message: z.string().min(1),
+  })).default([]),
+  diagnostics: z.array(GrocyHealthDiagnosticSchema).default([]),
+});
+
 export const GrocyBackupRecordSchema = z.object({
   id: z.string().min(1),
   createdAt: z.string().min(1),
@@ -175,5 +208,8 @@ export type GrocyConfigPlanItem = z.infer<typeof GrocyConfigPlanItemSchema>;
 export type GrocyConfigSyncPlan = z.infer<typeof GrocyConfigSyncPlanSchema>;
 export type GrocyConfigApplyDryRunReportItem = z.infer<typeof GrocyConfigApplyDryRunReportItemSchema>;
 export type GrocyConfigApplyDryRunReport = z.infer<typeof GrocyConfigApplyDryRunReportSchema>;
+export type GrocyHealthDiagnosticCode = z.infer<typeof GrocyHealthDiagnosticCodeSchema>;
+export type GrocyHealthDiagnostic = z.infer<typeof GrocyHealthDiagnosticSchema>;
+export type GrocyHealthDiagnosticsArtifact = z.infer<typeof GrocyHealthDiagnosticsArtifactSchema>;
 export type GrocyBackupRecord = z.infer<typeof GrocyBackupRecordSchema>;
 export type GrocyBackupManifest = z.infer<typeof GrocyBackupManifestSchema>;

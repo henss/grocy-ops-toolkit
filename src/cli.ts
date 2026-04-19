@@ -14,6 +14,7 @@ import {
 } from "./config-sync.js";
 import { createGrocyBackupSnapshot, verifyGrocyBackupSnapshot } from "./backups.js";
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
+import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
 
 function parseFlag(flag: string): string | undefined {
   const index = process.argv.indexOf(flag);
@@ -32,6 +33,15 @@ async function main(): Promise<void> {
   }
   if (command === "grocy:health") {
     printJson(await runGrocyHealthCheck(process.cwd()));
+    return;
+  }
+  if (command === "grocy:health:diagnostics") {
+    const artifact = await runGrocyHealthDiagnostics(process.cwd());
+    const outputPath = recordGrocyHealthDiagnosticsArtifact(artifact, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: artifact.summary });
     return;
   }
   if (command === "grocy:export-config") {

@@ -24,11 +24,14 @@ Create `config/grocy.local.json` from `examples/grocy.local.example.json`, then 
 ```bash
 npm run grocy:config:status
 npm run grocy:health
+npm run grocy:health:diagnostics
 npm run grocy:export-config
 npm run grocy:diff-config
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --dry-run
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
 ```
+
+The diagnostics command writes an agent-readable failure artifact to `data/grocy-health-diagnostics.json`. It records reachability checks and next actions without storing Grocy record contents, API keys, absolute local paths, or live URL values. Use `--output <path>` to write the artifact somewhere else.
 
 The apply dry run reads an existing sync plan and writes a review report to `data/grocy-config-apply-dry-run-report.json` without requiring Grocy credentials or sending live write requests. Use `--output <path>` to write the report somewhere else.
 

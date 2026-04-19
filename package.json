@@ -34,6 +34,7 @@
   "scripts": {
     "grocy:config:status": "tsx src/cli.ts grocy:config:status",
     "grocy:health": "tsx src/cli.ts grocy:health",
+    "grocy:health:diagnostics": "tsx src/cli.ts grocy:health:diagnostics",
     "grocy:export-config": "tsx src/cli.ts grocy:export-config",
     "grocy:diff-config": "tsx src/cli.ts grocy:diff-config",
     "grocy:apply-config": "tsx src/cli.ts grocy:apply-config",
