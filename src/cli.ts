@@ -2,10 +2,13 @@
 
 import {
   applyGrocyConfigSyncPlan,
+  createGrocyConfigApplyDryRunReport,
   createGrocyConfigSyncPlan,
   exportGrocyConfig,
   loadGrocyConfigExport,
   loadGrocyConfigManifest,
+  loadGrocyConfigSyncPlan,
+  recordGrocyConfigApplyDryRunReport,
   recordGrocyConfigExport,
   recordGrocyConfigSyncPlan,
 } from "./config-sync.js";
@@ -60,7 +63,19 @@ async function main(): Promise<void> {
   if (command === "grocy:apply-config") {
     const planPath = parseFlag("--plan");
     if (!planPath) {
-      throw new Error("Usage: grocy:apply-config -- --plan <path> --confirm-reviewed-write");
+      throw new Error("Usage: grocy:apply-config -- --plan <path> --dry-run|--confirm-reviewed-write");
+    }
+    if (process.argv.includes("--dry-run")) {
+      const report = createGrocyConfigApplyDryRunReport({
+        plan: loadGrocyConfigSyncPlan(planPath),
+        planPath,
+      });
+      const outputPath = recordGrocyConfigApplyDryRunReport(report, {
+        outputPath: parseFlag("--output"),
+        overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+      });
+      printJson({ outputPath, summary: report.summary });
+      return;
     }
     printJson(await applyGrocyConfigSyncPlan(planPath, process.cwd(), {
       confirmReviewedWrite: process.argv.includes("--confirm-reviewed-write"),

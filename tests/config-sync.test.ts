@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
   applyGrocyConfigSyncPlan,
+  createGrocyConfigApplyDryRunReport,
   createGrocyConfigSyncPlan,
   exportGrocyConfig,
   recordGrocyConfigSyncPlan,
@@ -170,6 +171,78 @@ describe("Grocy config sync", () => {
     );
 
     await expect(applyGrocyConfigSyncPlan(planPath, baseDir)).rejects.toThrow("confirm-reviewed-write");
+  });
+
+  it("creates a reviewable apply dry-run report without live writes", () => {
+    const plan = {
+      kind: "grocy_config_sync_plan" as const,
+      version: 1 as const,
+      generatedAt: "2026-04-19T10:00:00.000Z",
+      manifestPath: "examples/desired-state.example.json",
+      actions: [
+        {
+          action: "create" as const,
+          key: "products.example-tea",
+          entity: "products" as const,
+          name: "Example Tea",
+          ownership: "repo_managed" as const,
+          reason: "Repo-managed item is missing from live Grocy.",
+          changes: [],
+          desired: {
+            key: "products.example-tea",
+            entity: "products" as const,
+            name: "Example Tea",
+            ownership: "repo_managed" as const,
+            fields: { min_stock_amount: 1 },
+            aliases: [],
+            provenance: { source: "synthetic", notes: [] },
+          },
+        },
+        {
+          action: "update" as const,
+          key: "products.example-coffee",
+          entity: "products" as const,
+          name: "Example Coffee",
+          ownership: "repo_managed" as const,
+          liveId: "10",
+          reason: "Repo-managed item differs from live Grocy.",
+          changes: [{ field: "min_stock_amount", desired: 2, live: 1 }],
+          desired: {
+            key: "products.example-coffee",
+            entity: "products" as const,
+            name: "Example Coffee",
+            ownership: "repo_managed" as const,
+            fields: { min_stock_amount: 2 },
+            aliases: [],
+            provenance: { source: "synthetic", notes: [] },
+          },
+        },
+        {
+          action: "manual_review" as const,
+          key: "products.example-duplicate",
+          entity: "products" as const,
+          name: "Example Duplicate",
+          ownership: "repo_managed" as const,
+          reason: "Multiple live Grocy records match this manifest item.",
+          changes: [],
+        },
+      ],
+      summary: { create: 1, update: 1, noop: 0, manualReview: 1 },
+    };
+
+    const report = createGrocyConfigApplyDryRunReport({
+      plan,
+      planPath: "examples/config-sync-plan.example.json",
+      generatedAt: "2026-04-19T10:10:00.000Z",
+    });
+
+    expect(report.summary).toEqual({ wouldCreate: 1, wouldUpdate: 1, skipped: 0, manualReview: 1 });
+    expect(report.items.map((item) => item.action)).toEqual(["would_create", "would_update", "manual_review"]);
+    expect(report.items[1]).toMatchObject({
+      key: "products.example-coffee",
+      liveId: "10",
+      changes: [{ field: "min_stock_amount", desired: 2, live: 1 }],
+    });
   });
 
   it("uses caller-provided config paths for custom repo layouts", async () => {

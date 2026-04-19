@@ -8,3 +8,5 @@ Rules:
 - Keep examples small enough to audit in one pass.
 - Do not copy real source-repo fixtures and then redact them later.
 - Add a short note when an example intentionally models a private-repo behavior shape.
+
+Config sync examples use synthetic product names and IDs. `config-apply-dry-run-report.example.json` shows the report shape produced before any reviewed apply write.

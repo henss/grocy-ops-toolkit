@@ -116,6 +116,31 @@ export const GrocyConfigSyncPlanSchema = z.object({
   }),
 });
 
+export const GrocyConfigApplyDryRunReportItemSchema = z.object({
+  action: z.enum(["would_create", "would_update", "skipped", "manual_review"]),
+  key: z.string().min(1),
+  entity: GrocyConfigEntitySchema,
+  name: z.string().min(1),
+  ownership: GrocyConfigOwnershipSchema,
+  liveId: z.string().min(1).optional(),
+  reason: z.string().min(1),
+  changes: z.array(GrocyConfigPlanChangeSchema).default([]),
+});
+
+export const GrocyConfigApplyDryRunReportSchema = z.object({
+  kind: z.literal("grocy_config_apply_dry_run_report"),
+  version: z.literal(1),
+  generatedAt: z.string().min(1),
+  planPath: z.string().min(1),
+  summary: z.object({
+    wouldCreate: z.number().int().nonnegative(),
+    wouldUpdate: z.number().int().nonnegative(),
+    skipped: z.number().int().nonnegative(),
+    manualReview: z.number().int().nonnegative(),
+  }),
+  items: z.array(GrocyConfigApplyDryRunReportItemSchema).default([]),
+});
+
 export const GrocyBackupRecordSchema = z.object({
   id: z.string().min(1),
   createdAt: z.string().min(1),
@@ -148,5 +173,7 @@ export type GrocyConfigPlanAction = z.infer<typeof GrocyConfigPlanActionSchema>;
 export type GrocyConfigPlanChange = z.infer<typeof GrocyConfigPlanChangeSchema>;
 export type GrocyConfigPlanItem = z.infer<typeof GrocyConfigPlanItemSchema>;
 export type GrocyConfigSyncPlan = z.infer<typeof GrocyConfigSyncPlanSchema>;
+export type GrocyConfigApplyDryRunReportItem = z.infer<typeof GrocyConfigApplyDryRunReportItemSchema>;
+export type GrocyConfigApplyDryRunReport = z.infer<typeof GrocyConfigApplyDryRunReportSchema>;
 export type GrocyBackupRecord = z.infer<typeof GrocyBackupRecordSchema>;
 export type GrocyBackupManifest = z.infer<typeof GrocyBackupManifestSchema>;

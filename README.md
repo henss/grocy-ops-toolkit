@@ -26,8 +26,11 @@ npm run grocy:config:status
 npm run grocy:health
 npm run grocy:export-config
 npm run grocy:diff-config
+npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --dry-run
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
 ```
+
+The apply dry run reads an existing sync plan and writes a review report to `data/grocy-config-apply-dry-run-report.json` without requiring Grocy credentials or sending live write requests. Use `--output <path>` to write the report somewhere else.
 
 For backups, create `config/grocy-backup.local.json` from `examples/grocy-backup.local.example.json`, set the configured passphrase environment variable, then run:
 

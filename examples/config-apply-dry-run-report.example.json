@@ -1,0 +1,30 @@
+{
+  "kind": "grocy_config_apply_dry_run_report",
+  "version": 1,
+  "generatedAt": "2026-04-19T10:10:00.000Z",
+  "planPath": "examples/config-sync-plan.example.json",
+  "summary": {
+    "wouldCreate": 0,
+    "wouldUpdate": 1,
+    "skipped": 0,
+    "manualReview": 0
+  },
+  "items": [
+    {
+      "action": "would_update",
+      "key": "products.example-coffee",
+      "entity": "products",
+      "name": "Example Coffee",
+      "ownership": "repo_managed",
+      "liveId": "10",
+      "reason": "Repo-managed item differs from live Grocy on non-destructive fields.",
+      "changes": [
+        {
+          "field": "min_stock_amount",
+          "desired": 1,
+          "live": 0
+        }
+      ]
+    }
+  ]
+}

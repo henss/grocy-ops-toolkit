@@ -7,10 +7,13 @@ import {
   type GrocyObjectRecord,
 } from "./grocy-live.js";
 import {
+  GrocyConfigApplyDryRunReportSchema,
   GrocyConfigEntitySchema,
   GrocyConfigExportSchema,
   GrocyConfigManifestSchema,
   GrocyConfigSyncPlanSchema,
+  type GrocyConfigApplyDryRunReport,
+  type GrocyConfigApplyDryRunReportItem,
   type GrocyConfigEntity,
   type GrocyConfigExport,
   type GrocyConfigItem,
@@ -24,6 +27,7 @@ import {
 export const GROCY_CONFIG_MANIFEST_PATH = path.join("config", "desired-state.json");
 export const GROCY_CONFIG_EXPORT_PATH = path.join("data", "grocy-config-export.json");
 export const GROCY_CONFIG_PLAN_PATH = path.join("data", "grocy-config-sync-plan.json");
+export const GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH = path.join("data", "grocy-config-apply-dry-run-report.json");
 
 const CONFIG_ENTITIES: GrocyConfigEntity[] = [
   "products",
@@ -358,6 +362,62 @@ export function recordGrocyConfigSyncPlan(
 
 export function loadGrocyConfigSyncPlan(planPath: string): GrocyConfigSyncPlan {
   return GrocyConfigSyncPlanSchema.parse(readJsonFile(planPath));
+}
+
+function applyDryRunAction(item: GrocyConfigPlanItem): GrocyConfigApplyDryRunReportItem["action"] {
+  if (item.action === "create" && item.ownership === "repo_managed" && item.desired) {
+    return "would_create";
+  }
+  if (item.action === "update" && item.ownership === "repo_managed" && item.desired && item.liveId) {
+    return "would_update";
+  }
+  return item.action === "noop" ? "skipped" : "manual_review";
+}
+
+function summarizeApplyDryRun(items: GrocyConfigApplyDryRunReportItem[]): GrocyConfigApplyDryRunReport["summary"] {
+  return {
+    wouldCreate: items.filter((item) => item.action === "would_create").length,
+    wouldUpdate: items.filter((item) => item.action === "would_update").length,
+    skipped: items.filter((item) => item.action === "skipped").length,
+    manualReview: items.filter((item) => item.action === "manual_review").length,
+  };
+}
+
+export function createGrocyConfigApplyDryRunReport(input: {
+  plan: GrocyConfigSyncPlan;
+  planPath: string;
+  generatedAt?: string;
+}): GrocyConfigApplyDryRunReport {
+  const items = input.plan.actions.map((item): GrocyConfigApplyDryRunReportItem => ({
+    action: applyDryRunAction(item),
+    key: item.key,
+    entity: item.entity,
+    name: item.name,
+    ownership: item.ownership,
+    liveId: item.liveId,
+    reason: item.reason,
+    changes: item.changes,
+  }));
+
+  return GrocyConfigApplyDryRunReportSchema.parse({
+    kind: "grocy_config_apply_dry_run_report",
+    version: 1,
+    generatedAt: input.generatedAt ?? new Date().toISOString(),
+    planPath: input.planPath,
+    summary: summarizeApplyDryRun(items),
+    items,
+  });
+}
+
+export function recordGrocyConfigApplyDryRunReport(
+  report: GrocyConfigApplyDryRunReport,
+  options: { baseDir?: string; outputPath?: string; overwrite?: boolean } = {},
+): string {
+  return writeJsonFile(
+    path.resolve(options.baseDir ?? process.cwd(), options.outputPath ?? GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH),
+    report,
+    options.overwrite ?? true,
+  );
 }
 
 export async function applyGrocyConfigSyncPlan(
