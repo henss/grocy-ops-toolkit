@@ -16,6 +16,7 @@ import { createGrocyBackupSnapshot, verifyGrocyBackupSnapshot } from "./backups.
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
 import { recordGrocyMockSmokeReport, runGrocyMockSmokeTest } from "./mock-smoke.js";
+import { createGrocyReviewDashboardFromArtifacts, recordGrocyReviewDashboard } from "./review-dashboard.js";
 
 function parseFlag(flag: string): string | undefined {
   const index = process.argv.indexOf(flag);
@@ -112,6 +113,21 @@ async function main(): Promise<void> {
       restoreDir: parseFlag("--restore-dir"),
       confirmRestoreWrite: process.argv.includes("--confirm-restore-write"),
     }));
+    return;
+  }
+  if (command === "grocy:review:dashboard") {
+    const dashboard = createGrocyReviewDashboardFromArtifacts(process.cwd(), {
+      planPath: parseFlag("--plan"),
+      applyDryRunReportPath: parseFlag("--dry-run-report"),
+      diagnosticsPath: parseFlag("--diagnostics"),
+      backupManifestPath: parseFlag("--backup-manifest"),
+      mockSmokeReportPath: parseFlag("--smoke-report"),
+    });
+    const outputPath = recordGrocyReviewDashboard(dashboard, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath });
     return;
   }
   throw new Error("Unsupported command.");
