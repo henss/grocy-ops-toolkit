@@ -15,6 +15,7 @@ TypeScript toolkit for safe Grocy GitOps, health checks, and encrypted local bac
 ```bash
 npm install
 npm run typecheck
+npm run build
 npm test
 ```
 
