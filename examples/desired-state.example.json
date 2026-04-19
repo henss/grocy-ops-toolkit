@@ -1,0 +1,26 @@
+{
+  "kind": "grocy_config_manifest",
+  "version": 1,
+  "updatedAt": "2026-04-19T10:00:00.000Z",
+  "notes": [
+    "Synthetic desired state for public examples."
+  ],
+  "items": [
+    {
+      "key": "products.example-coffee",
+      "entity": "products",
+      "name": "Example Coffee",
+      "ownership": "repo_managed",
+      "fields": {
+        "min_stock_amount": 1
+      },
+      "aliases": [
+        "Sample Coffee"
+      ],
+      "provenance": {
+        "source": "synthetic-example",
+        "notes": []
+      }
+    }
+  ]
+}

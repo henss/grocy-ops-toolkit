@@ -1,0 +1,30 @@
+{
+  "name": "grocy-ops-toolkit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TypeScript toolkit for safe Grocy GitOps, health checks, and encrypted local backups",
+  "type": "module",
+  "bin": {
+    "grocy-ops-toolkit": "dist/cli.js"
+  },
+  "scripts": {
+    "grocy:config:status": "tsx src/cli.ts grocy:config:status",
+    "grocy:health": "tsx src/cli.ts grocy:health",
+    "grocy:export-config": "tsx src/cli.ts grocy:export-config",
+    "grocy:diff-config": "tsx src/cli.ts grocy:diff-config",
+    "grocy:apply-config": "tsx src/cli.ts grocy:apply-config",
+    "grocy:backup:snapshot": "tsx src/cli.ts grocy:backup:snapshot",
+    "grocy:backup:verify": "tsx src/cli.ts grocy:backup:verify",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.0",
+    "tsx": "4.21.0",
+    "typescript": "6.0.2",
+    "vitest": "4.1.2"
+  }
+}

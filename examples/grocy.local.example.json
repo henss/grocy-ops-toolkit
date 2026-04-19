@@ -1,0 +1,5 @@
+{
+  "baseUrl": "https://grocy.example.com/api",
+  "apiKey": "YOUR_GROCY_API_KEY",
+  "timeoutMs": 10000
+}

@@ -1,0 +1,39 @@
+{
+  "kind": "grocy_config_export",
+  "version": 1,
+  "exportedAt": "2026-04-19T10:00:00.000Z",
+  "source": {
+    "toolId": "grocy",
+    "baseUrl": "https://grocy.example.com/api",
+    "grocyVersion": "4.0.0"
+  },
+  "counts": {
+    "products": 1,
+    "product_groups": 0,
+    "locations": 0,
+    "quantity_units": 0,
+    "product_barcodes": 0,
+    "shopping_lists": 0,
+    "shopping_list": 0
+  },
+  "items": [
+    {
+      "key": "products.example-coffee",
+      "entity": "products",
+      "name": "Example Coffee",
+      "ownership": "observed_only",
+      "fields": {
+        "min_stock_amount": 0,
+        "name": "Example Coffee"
+      },
+      "aliases": [],
+      "provenance": {
+        "source": "live-grocy-export",
+        "recordedAt": "2026-04-19T10:00:00.000Z",
+        "notes": []
+      },
+      "lastObservedLiveId": "10",
+      "lastObservedAt": "2026-04-19T10:00:00.000Z"
+    }
+  ]
+}
