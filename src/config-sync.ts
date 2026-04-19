@@ -21,9 +21,9 @@ import {
   type GrocyJsonValue,
 } from "./schemas.js";
 
-export const GROCY_CONFIG_MANIFEST_PATH = path.join("registry", "grocy", "desired-state.json");
-export const GROCY_CONFIG_EXPORT_PATH = path.join(".runtime", "current", "grocy-config-export.json");
-export const GROCY_CONFIG_PLAN_PATH = path.join(".runtime", "current", "grocy-config-sync-plan.json");
+export const GROCY_CONFIG_MANIFEST_PATH = path.join("config", "desired-state.json");
+export const GROCY_CONFIG_EXPORT_PATH = path.join("data", "grocy-config-export.json");
+export const GROCY_CONFIG_PLAN_PATH = path.join("data", "grocy-config-sync-plan.json");
 
 const CONFIG_ENTITIES: GrocyConfigEntity[] = [
   "products",

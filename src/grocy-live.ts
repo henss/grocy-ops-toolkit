@@ -51,7 +51,7 @@ export interface GrocyProductRecord {
   minStockAmount?: string;
 }
 
-export const DEFAULT_GROCY_CONFIG_PATH = path.join(".runtime", "config", "grocy.local.json");
+export const DEFAULT_GROCY_CONFIG_PATH = path.join("config", "grocy.local.json");
 
 function normalizeBaseUrl(baseUrl: string): string {
   const trimmed = baseUrl.trim().replace(/\/+$/g, "");

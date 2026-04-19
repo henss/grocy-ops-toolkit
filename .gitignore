@@ -1,6 +1,9 @@
 node_modules/
 dist/
 coverage/
+data/
+backups/
+config/*.local.json
 .env
 .env.*
 !.env.example

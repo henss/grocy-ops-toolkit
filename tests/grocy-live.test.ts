@@ -5,9 +5,9 @@ import { describe, expect, it, vi } from "vitest";
 import { createGrocyLiveReadSurface, loadGrocyLiveConfig, runGrocyHealthCheck } from "../src/grocy-live.js";
 
 function writeConfig(baseDir: string): void {
-  fs.mkdirSync(path.join(baseDir, ".runtime", "config"), { recursive: true });
+  fs.mkdirSync(path.join(baseDir, "config"), { recursive: true });
   fs.writeFileSync(
-    path.join(baseDir, ".runtime", "config", "grocy.local.json"),
+    path.join(baseDir, "config", "grocy.local.json"),
     JSON.stringify({
       baseUrl: "https://grocy.example.com",
       apiKey: "test-api-key",

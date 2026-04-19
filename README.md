@@ -18,17 +18,17 @@ pnpm typecheck
 pnpm test
 ```
 
-Create `.runtime/config/grocy.local.json` from `examples/grocy.local.example.json`, then run:
+Create `config/grocy.local.json` from `examples/grocy.local.example.json`, then run:
 
 ```bash
 pnpm grocy:config:status
 pnpm grocy:health
 pnpm grocy:export-config
 pnpm grocy:diff-config
-pnpm grocy:apply-config -- --plan .runtime/current/grocy-config-sync-plan.json --confirm-reviewed-write
+pnpm grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
 ```
 
-For backups, create `.runtime/config/grocy-backup.local.json` from `examples/grocy-backup.local.example.json`, set the configured passphrase environment variable, then run:
+For backups, create `config/grocy-backup.local.json` from `examples/grocy-backup.local.example.json`, set the configured passphrase environment variable, then run:
 
 ```bash
 pnpm grocy:backup:snapshot

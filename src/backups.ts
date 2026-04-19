@@ -8,8 +8,8 @@ import {
   type GrocyBackupRecord,
 } from "./schemas.js";
 
-export const GROCY_BACKUP_CONFIG_PATH = path.join(".runtime", "config", "grocy-backup.local.json");
-export const GROCY_BACKUP_MANIFEST_PATH = path.join("registry", "grocy", "backup-manifest.json");
+export const GROCY_BACKUP_CONFIG_PATH = path.join("config", "grocy-backup.local.json");
+export const GROCY_BACKUP_MANIFEST_PATH = path.join("data", "grocy-backup-manifest.json");
 
 interface GrocyBackupLocalConfig {
   sourcePath: string;

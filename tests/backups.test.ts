@@ -13,13 +13,13 @@ afterEach(() => {
 function setupBackupBase(): string {
   const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-backup-"));
   fs.mkdirSync(path.join(baseDir, "source"), { recursive: true });
-  fs.mkdirSync(path.join(baseDir, ".runtime", "config"), { recursive: true });
+  fs.mkdirSync(path.join(baseDir, "config"), { recursive: true });
   fs.writeFileSync(path.join(baseDir, "source", "config.php"), "<?php return [];\n", "utf8");
   fs.writeFileSync(
-    path.join(baseDir, ".runtime", "config", "grocy-backup.local.json"),
+    path.join(baseDir, "config", "grocy-backup.local.json"),
     JSON.stringify({
       sourcePath: "source",
-      backupDir: ".runtime/backups",
+      backupDir: "backups",
       passphraseEnv: envName,
       locationLabel: "synthetic-local-encrypted",
     }),
