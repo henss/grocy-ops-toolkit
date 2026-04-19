@@ -1,10 +1,10 @@
 # Contributing To grocy-ops-toolkit
 
-Contributions should keep the public boundary generic.
+Contributions should keep examples generic and safe to share.
 
 Before opening a pull request:
 
 - Use only synthetic fixtures and examples.
-- Remove private repo names, absolute local paths, credentials, production hostnames, and production identifiers.
+- Remove absolute local paths, credentials, production hostnames, and production identifiers.
 - Keep source-specific adapters outside this public repository unless they are already generic.
-- Document any remaining sanitization question in the pull request body.
+- Document any remaining data-safety question in the pull request body.

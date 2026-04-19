@@ -10,12 +10,6 @@ TypeScript toolkit for safe Grocy GitOps, health checks, and encrypted local bac
 - Applies only reviewed `repo_managed` creates and updates when explicitly confirmed.
 - Creates and verifies encrypted local backup bundles.
 
-## Privacy Boundary
-
-Use synthetic examples by default. Do not publish real Grocy data, local filesystem paths, credentials, production hostnames, operational logs, or private planning context.
-
-This scaffold is local-first. Creating a GitHub repository, changing visibility, adding remotes, pushing commits, or publishing packages remains approval-gated outside this repo.
-
 ## Local Setup
 
 ```bash

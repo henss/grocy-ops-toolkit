@@ -1,5 +1,5 @@
 # Security Policy For grocy-ops-toolkit
 
-Do not file public issues containing secrets, private source data, customer data, or production configuration.
+Do not file public issues containing secrets, personal data, customer data, or production configuration.
 
-If you find a privacy-boundary leak in this repo, report it through the private maintainer channel before expanding public discussion.
+If you find exposed sensitive data in this repo, report it privately to the maintainer before expanding public discussion.
