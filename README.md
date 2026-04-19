@@ -2,15 +2,30 @@
 
 TypeScript toolkit for safe Grocy GitOps, health checks, and encrypted local backups.
 
-## What It Does
+## Overview
 
-- Reads Grocy stock, shopping-list, product, and master/config objects.
-- Exports stable Grocy master/config records into a reviewable JSON manifest.
-- Diffs a reviewed desired-state manifest against a live export.
-- Applies only reviewed `repo_managed` creates and updates when explicitly confirmed.
-- Creates and verifies encrypted local backup bundles.
+`grocy-ops-toolkit` helps manage Grocy configuration and local backup workflows in a reviewable, automation-friendly way.
 
-## Local Setup
+It can:
+
+- Read Grocy stock, shopping-list, product, and master/config objects.
+- Export stable Grocy master/config records into a reviewable JSON manifest.
+- Diff a reviewed desired-state manifest against a live export.
+- Apply only reviewed `repo_managed` creates and updates when explicitly confirmed.
+- Create and verify encrypted local backup bundles.
+- Render a Markdown review dashboard from generated artifacts.
+
+## Requirements
+
+- Node.js 20 or newer.
+- npm.
+- Grocy credentials for live Grocy health, export, diff, and apply workflows.
+
+Live credentials are not required for the synthetic demo, mock smoke test, apply dry run from an existing plan, or backup verification against synthetic files.
+
+## Quick Start
+
+Install dependencies and verify the project:
 
 ```bash
 npm install
@@ -19,7 +34,162 @@ npm run build
 npm test
 ```
 
-Create `config/grocy.local.json` from `examples/grocy.local.example.json`, then run:
+Create a local Grocy config from the example:
+
+```bash
+cp examples/grocy.local.example.json config/grocy.local.json
+```
+
+Then run the basic status and health checks:
+
+```bash
+npm run grocy:config:status
+npm run grocy:health
+npm run grocy:health:diagnostics
+```
+
+## Configuration Workflow
+
+Use this workflow to export Grocy configuration, review changes, and apply only explicitly approved writes.
+
+### 1. Export Live Configuration
+
+```bash
+npm run grocy:export-config
+```
+
+### 2. Diff Desired State Against Live State
+
+```bash
+npm run grocy:diff-config
+```
+
+### 3. Review The Apply Plan
+
+Run a dry run first. This reads an existing sync plan and writes a review report without sending live write requests.
+
+```bash
+npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --dry-run
+```
+
+By default, the dry-run report is written to:
+
+```text
+data/grocy-config-apply-dry-run-report.json
+```
+
+Use `--output <path>` to write the report somewhere else.
+
+### 4. Apply Reviewed Writes
+
+Only run this after reviewing the generated plan and dry-run report.
+
+```bash
+npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
+```
+
+## Health And Diagnostics
+
+Run diagnostics when health checks fail or when an agent-readable troubleshooting artifact is useful.
+
+```bash
+npm run grocy:health:diagnostics
+```
+
+By default, diagnostics are written to:
+
+```text
+data/grocy-health-diagnostics.json
+```
+
+The diagnostics artifact records reachability checks and next actions. It does not store Grocy record contents, API keys, absolute local paths, or live URL values.
+
+Use `--output <path>` to write the artifact somewhere else.
+
+## Mock Smoke Test
+
+The mock smoke command runs the health, config export, sync-plan, and apply dry-run path against synthetic Grocy responses. It is intended for CI environments that must not depend on live Grocy credentials.
+
+```bash
+npm run grocy:smoke:mock
+```
+
+By default, the mock smoke report is written to:
+
+```text
+data/grocy-mock-smoke-report.json
+```
+
+Use `--output <path>` to write the report somewhere else.
+
+## Review Dashboard
+
+Render a Markdown dashboard from existing JSON artifacts:
+
+```bash
+npm run grocy:review:dashboard
+```
+
+By default, the dashboard is written to:
+
+```text
+data/grocy-review-dashboard.md
+```
+
+The dashboard can summarize:
+
+- Config sync plans.
+- Apply dry-run reports.
+- Health diagnostics.
+- Backup manifests.
+- Mock smoke reports.
+
+Use these options to point at specific local artifacts:
+
+- `--plan`
+- `--dry-run-report`
+- `--diagnostics`
+- `--backup-manifest`
+- `--smoke-report`
+- `--output <path>`
+
+## Backup Workflow
+
+Create a local backup config from the example:
+
+```bash
+cp examples/grocy-backup.local.example.json config/grocy-backup.local.json
+```
+
+Set the configured passphrase environment variable, then create and verify a backup:
+
+```bash
+npm run grocy:backup:snapshot
+npm run grocy:backup:verify
+```
+
+To verify by restoring into a local restore directory, explicitly confirm the restore write:
+
+```bash
+npm run grocy:backup:verify -- --restore-dir restore/grocy-backup-check --confirm-restore-write
+```
+
+The example backup source under `examples/synthetic-grocy-backup-source` is intentionally synthetic. Use it to test the snapshot, encrypted archive, verification, and restore loop before pointing a local config at private Grocy files.
+
+## Synthetic Demo Lab
+
+For a clean-checkout walkthrough that uses synthetic data only, see [Synthetic Grocy Demo Lab](docs/synthetic-demo-lab.md).
+
+The demo combines:
+
+- Diagnostics.
+- Mock smoke.
+- Config diff.
+- Apply dry run.
+- Backup verification.
+- Dashboard rendering.
+
+## Common Commands
 
 ```bash
 npm run grocy:config:status
@@ -30,25 +200,8 @@ npm run grocy:export-config
 npm run grocy:diff-config
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --dry-run
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
-npm run grocy:review:dashboard
-```
-
-The diagnostics command writes an agent-readable failure artifact to `data/grocy-health-diagnostics.json`. It records reachability checks and next actions without storing Grocy record contents, API keys, absolute local paths, or live URL values. Use `--output <path>` to write the artifact somewhere else.
-
-The mock smoke command runs the health, config export, sync-plan, and apply dry-run path against synthetic Grocy responses. It is intended for CI environments that must not depend on live Grocy credentials. By default it writes `data/grocy-mock-smoke-report.json`; use `--output <path>` to write the report somewhere else.
-
-For a clean-checkout walkthrough that combines diagnostics, mock smoke, config diff, apply dry-run, backup verification, and dashboard rendering with synthetic data only, see [Synthetic Grocy Demo Lab](docs/synthetic-demo-lab.md).
-
-The apply dry run reads an existing sync plan and writes a review report to `data/grocy-config-apply-dry-run-report.json` without requiring Grocy credentials or sending live write requests. Use `--output <path>` to write the report somewhere else.
-
-The review dashboard command renders a Markdown summary from existing JSON artifacts, including config sync plans, apply dry-run reports, health diagnostics, backup manifests, and mock smoke reports. By default it writes `data/grocy-review-dashboard.md`; use `--plan`, `--dry-run-report`, `--diagnostics`, `--backup-manifest`, `--smoke-report`, or `--output <path>` to point at specific local artifacts.
-
-For backups, create `config/grocy-backup.local.json` from `examples/grocy-backup.local.example.json`, set the configured passphrase environment variable, then run:
-
-```bash
 npm run grocy:backup:snapshot
 npm run grocy:backup:verify
 npm run grocy:backup:verify -- --restore-dir restore/grocy-backup-check --confirm-restore-write
+npm run grocy:review:dashboard
 ```
-
-The example backup source under `examples/synthetic-grocy-backup-source` is intentionally synthetic. Use it to test the snapshot, encrypted archive, verification, and restore loop before pointing a local config at private Grocy files.
