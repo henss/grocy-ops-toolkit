@@ -6,6 +6,7 @@ import {
 } from "./backups.js";
 import {
   GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH,
+  GROCY_CONFIG_DRIFT_TREND_REPORT_PATH,
   GROCY_CONFIG_PLAN_PATH,
 } from "./config-sync.js";
 import { GROCY_HEALTH_DIAGNOSTICS_PATH } from "./health-diagnostics.js";
@@ -13,11 +14,13 @@ import { GROCY_MOCK_SMOKE_REPORT_PATH } from "./mock-smoke.js";
 import {
   GrocyBackupManifestSchema,
   GrocyConfigApplyDryRunReportSchema,
+  GrocyConfigDriftTrendReportSchema,
   GrocyConfigSyncPlanSchema,
   GrocyHealthDiagnosticsArtifactSchema,
   type GrocyBackupManifest,
   type GrocyConfigApplyDryRunReport,
   type GrocyConfigApplyDryRunReportItem,
+  type GrocyConfigDriftTrendReport,
   type GrocyConfigSyncPlan,
   type GrocyHealthDiagnosticsArtifact,
 } from "./schemas.js";
@@ -49,6 +52,7 @@ type GrocyMockSmokeReport = z.infer<typeof GrocyMockSmokeReportSchema>;
 export interface GrocyReviewDashboardArtifacts {
   plan?: GrocyConfigSyncPlan;
   applyDryRunReport?: GrocyConfigApplyDryRunReport;
+  driftTrendReport?: GrocyConfigDriftTrendReport;
   diagnostics?: GrocyHealthDiagnosticsArtifact;
   backupManifest?: GrocyBackupManifest;
   mockSmokeReport?: GrocyMockSmokeReport;
@@ -57,6 +61,7 @@ export interface GrocyReviewDashboardArtifacts {
 export interface GrocyReviewDashboardArtifactPaths {
   planPath?: string;
   applyDryRunReportPath?: string;
+  driftTrendReportPath?: string;
   diagnosticsPath?: string;
   backupManifestPath?: string;
   mockSmokeReportPath?: string;
@@ -159,6 +164,26 @@ function renderApplyItems(report: GrocyConfigApplyDryRunReport | undefined): str
   ];
 }
 
+function renderDriftTrend(report: GrocyConfigDriftTrendReport | undefined): string[] {
+  if (!report) {
+    return ["No config drift trend report was loaded."];
+  }
+  const changedCount = report.summary.added + report.summary.removed + report.summary.changed;
+  const header = `Period: ${report.period.previousExportedAt} to ${report.period.currentExportedAt}. Changed records: ${changedCount}; unchanged: ${report.summary.unchanged}.`;
+  if (report.items.length === 0) {
+    return [header, "No drift items were detected between the loaded exports."];
+  }
+  return [
+    header,
+    "",
+    "| Status | Key | Entity | Change fields |",
+    "| --- | --- | --- | --- |",
+    ...report.items.map((item) =>
+      `| ${escapeCell(item.status)} | ${escapeCell(item.key)} | ${escapeCell(item.entity)} | ${escapeCell(item.changedFields.length > 0 ? item.changedFields.join(", ") : "-")} |`,
+    ),
+  ];
+}
+
 function renderManualReview(plan: GrocyConfigSyncPlan | undefined): string[] {
   const manualReviewItems = plan?.actions.filter((item) => item.action === "manual_review") ?? [];
   if (manualReviewItems.length === 0) {
@@ -220,6 +245,7 @@ export function createGrocyReviewDashboard(input: GrocyReviewDashboardInput = {}
   const loadedArtifacts = [
     input.plan ? "config sync plan" : undefined,
     input.applyDryRunReport ? "apply dry-run report" : undefined,
+    input.driftTrendReport ? "config drift trend report" : undefined,
     input.diagnostics ? "health diagnostics" : undefined,
     input.backupManifest ? "backup manifest" : undefined,
     input.mockSmokeReport ? "mock smoke report" : undefined,
@@ -246,6 +272,7 @@ export function createGrocyReviewDashboard(input: GrocyReviewDashboardInput = {}
     "",
     `- Config sync plan: ${displayArtifactPath(baseDir, input.artifactPaths?.planPath) ?? "not loaded"}`,
     `- Apply dry-run report: ${displayArtifactPath(baseDir, input.artifactPaths?.applyDryRunReportPath) ?? "not loaded"}`,
+    `- Config drift trend report: ${displayArtifactPath(baseDir, input.artifactPaths?.driftTrendReportPath) ?? "not loaded"}`,
     `- Health diagnostics: ${displayArtifactPath(baseDir, input.artifactPaths?.diagnosticsPath) ?? "not loaded"}`,
     `- Backup manifest: ${displayArtifactPath(baseDir, input.artifactPaths?.backupManifestPath) ?? "not loaded"}`,
     `- Mock smoke report: ${displayArtifactPath(baseDir, input.artifactPaths?.mockSmokeReportPath) ?? "not loaded"}`,
@@ -257,6 +284,10 @@ export function createGrocyReviewDashboard(input: GrocyReviewDashboardInput = {}
     "## Manual Review Reasons",
     "",
     ...renderManualReview(input.plan),
+    "",
+    "## Config Drift Trend",
+    "",
+    ...renderDriftTrend(input.driftTrendReport),
     "",
     "## Health Diagnostics",
     "",
@@ -285,6 +316,12 @@ export function createGrocyReviewDashboardFromArtifacts(
       GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH,
       GrocyConfigApplyDryRunReportSchema,
     ),
+    driftTrendReport: loadOptionalArtifact(
+      baseDir,
+      options.driftTrendReportPath,
+      GROCY_CONFIG_DRIFT_TREND_REPORT_PATH,
+      GrocyConfigDriftTrendReportSchema,
+    ),
     diagnostics: loadOptionalArtifact(
       baseDir,
       options.diagnosticsPath,
@@ -303,6 +340,9 @@ export function createGrocyReviewDashboardFromArtifacts(
       planPath: artifacts.plan ? options.planPath ?? GROCY_CONFIG_PLAN_PATH : undefined,
       applyDryRunReportPath: artifacts.applyDryRunReport
         ? options.applyDryRunReportPath ?? GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH
+        : undefined,
+      driftTrendReportPath: artifacts.driftTrendReport
+        ? options.driftTrendReportPath ?? GROCY_CONFIG_DRIFT_TREND_REPORT_PATH
         : undefined,
       diagnosticsPath: artifacts.diagnostics ? options.diagnosticsPath ?? GROCY_HEALTH_DIAGNOSTICS_PATH : undefined,
       backupManifestPath: artifacts.backupManifest ? options.backupManifestPath ?? GROCY_BACKUP_MANIFEST_PATH : undefined,

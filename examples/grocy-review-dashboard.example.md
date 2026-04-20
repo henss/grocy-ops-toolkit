@@ -5,13 +5,14 @@ Generated at: 2026-04-19T10:30:00.000Z
 ## Review Status
 
 Status: needs attention.
-Loaded artifacts: config sync plan, apply dry-run report, health diagnostics, backup manifest, mock smoke report.
+Loaded artifacts: config sync plan, apply dry-run report, config drift trend report, health diagnostics, backup manifest, mock smoke report.
 1 reviewed write would run if confirmed.
 
 ## Artifact Sources
 
 - Config sync plan: examples/config-sync-plan.example.json
 - Apply dry-run report: examples/config-apply-dry-run-report.example.json
+- Config drift trend report: examples/grocy-config-drift-trend-report.example.json
 - Health diagnostics: examples/grocy-health-diagnostics.example.json
 - Backup manifest: examples/backup-manifest.example.json
 - Mock smoke report: examples/grocy-mock-smoke-report.example.json
@@ -25,6 +26,14 @@ Loaded artifacts: config sync plan, apply dry-run report, health diagnostics, ba
 ## Manual Review Reasons
 
 No manual-review plan actions were loaded.
+
+## Config Drift Trend
+
+Period: 2026-04-18T10:00:00.000Z to 2026-04-19T10:00:00.000Z. Changed records: 1; unchanged: 0.
+
+| Status | Key | Entity | Change fields |
+| --- | --- | --- | --- |
+| changed | products.example-coffee | products | min_stock_amount |
 
 ## Health Diagnostics
 

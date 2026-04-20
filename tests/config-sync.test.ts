@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   applyGrocyConfigSyncPlan,
   createGrocyConfigApplyDryRunReport,
+  createGrocyConfigDriftTrendReport,
   createGrocyConfigSyncPlan,
   exportGrocyConfig,
   recordGrocyConfigSyncPlan,
@@ -243,6 +244,96 @@ describe("Grocy config sync", () => {
       liveId: "10",
       changes: [{ field: "min_stock_amount", desired: 2, live: 1 }],
     });
+  });
+
+  it("reports config drift trends between two exports", () => {
+    const previousExport: GrocyConfigExport = {
+      kind: "grocy_config_export",
+      version: 1,
+      exportedAt: "2026-04-19T10:00:00.000Z",
+      source: { toolId: "grocy" },
+      counts: {
+        products: 2,
+        product_groups: 0,
+        locations: 0,
+        quantity_units: 0,
+        product_barcodes: 0,
+        shopping_lists: 0,
+        shopping_list: 0,
+      },
+      items: [
+        {
+          key: "products.example-coffee",
+          entity: "products",
+          name: "Example Coffee",
+          ownership: "observed_only",
+          fields: { min_stock_amount: 1 },
+          aliases: [],
+          provenance: { source: "synthetic", notes: [] },
+        },
+        {
+          key: "products.example-removed",
+          entity: "products",
+          name: "Example Removed",
+          ownership: "observed_only",
+          fields: {},
+          aliases: [],
+          provenance: { source: "synthetic", notes: [] },
+        },
+      ],
+    };
+    const currentExport: GrocyConfigExport = {
+      kind: "grocy_config_export",
+      version: 1,
+      exportedAt: "2026-04-20T10:00:00.000Z",
+      source: { toolId: "grocy" },
+      counts: {
+        products: 2,
+        product_groups: 0,
+        locations: 0,
+        quantity_units: 0,
+        product_barcodes: 0,
+        shopping_lists: 0,
+        shopping_list: 0,
+      },
+      items: [
+        {
+          key: "products.example-coffee",
+          entity: "products",
+          name: "Example Coffee",
+          ownership: "observed_only",
+          fields: { min_stock_amount: 2 },
+          aliases: [],
+          provenance: { source: "synthetic", notes: [] },
+        },
+        {
+          key: "products.example-added",
+          entity: "products",
+          name: "Example Added",
+          ownership: "observed_only",
+          fields: {},
+          aliases: [],
+          provenance: { source: "synthetic", notes: [] },
+        },
+      ],
+    };
+
+    const report = createGrocyConfigDriftTrendReport({
+      previousExport,
+      currentExport,
+      previousExportPath: "examples/config-export.previous.example.json",
+      currentExportPath: "examples/config-export.example.json",
+      generatedAt: "2026-04-20T10:05:00.000Z",
+    });
+
+    expect(report.summary).toEqual({ added: 1, removed: 1, changed: 1, unchanged: 0 });
+    expect(report.entityBreakdown.products).toEqual({ added: 1, removed: 1, changed: 1, unchanged: 0 });
+    expect(report.items.map((item) => `${item.status}:${item.key}`)).toEqual([
+      "added:products.example-added",
+      "changed:products.example-coffee",
+      "removed:products.example-removed",
+    ]);
+    expect(report.items.find((item) => item.status === "changed")?.changedFields).toEqual(["min_stock_amount"]);
   });
 
   it("uses caller-provided config paths for custom repo layouts", async () => {

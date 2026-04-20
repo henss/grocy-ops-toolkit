@@ -10,6 +10,7 @@ import {
 import type {
   GrocyBackupManifest,
   GrocyConfigApplyDryRunReport,
+  GrocyConfigDriftTrendReport,
   GrocyConfigSyncPlan,
   GrocyHealthDiagnosticsArtifact,
 } from "../src/schemas.js";
@@ -58,6 +59,46 @@ const dryRunReport: GrocyConfigApplyDryRunReport = {
       liveId: "10",
       reason: "Repo-managed item differs from live Grocy.",
       changes: [{ field: "min_stock_amount", desired: 2, live: 1 }],
+    },
+  ],
+};
+
+const driftTrendReport: GrocyConfigDriftTrendReport = {
+  kind: "grocy_config_drift_trend_report",
+  version: 1,
+  generatedAt: "2026-04-20T10:05:00.000Z",
+  previousExportPath: "examples/config-export.previous.example.json",
+  currentExportPath: "examples/config-export.example.json",
+  period: {
+    previousExportedAt: "2026-04-19T10:00:00.000Z",
+    currentExportedAt: "2026-04-20T10:00:00.000Z",
+  },
+  summary: { added: 1, removed: 0, changed: 1, unchanged: 3 },
+  entityBreakdown: {
+    products: { added: 1, removed: 0, changed: 1, unchanged: 1 },
+    product_groups: { added: 0, removed: 0, changed: 0, unchanged: 1 },
+    locations: { added: 0, removed: 0, changed: 0, unchanged: 1 },
+    quantity_units: { added: 0, removed: 0, changed: 0, unchanged: 0 },
+    product_barcodes: { added: 0, removed: 0, changed: 0, unchanged: 0 },
+    shopping_lists: { added: 0, removed: 0, changed: 0, unchanged: 0 },
+    shopping_list: { added: 0, removed: 0, changed: 0, unchanged: 0 },
+  },
+  items: [
+    {
+      status: "changed",
+      key: "products.example-coffee",
+      entity: "products",
+      name: "Example Coffee",
+      changedFields: ["min_stock_amount"],
+      changes: [{ field: "min_stock_amount", previous: 1, current: 2 }],
+    },
+    {
+      status: "added",
+      key: "products.example-cocoa",
+      entity: "products",
+      name: "Example Cocoa",
+      changedFields: [],
+      changes: [],
     },
   ],
 };
@@ -112,11 +153,13 @@ describe("Grocy review dashboard", () => {
       generatedAt: "2026-04-19T10:30:00.000Z",
       plan,
       applyDryRunReport: dryRunReport,
+      driftTrendReport,
       diagnostics,
       backupManifest,
       artifactPaths: {
         planPath: "data/grocy-config-sync-plan.json",
         applyDryRunReportPath: "data/grocy-config-apply-dry-run-report.json",
+        driftTrendReportPath: "data/grocy-config-drift-trend-report.json",
         diagnosticsPath: "data/grocy-health-diagnostics.json",
         backupManifestPath: "data/grocy-backup-manifest.json",
       },
@@ -126,6 +169,8 @@ describe("Grocy review dashboard", () => {
     expect(dashboard).toContain("Status: needs attention.");
     expect(dashboard).toContain("1 item requires manual review before apply.");
     expect(dashboard).toContain("| would_update | products.example-coffee | products | Repo-managed item differs from live Grocy. | min_stock_amount |");
+    expect(dashboard).toContain("Period: 2026-04-19T10:00:00.000Z to 2026-04-20T10:00:00.000Z. Changed records: 2; unchanged: 3.");
+    expect(dashboard).toContain("| changed | products.example-coffee | products | min_stock_amount |");
     expect(dashboard).toContain("| products.example-duplicate | products | Multiple live Grocy records match this manifest item. |");
     expect(dashboard).toContain("Latest record: grocy-backup-20260419102000; files: 2; bytes: 123; restore test: verified.");
   });
@@ -134,6 +179,7 @@ describe("Grocy review dashboard", () => {
     const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-review-dashboard-"));
     writeJson(baseDir, path.join("data", "grocy-config-sync-plan.json"), plan);
     writeJson(baseDir, path.join("data", "grocy-config-apply-dry-run-report.json"), dryRunReport);
+    writeJson(baseDir, path.join("data", "grocy-config-drift-trend-report.json"), driftTrendReport);
     writeJson(baseDir, path.join("data", "grocy-health-diagnostics.json"), diagnostics);
     writeJson(baseDir, path.join("data", "grocy-backup-manifest.json"), backupManifest);
 
@@ -144,6 +190,7 @@ describe("Grocy review dashboard", () => {
 
     expect(path.relative(baseDir, outputPath)).toBe(path.join("data", "grocy-review-dashboard.md"));
     expect(fs.readFileSync(outputPath, "utf8")).toContain("- Config sync plan: data/grocy-config-sync-plan.json");
+    expect(fs.readFileSync(outputPath, "utf8")).toContain("- Config drift trend report: data/grocy-config-drift-trend-report.json");
   });
 
   it("redacts external artifact paths from the rendered source list", () => {

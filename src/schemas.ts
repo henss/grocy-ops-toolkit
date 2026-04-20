@@ -141,6 +141,51 @@ export const GrocyConfigApplyDryRunReportSchema = z.object({
   items: z.array(GrocyConfigApplyDryRunReportItemSchema).default([]),
 });
 
+export const GrocyConfigDriftTrendStatusSchema = z.enum(["added", "removed", "changed"]);
+
+export const GrocyConfigDriftTrendChangeSchema = z.object({
+  field: z.string().min(1),
+  previous: GrocyJsonValueSchema.optional(),
+  current: GrocyJsonValueSchema.optional(),
+});
+
+export const GrocyConfigDriftTrendItemSchema = z.object({
+  status: GrocyConfigDriftTrendStatusSchema,
+  key: z.string().min(1),
+  entity: GrocyConfigEntitySchema,
+  name: z.string().min(1),
+  changedFields: z.array(z.string().min(1)).default([]),
+  changes: z.array(GrocyConfigDriftTrendChangeSchema).default([]),
+});
+
+export const GrocyConfigDriftTrendReportSchema = z.object({
+  kind: z.literal("grocy_config_drift_trend_report"),
+  version: z.literal(1),
+  generatedAt: z.string().min(1),
+  previousExportPath: z.string().min(1),
+  currentExportPath: z.string().min(1),
+  period: z.object({
+    previousExportedAt: z.string().min(1),
+    currentExportedAt: z.string().min(1),
+  }),
+  summary: z.object({
+    added: z.number().int().nonnegative(),
+    removed: z.number().int().nonnegative(),
+    changed: z.number().int().nonnegative(),
+    unchanged: z.number().int().nonnegative(),
+  }),
+  entityBreakdown: z.record(
+    GrocyConfigEntitySchema,
+    z.object({
+      added: z.number().int().nonnegative(),
+      removed: z.number().int().nonnegative(),
+      changed: z.number().int().nonnegative(),
+      unchanged: z.number().int().nonnegative(),
+    }),
+  ),
+  items: z.array(GrocyConfigDriftTrendItemSchema).default([]),
+});
+
 export const GrocyHealthDiagnosticCodeSchema = z.enum([
   "config_missing",
   "config_invalid",
@@ -208,6 +253,10 @@ export type GrocyConfigPlanItem = z.infer<typeof GrocyConfigPlanItemSchema>;
 export type GrocyConfigSyncPlan = z.infer<typeof GrocyConfigSyncPlanSchema>;
 export type GrocyConfigApplyDryRunReportItem = z.infer<typeof GrocyConfigApplyDryRunReportItemSchema>;
 export type GrocyConfigApplyDryRunReport = z.infer<typeof GrocyConfigApplyDryRunReportSchema>;
+export type GrocyConfigDriftTrendStatus = z.infer<typeof GrocyConfigDriftTrendStatusSchema>;
+export type GrocyConfigDriftTrendChange = z.infer<typeof GrocyConfigDriftTrendChangeSchema>;
+export type GrocyConfigDriftTrendItem = z.infer<typeof GrocyConfigDriftTrendItemSchema>;
+export type GrocyConfigDriftTrendReport = z.infer<typeof GrocyConfigDriftTrendReportSchema>;
 export type GrocyHealthDiagnosticCode = z.infer<typeof GrocyHealthDiagnosticCodeSchema>;
 export type GrocyHealthDiagnostic = z.infer<typeof GrocyHealthDiagnosticSchema>;
 export type GrocyHealthDiagnosticsArtifact = z.infer<typeof GrocyHealthDiagnosticsArtifactSchema>;

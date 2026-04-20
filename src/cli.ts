@@ -2,12 +2,16 @@
 
 import {
   applyGrocyConfigSyncPlan,
+  createGrocyConfigDriftTrendReport,
   createGrocyConfigApplyDryRunReport,
   createGrocyConfigSyncPlan,
   exportGrocyConfig,
+  GROCY_CONFIG_EXPORT_PATH,
+  GROCY_CONFIG_PREVIOUS_EXPORT_PATH,
   loadGrocyConfigExport,
   loadGrocyConfigManifest,
   loadGrocyConfigSyncPlan,
+  recordGrocyConfigDriftTrendReport,
   recordGrocyConfigApplyDryRunReport,
   recordGrocyConfigExport,
   recordGrocyConfigSyncPlan,
@@ -96,6 +100,22 @@ async function main(): Promise<void> {
     printJson({ outputPath, summary: plan.summary });
     return;
   }
+  if (command === "grocy:config:drift-trend") {
+    const previousExportPath = parseFlag("--previous") ?? GROCY_CONFIG_PREVIOUS_EXPORT_PATH;
+    const currentExportPath = parseFlag("--current") ?? GROCY_CONFIG_EXPORT_PATH;
+    const report = createGrocyConfigDriftTrendReport({
+      previousExport: loadGrocyConfigExport(previousExportPath),
+      currentExport: loadGrocyConfigExport(currentExportPath),
+      previousExportPath,
+      currentExportPath,
+    });
+    const outputPath = recordGrocyConfigDriftTrendReport(report, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: report.summary, period: report.period });
+    return;
+  }
   if (command === "grocy:apply-config") {
     const planPath = parseFlag("--plan");
     if (!planPath) {
@@ -134,6 +154,7 @@ async function main(): Promise<void> {
     const dashboard = createGrocyReviewDashboardFromArtifacts(process.cwd(), {
       planPath: parseFlag("--plan"),
       applyDryRunReportPath: parseFlag("--dry-run-report"),
+      driftTrendReportPath: parseFlag("--drift-trend-report"),
       diagnosticsPath: parseFlag("--diagnostics"),
       backupManifestPath: parseFlag("--backup-manifest"),
       mockSmokeReportPath: parseFlag("--smoke-report"),

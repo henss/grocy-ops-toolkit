@@ -64,6 +64,16 @@ npm run grocy:diff-config -- --manifest examples/desired-state.example.json --ex
 
 Expected result: the generated plan contains one reviewed update for `Example Coffee`.
 
+## Config Drift Trend
+
+Create an offline trend report from two synthetic config exports.
+
+```bash
+npm run grocy:config:drift-trend -- --previous examples/config-export.previous.example.json --current examples/config-export.example.json --output data/demo-config-drift-trend-report.json --force
+```
+
+Expected result: the generated report shows one changed `Example Coffee` record and no live write.
+
 ## Apply Dry Run
 
 Render the apply review report from the generated synthetic plan. This does not send write requests and does not require Grocy credentials.
@@ -105,10 +115,10 @@ Expected result: verification reports `checksumVerified: true`, and the restore 
 Render one Markdown review surface from the generated lab artifacts:
 
 ```bash
-npm run grocy:review:dashboard -- --plan data/demo-config-sync-plan.json --dry-run-report data/demo-apply-dry-run-report.json --diagnostics data/demo-health-diagnostics.json --backup-manifest data/grocy-backup-manifest.json --smoke-report data/demo-mock-smoke-report.json --output data/demo-review-dashboard.md --force
+npm run grocy:review:dashboard -- --plan data/demo-config-sync-plan.json --dry-run-report data/demo-apply-dry-run-report.json --drift-trend-report data/demo-config-drift-trend-report.json --diagnostics data/demo-health-diagnostics.json --backup-manifest data/grocy-backup-manifest.json --smoke-report data/demo-mock-smoke-report.json --output data/demo-review-dashboard.md --force
 ```
 
-Expected result: the dashboard is reviewable and shows the diagnostic config gap, mock smoke pass, apply dry-run action, and latest synthetic backup verification state.
+Expected result: the dashboard is reviewable and shows the diagnostic config gap, mock smoke pass, apply dry-run action, config drift trend, and latest synthetic backup verification state.
 
 ## Cleanup
 

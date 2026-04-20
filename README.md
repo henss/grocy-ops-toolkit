@@ -11,6 +11,7 @@ It can:
 - Read Grocy stock, shopping-list, product, and master/config objects.
 - Export stable Grocy master/config records into a reviewable JSON manifest.
 - Diff a reviewed desired-state manifest against a live export.
+- Report config drift trends between two offline exports.
 - Apply only reviewed `repo_managed` creates and updates when explicitly confirmed.
 - Create and verify encrypted local backup bundles.
 - Render a Markdown review dashboard from generated artifacts.
@@ -82,7 +83,23 @@ data/grocy-config-apply-dry-run-report.json
 
 Use `--output <path>` to write the report somewhere else.
 
-### 4. Apply Reviewed Writes
+### 4. Compare Exports Over Time
+
+Render a longitudinal drift report from two existing config exports. This is offline and does not require live Grocy credentials.
+
+```bash
+npm run grocy:config:drift-trend -- --previous data/grocy-config-export.previous.json --current data/grocy-config-export.json
+```
+
+By default, the report is written to:
+
+```text
+data/grocy-config-drift-trend-report.json
+```
+
+Use `--output <path>` to write the report somewhere else.
+
+### 5. Apply Reviewed Writes
 
 Only run this after reviewing the generated plan and dry-run report.
 
@@ -158,6 +175,7 @@ The dashboard can summarize:
 
 - Config sync plans.
 - Apply dry-run reports.
+- Config drift trend reports.
 - Health diagnostics.
 - Backup manifests.
 - Mock smoke reports.
@@ -166,6 +184,7 @@ Use these options to point at specific local artifacts:
 
 - `--plan`
 - `--dry-run-report`
+- `--drift-trend-report`
 - `--diagnostics`
 - `--backup-manifest`
 - `--smoke-report`
@@ -240,6 +259,7 @@ npm run grocy:compatibility:matrix
 npm run grocy:smoke:mock
 npm run grocy:export-config
 npm run grocy:diff-config
+npm run grocy:config:drift-trend -- --previous data/grocy-config-export.previous.json --current data/grocy-config-export.json
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --dry-run
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
 npm run grocy:backup:snapshot

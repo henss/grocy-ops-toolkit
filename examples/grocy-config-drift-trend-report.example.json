@@ -1,0 +1,79 @@
+{
+  "kind": "grocy_config_drift_trend_report",
+  "version": 1,
+  "generatedAt": "2026-04-19T10:05:00.000Z",
+  "previousExportPath": "examples/config-export.previous.example.json",
+  "currentExportPath": "examples/config-export.example.json",
+  "period": {
+    "previousExportedAt": "2026-04-18T10:00:00.000Z",
+    "currentExportedAt": "2026-04-19T10:00:00.000Z"
+  },
+  "summary": {
+    "added": 0,
+    "removed": 0,
+    "changed": 1,
+    "unchanged": 0
+  },
+  "entityBreakdown": {
+    "products": {
+      "added": 0,
+      "removed": 0,
+      "changed": 1,
+      "unchanged": 0
+    },
+    "product_groups": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0,
+      "unchanged": 0
+    },
+    "locations": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0,
+      "unchanged": 0
+    },
+    "quantity_units": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0,
+      "unchanged": 0
+    },
+    "product_barcodes": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0,
+      "unchanged": 0
+    },
+    "shopping_lists": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0,
+      "unchanged": 0
+    },
+    "shopping_list": {
+      "added": 0,
+      "removed": 0,
+      "changed": 0,
+      "unchanged": 0
+    }
+  },
+  "items": [
+    {
+      "status": "changed",
+      "key": "products.example-coffee",
+      "entity": "products",
+      "name": "Example Coffee",
+      "changedFields": [
+        "min_stock_amount"
+      ],
+      "changes": [
+        {
+          "field": "min_stock_amount",
+          "previous": 1,
+          "current": 0
+        }
+      ]
+    }
+  ]
+}
