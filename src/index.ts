@@ -7,3 +7,4 @@ export * from "./mock-smoke.js";
 export * from "./redaction-audit.js";
 export * from "./review-dashboard.js";
 export * from "./schemas.js";
+export * from "./support-bundle.js";

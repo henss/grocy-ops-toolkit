@@ -16,6 +16,7 @@ It can:
 - Create and verify encrypted local backup bundles.
 - Render a Markdown review dashboard from generated artifacts.
 - Audit generated public artifacts for private-path, URL, credential, and boundary-term leaks.
+- Generate an offline sanitized support bundle manifest from local generated artifacts.
 - Generate a synthetic Grocy API compatibility matrix for fixture-only API-shape review.
 
 ## Requirements
@@ -213,6 +214,24 @@ data/grocy-public-artifact-redaction-audit.json
 
 The report lists finding codes, line numbers, and repo-relative file paths only. It does not echo matched snippets. Use `--path <path>` one or more times to scan specific repo-local artifact paths, and `--output <path>` to write the report somewhere else.
 
+## Offline Support Bundle
+
+Generate a sanitized support bundle manifest from local generated artifacts:
+
+```bash
+npm run grocy:support:bundle
+```
+
+By default, the bundle is written to:
+
+```text
+data/grocy-support-bundle.json
+```
+
+The bundle records repo-relative artifact paths, file checksums, file sizes, safe summary fields, and the current redaction-audit readiness result. It does not embed artifact contents, Grocy record payloads, credentials, absolute local paths, or encrypted backup archives. If the redaction audit finds issues, the command exits non-zero and the bundle summary is marked `needs_redaction_review`.
+
+Use `--artifact <path>` one or more times to include specific repo-local generated artifacts, and `--output <path>` to write the bundle somewhere else.
+
 ## Backup Workflow
 
 Create a local backup config from the example:
@@ -278,4 +297,5 @@ npm run grocy:backup:verify
 npm run grocy:backup:verify -- --restore-dir restore/grocy-backup-check --confirm-restore-write
 npm run grocy:review:dashboard
 npm run grocy:artifacts:audit-redaction
+npm run grocy:support:bundle
 ```

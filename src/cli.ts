@@ -23,6 +23,7 @@ import { createGrocyApiCompatibilityMatrix, recordGrocyApiCompatibilityMatrix } 
 import { recordGrocyMockSmokeReport, runGrocyMockSmokeTest } from "./mock-smoke.js";
 import { auditGrocyPublicArtifacts, recordGrocyPublicArtifactRedactionAudit } from "./redaction-audit.js";
 import { createGrocyReviewDashboardFromArtifacts, recordGrocyReviewDashboard } from "./review-dashboard.js";
+import { createGrocySupportBundle, recordGrocySupportBundle } from "./support-bundle.js";
 
 function parseFlag(flag: string): string | undefined {
   const index = process.argv.indexOf(flag);
@@ -177,6 +178,21 @@ async function main(): Promise<void> {
     });
     printJson({ outputPath, summary: audit.summary });
     if (audit.summary.findingCount > 0) {
+      process.exitCode = 1;
+    }
+    return;
+  }
+  if (command === "grocy:support:bundle") {
+    const bundle = createGrocySupportBundle({
+      baseDir: process.cwd(),
+      artifactPaths: parseFlags("--artifact").length > 0 ? parseFlags("--artifact") : undefined,
+    });
+    const outputPath = recordGrocySupportBundle(bundle, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: bundle.summary });
+    if (bundle.summary.readiness !== "ready_to_share") {
       process.exitCode = 1;
     }
     return;

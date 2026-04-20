@@ -45,6 +45,7 @@
     "grocy:backup:verify": "tsx src/cli.ts grocy:backup:verify",
     "grocy:review:dashboard": "tsx src/cli.ts grocy:review:dashboard",
     "grocy:artifacts:audit-redaction": "tsx src/cli.ts grocy:artifacts:audit-redaction",
+    "grocy:support:bundle": "tsx src/cli.ts grocy:support:bundle",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"

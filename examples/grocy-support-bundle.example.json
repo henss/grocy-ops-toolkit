@@ -1,0 +1,53 @@
+{
+  "kind": "grocy_support_bundle",
+  "version": 1,
+  "generatedAt": "2026-04-20T10:02:00.000Z",
+  "summary": {
+    "readiness": "ready_to_share",
+    "artifactCount": 2,
+    "redactionFindingCount": 0
+  },
+  "artifacts": [
+    {
+      "path": "data/grocy-health-diagnostics.json",
+      "type": "json",
+      "bytes": 420,
+      "sha256": "example-health-diagnostics-checksum",
+      "kind": "grocy_health_diagnostics",
+      "version": 1,
+      "generatedAt": "2026-04-20T10:00:00.000Z",
+      "summary": {
+        "result": "pass",
+        "failureCount": 0,
+        "warningCount": 0
+      }
+    },
+    {
+      "path": "data/grocy-mock-smoke-report.json",
+      "type": "json",
+      "bytes": 640,
+      "sha256": "example-mock-smoke-checksum",
+      "kind": "grocy_mock_smoke_report",
+      "version": 1,
+      "generatedAt": "2026-04-20T10:01:00.000Z",
+      "summary": {
+        "result": "pass",
+        "checkCount": 4,
+        "failureCount": 0
+      }
+    }
+  ],
+  "redactionAudit": {
+    "result": "pass",
+    "scannedFileCount": 2,
+    "findingCount": 0,
+    "findingCodes": []
+  },
+  "omitted": [
+    "Live Grocy credentials.",
+    "Raw Grocy record payloads.",
+    "Absolute local filesystem paths.",
+    "Encrypted backup archives.",
+    "Unreviewed generated snippets."
+  ]
+}
