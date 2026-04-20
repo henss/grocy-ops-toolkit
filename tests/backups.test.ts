@@ -100,6 +100,11 @@ describe("Grocy backups", () => {
     expect(verification.fileCount).toBe(2);
     expect(verification.restoredTo).toBe(path.join(baseDir, "restore"));
     expect(readTreeContents(path.join(baseDir, "restore"))).toEqual(sourceContents);
+    const manifest = JSON.parse(fs.readFileSync(path.join(baseDir, "data", "grocy-backup-manifest.json"), "utf8")) as {
+      records: Array<{ restoreTestStatus: string; restoreTestedAt?: string }>;
+    };
+    expect(manifest.records[0].restoreTestStatus).toBe("verified");
+    expect(manifest.records[0].restoreTestedAt).toBeDefined();
   });
 
   it("rejects invalid archives during verification", () => {

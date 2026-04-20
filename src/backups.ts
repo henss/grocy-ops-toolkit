@@ -177,6 +177,24 @@ function recordBackupManifest(baseDir: string, record: GrocyBackupRecord, manife
   return absoluteManifestPath;
 }
 
+function updateBackupManifestRecord(
+  baseDir: string,
+  recordId: string,
+  updates: Partial<GrocyBackupRecord>,
+  manifestPath = GROCY_BACKUP_MANIFEST_PATH,
+): void {
+  const absoluteManifestPath = path.resolve(baseDir, manifestPath);
+  const current = loadBackupManifest(baseDir, manifestPath);
+  const updated = GrocyBackupManifestSchema.parse({
+    ...current,
+    updatedAt: new Date().toISOString(),
+    records: current.records.map((record) => (
+      record.id === recordId ? GrocyBackupRecordSchema.parse({ ...record, ...updates }) : record
+    )),
+  });
+  writeJsonFile(absoluteManifestPath, updated);
+}
+
 function requirePassphrase(config: GrocyBackupLocalConfig): string {
   const variableName = config.passphraseEnv ?? "GROCY_BACKUP_PASSPHRASE";
   const passphrase = process.env[variableName];
@@ -259,6 +277,10 @@ export function verifyGrocyBackupSnapshot(
       fs.writeFileSync(target, Buffer.from(file.contentBase64, "base64"));
     }
     restoredTo = restoreDir;
+    updateBackupManifestRecord(baseDir, latest.id, {
+      restoreTestStatus: "verified",
+      restoreTestedAt: new Date().toISOString(),
+    }, options.manifestPath);
   }
   return { archivePath, fileCount: bundle.files.length, totalBytes: bundle.files.reduce((sum, file) => sum + file.size, 0), checksumVerified, restoredTo };
 }
