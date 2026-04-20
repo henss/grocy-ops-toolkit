@@ -175,6 +175,22 @@ describe("Grocy review dashboard", () => {
     expect(dashboard).toContain("Latest record: grocy-backup-20260419102000; files: 2; bytes: 123; restore test: verified.");
   });
 
+  it("renders public-safe restore failure categories when present", () => {
+    const dashboard = createGrocyReviewDashboard({
+      generatedAt: "2026-04-19T10:30:00.000Z",
+      backupManifest: {
+        ...backupManifest,
+        records: [{
+          ...backupManifest.records[0],
+          restoreTestStatus: "failed",
+          restoreFailureCategory: "manifest_checksum_mismatch",
+        }],
+      },
+    });
+
+    expect(dashboard).toContain("Restore failure category: manifest_checksum_mismatch.");
+  });
+
   it("loads conventional JSON artifact paths and writes the dashboard to data", () => {
     const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-review-dashboard-"));
     writeJson(baseDir, path.join("data", "grocy-config-sync-plan.json"), plan);

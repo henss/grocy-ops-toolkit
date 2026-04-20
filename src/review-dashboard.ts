@@ -218,10 +218,14 @@ function renderBackups(manifest: GrocyBackupManifest | undefined): string[] {
     return ["No backup manifest records were loaded."];
   }
   const latest = manifest.records[0];
-  return [
+  const lines = [
     `Latest record: ${latest.id}; files: ${latest.fileCount}; bytes: ${latest.totalBytes}; restore test: ${latest.restoreTestStatus}.`,
     `Location label: ${latest.locationLabel}.`,
   ];
+  if (latest.restoreFailureCategory) {
+    lines.push(`Restore failure category: ${latest.restoreFailureCategory}.`);
+  }
+  return lines;
 }
 
 function renderSmoke(report: GrocyMockSmokeReport | undefined): string[] {

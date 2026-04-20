@@ -2,7 +2,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createGrocyBackupSnapshot, verifyGrocyBackupSnapshot } from "../src/backups.js";
+import { createGrocyBackupSnapshot, GrocyBackupRestoreError, verifyGrocyBackupSnapshot } from "../src/backups.js";
 
 const envName = "GROCY_TEST_BACKUP_PASSPHRASE";
 const fixtureSourcePath = path.resolve("examples", "synthetic-grocy-backup-source");
@@ -61,6 +61,13 @@ function readTreeContents(rootPath: string): Record<string, string> {
   return entries;
 }
 
+function readRestoreState(baseDir: string): { restoreTestStatus: string; restoreFailureCategory?: string } {
+  const manifest = JSON.parse(fs.readFileSync(path.join(baseDir, "data", "grocy-backup-manifest.json"), "utf8")) as {
+    records: Array<{ restoreTestStatus: string; restoreFailureCategory?: string }>;
+  };
+  return manifest.records[0];
+}
+
 describe("Grocy backups", () => {
   it("creates and verifies encrypted backup archives", () => {
     const baseDir = setupBackupBase();
@@ -114,7 +121,21 @@ describe("Grocy backups", () => {
     });
     fs.writeFileSync(record.archivePath, "not valid", "utf8");
 
-    expect(() => verifyGrocyBackupSnapshot(baseDir)).toThrow();
+    let thrown: unknown;
+    try {
+      verifyGrocyBackupSnapshot(baseDir);
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(GrocyBackupRestoreError);
+    expect(thrown).toMatchObject({
+      category: "archive_unreadable",
+      message: "Grocy backup archive could not be read as JSON.",
+    });
+    expect(readRestoreState(baseDir)).toMatchObject({
+      restoreTestStatus: "failed",
+      restoreFailureCategory: "archive_unreadable",
+    });
   });
 
   it("rejects archives whose manifest checksum does not match", () => {
@@ -128,6 +149,10 @@ describe("Grocy backups", () => {
     fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 
     expect(() => verifyGrocyBackupSnapshot(baseDir)).toThrow("checksum verification failed");
+    expect(readRestoreState(baseDir)).toMatchObject({
+      restoreTestStatus: "failed",
+      restoreFailureCategory: "manifest_checksum_mismatch",
+    });
   });
 
   it("requires confirmation before writing restore files", () => {
@@ -137,6 +162,10 @@ describe("Grocy backups", () => {
     });
 
     expect(() => verifyGrocyBackupSnapshot(baseDir, { restoreDir: "restore" })).toThrow("confirm-restore-write");
+    expect(readRestoreState(baseDir)).toMatchObject({
+      restoreTestStatus: "failed",
+      restoreFailureCategory: "restore_write_unconfirmed",
+    });
   });
 
   it("uses caller-provided config and manifest paths for custom repo layouts", () => {

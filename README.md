@@ -236,6 +236,17 @@ npm run grocy:backup:verify -- --restore-dir restore/grocy-backup-check --confir
 
 The example backup source under `examples/synthetic-grocy-backup-source` is intentionally synthetic. Use it to test the snapshot, encrypted archive, verification, and restore loop before pointing a local config at private Grocy files.
 
+When restore verification fails, the backup manifest records `restoreTestStatus: "failed"` and a public-safe `restoreFailureCategory` when a backup record is available. Categories intentionally describe the failure class without storing file contents, Grocy records, credentials, live URLs, or private local paths:
+
+- `archive_unreadable`: the encrypted archive file could not be read or parsed.
+- `archive_format_unsupported`: the archive envelope is not a supported toolkit backup format.
+- `archive_decryption_failed`: the archive could not be decrypted with the configured passphrase.
+- `manifest_checksum_mismatch`: the archive hash differs from the manifest record.
+- `bundle_file_checksum_mismatch`: a restored bundle file does not match its embedded checksum.
+- `restore_write_unconfirmed`: a restore directory was requested without `--confirm-restore-write`.
+- `restore_path_escape`: a bundle path attempted to write outside the requested restore directory.
+- `restore_write_failed`: the restore check could not create directories or write files.
+
 ## Synthetic Demo Lab
 
 For a clean-checkout walkthrough that uses synthetic data only, see [Synthetic Grocy Demo Lab](docs/synthetic-demo-lab.md).

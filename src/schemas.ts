@@ -219,6 +219,17 @@ export const GrocyHealthDiagnosticsArtifactSchema = z.object({
   diagnostics: z.array(GrocyHealthDiagnosticSchema).default([]),
 });
 
+export const GrocyBackupRestoreFailureCategorySchema = z.enum([
+  "archive_unreadable",
+  "archive_format_unsupported",
+  "archive_decryption_failed",
+  "manifest_checksum_mismatch",
+  "bundle_file_checksum_mismatch",
+  "restore_write_unconfirmed",
+  "restore_path_escape",
+  "restore_write_failed",
+]);
+
 export const GrocyBackupRecordSchema = z.object({
   id: z.string().min(1),
   createdAt: z.string().min(1),
@@ -231,6 +242,7 @@ export const GrocyBackupRecordSchema = z.object({
   grocyVersion: z.string().min(1).optional(),
   restoreTestStatus: z.enum(["not_tested", "verified", "failed"]).default("not_tested"),
   restoreTestedAt: z.string().min(1).optional(),
+  restoreFailureCategory: GrocyBackupRestoreFailureCategorySchema.optional(),
   notes: z.array(z.string().min(1)).default([]),
 });
 
@@ -260,5 +272,6 @@ export type GrocyConfigDriftTrendReport = z.infer<typeof GrocyConfigDriftTrendRe
 export type GrocyHealthDiagnosticCode = z.infer<typeof GrocyHealthDiagnosticCodeSchema>;
 export type GrocyHealthDiagnostic = z.infer<typeof GrocyHealthDiagnosticSchema>;
 export type GrocyHealthDiagnosticsArtifact = z.infer<typeof GrocyHealthDiagnosticsArtifactSchema>;
+export type GrocyBackupRestoreFailureCategory = z.infer<typeof GrocyBackupRestoreFailureCategorySchema>;
 export type GrocyBackupRecord = z.infer<typeof GrocyBackupRecordSchema>;
 export type GrocyBackupManifest = z.infer<typeof GrocyBackupManifestSchema>;

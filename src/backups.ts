@@ -6,6 +6,7 @@ import {
   GrocyBackupRecordSchema,
   type GrocyBackupManifest,
   type GrocyBackupRecord,
+  type GrocyBackupRestoreFailureCategory,
 } from "./schemas.js";
 
 export const GROCY_BACKUP_CONFIG_PATH = path.join("config", "grocy-backup.local.json");
@@ -33,6 +34,16 @@ interface BackupBundle {
   createdAt: string;
   sourcePath: string;
   files: BackupBundleFile[];
+}
+
+export class GrocyBackupRestoreError extends Error {
+  readonly category: GrocyBackupRestoreFailureCategory;
+
+  constructor(category: GrocyBackupRestoreFailureCategory, message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = "GrocyBackupRestoreError";
+    this.category = category;
+  }
 }
 
 function readJsonFile(filePath: string): unknown {
@@ -139,9 +150,14 @@ function encryptBundle(bundle: BackupBundle, passphrase: string): Buffer {
 }
 
 function decryptBundle(archive: Buffer, passphrase: string): BackupBundle {
-  const payload = JSON.parse(archive.toString("utf8")) as Record<string, string | number>;
+  let payload: Record<string, string | number>;
+  try {
+    payload = JSON.parse(archive.toString("utf8")) as Record<string, string | number>;
+  } catch (error) {
+    throw new GrocyBackupRestoreError("archive_unreadable", "Grocy backup archive could not be read as JSON.", { cause: error });
+  }
   if (payload.kind !== "grocy_backup_archive" || payload.version !== 1 || payload.algorithm !== "aes-256-gcm") {
-    throw new Error("Unsupported Grocy backup archive format.");
+    throw new GrocyBackupRestoreError("archive_format_unsupported", "Unsupported Grocy backup archive format.");
   }
   const decipher = crypto.createDecipheriv(
     "aes-256-gcm",
@@ -149,11 +165,15 @@ function decryptBundle(archive: Buffer, passphrase: string): BackupBundle {
     Buffer.from(String(payload.iv), "base64"),
   );
   decipher.setAuthTag(Buffer.from(String(payload.tag), "base64"));
-  const plaintext = Buffer.concat([
-    decipher.update(Buffer.from(String(payload.ciphertext), "base64")),
-    decipher.final(),
-  ]);
-  return JSON.parse(plaintext.toString("utf8")) as BackupBundle;
+  try {
+    const plaintext = Buffer.concat([
+      decipher.update(Buffer.from(String(payload.ciphertext), "base64")),
+      decipher.final(),
+    ]);
+    return JSON.parse(plaintext.toString("utf8")) as BackupBundle;
+  } catch (error) {
+    throw new GrocyBackupRestoreError("archive_decryption_failed", "Grocy backup archive could not be decrypted.", { cause: error });
+  }
 }
 
 function loadBackupManifest(baseDir: string, manifestPath = GROCY_BACKUP_MANIFEST_PATH): GrocyBackupManifest {
@@ -193,6 +213,19 @@ function updateBackupManifestRecord(
     )),
   });
   writeJsonFile(absoluteManifestPath, updated);
+}
+
+function markRestoreFailure(
+  baseDir: string,
+  recordId: string,
+  category: GrocyBackupRestoreFailureCategory,
+  manifestPath = GROCY_BACKUP_MANIFEST_PATH,
+): void {
+  updateBackupManifestRecord(baseDir, recordId, {
+    restoreTestStatus: "failed",
+    restoreTestedAt: new Date().toISOString(),
+    restoreFailureCategory: category,
+  }, manifestPath);
 }
 
 function requirePassphrase(config: GrocyBackupLocalConfig): string {
@@ -249,38 +282,58 @@ export function verifyGrocyBackupSnapshot(
     throw new Error("No Grocy backup record found to verify.");
   }
   const archivePath = path.resolve(latest.archivePath);
-  const archive = fs.readFileSync(archivePath);
-  const bundle = decryptBundle(archive, passphrase);
-  const checksumVerified = sha256(archive) === latest.checksumSha256;
-  if (!checksumVerified) {
-    throw new Error(`Grocy backup checksum verification failed for ${archivePath}.`);
-  }
-  for (const file of bundle.files) {
-    const content = Buffer.from(file.contentBase64, "base64");
-    if (sha256(content) !== file.sha256) {
-      throw new Error(`Grocy backup verification failed for ${file.path}.`);
+  try {
+    let archive: Buffer;
+    try {
+      archive = fs.readFileSync(archivePath);
+    } catch (error) {
+      throw new GrocyBackupRestoreError("archive_unreadable", `Grocy backup archive could not be read at ${archivePath}.`, { cause: error });
     }
-  }
-  let restoredTo: string | undefined;
-  if (options.restoreDir) {
-    if (!options.confirmRestoreWrite) {
-      throw new Error("Refusing restore verification write without --confirm-restore-write.");
+    const bundle = decryptBundle(archive, passphrase);
+    const checksumVerified = sha256(archive) === latest.checksumSha256;
+    if (!checksumVerified) {
+      throw new GrocyBackupRestoreError("manifest_checksum_mismatch", `Grocy backup checksum verification failed for ${archivePath}.`);
     }
-    const restoreDir = path.resolve(baseDir, options.restoreDir);
-    fs.mkdirSync(restoreDir, { recursive: true });
     for (const file of bundle.files) {
-      const target = path.resolve(restoreDir, file.path);
-      if (!isPathInside(restoreDir, target)) {
-        throw new Error(`Refusing to restore path outside target directory: ${file.path}`);
+      const content = Buffer.from(file.contentBase64, "base64");
+      if (sha256(content) !== file.sha256) {
+        throw new GrocyBackupRestoreError("bundle_file_checksum_mismatch", `Grocy backup verification failed for ${file.path}.`);
       }
-      fs.mkdirSync(path.dirname(target), { recursive: true });
-      fs.writeFileSync(target, Buffer.from(file.contentBase64, "base64"));
     }
-    restoredTo = restoreDir;
-    updateBackupManifestRecord(baseDir, latest.id, {
-      restoreTestStatus: "verified",
-      restoreTestedAt: new Date().toISOString(),
-    }, options.manifestPath);
+    let restoredTo: string | undefined;
+    if (options.restoreDir) {
+      if (!options.confirmRestoreWrite) {
+        throw new GrocyBackupRestoreError("restore_write_unconfirmed", "Refusing restore verification write without --confirm-restore-write.");
+      }
+      const restoreDir = path.resolve(baseDir, options.restoreDir);
+      try {
+        fs.mkdirSync(restoreDir, { recursive: true });
+        for (const file of bundle.files) {
+          const target = path.resolve(restoreDir, file.path);
+          if (!isPathInside(restoreDir, target)) {
+            throw new GrocyBackupRestoreError("restore_path_escape", `Refusing to restore path outside target directory: ${file.path}`);
+          }
+          fs.mkdirSync(path.dirname(target), { recursive: true });
+          fs.writeFileSync(target, Buffer.from(file.contentBase64, "base64"));
+        }
+      } catch (error) {
+        if (error instanceof GrocyBackupRestoreError) {
+          throw error;
+        }
+        throw new GrocyBackupRestoreError("restore_write_failed", `Grocy backup restore verification could not write to ${restoreDir}.`, { cause: error });
+      }
+      restoredTo = restoreDir;
+      updateBackupManifestRecord(baseDir, latest.id, {
+        restoreTestStatus: "verified",
+        restoreTestedAt: new Date().toISOString(),
+        restoreFailureCategory: undefined,
+      }, options.manifestPath);
+    }
+    return { archivePath, fileCount: bundle.files.length, totalBytes: bundle.files.reduce((sum, file) => sum + file.size, 0), checksumVerified, restoredTo };
+  } catch (error) {
+    if (error instanceof GrocyBackupRestoreError) {
+      markRestoreFailure(baseDir, latest.id, error.category, options.manifestPath);
+    }
+    throw error;
   }
-  return { archivePath, fileCount: bundle.files.length, totalBytes: bundle.files.reduce((sum, file) => sum + file.size, 0), checksumVerified, restoredTo };
 }
