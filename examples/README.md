@@ -17,6 +17,8 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-health-diagnostics.example.json` shows the agent-readable health failure artifact shape. It uses only synthetic failure evidence and intentionally omits Grocy record contents, live URL values, and local absolute paths.
 
+`grocy-health-badge.example.json` shows the compact badge-style JSON emitted by `npm run grocy:health:badge` for CI, docs, and agent receipts.
+
 `grocy-mock-smoke-report.example.json` shows the public-safe report shape emitted by `npm run grocy:smoke:mock`.
 
 `grocy-api-compatibility-matrix.example.json` shows the fixture-only matrix shape emitted by `npm run grocy:compatibility:matrix`.

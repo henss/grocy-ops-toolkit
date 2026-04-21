@@ -27,6 +27,7 @@ import {
   verifyGrocyBackupSnapshot,
 } from "./backups.js";
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
+import { recordGrocyHealthBadgeArtifact, runGrocyHealthBadge } from "./health-badge.js";
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
 import { createGrocyApiCompatibilityMatrix, recordGrocyApiCompatibilityMatrix } from "./compatibility-matrix.js";
 import { createGrocyApiDeprecationCanaryReport, recordGrocyApiDeprecationCanaryReport } from "./deprecation-canary.js";
@@ -56,6 +57,15 @@ async function main(): Promise<void> {
   }
   if (command === "grocy:health") {
     printJson(await runGrocyHealthCheck(process.cwd()));
+    return;
+  }
+  if (command === "grocy:health:badge") {
+    const artifact = await runGrocyHealthBadge(process.cwd());
+    const outputPath = recordGrocyHealthBadgeArtifact(artifact, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: artifact.summary, badge: artifact.badge });
     return;
   }
   if (command === "grocy:health:diagnostics") {

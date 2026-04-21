@@ -1,0 +1,29 @@
+{
+  "kind": "grocy_health_badge",
+  "version": 1,
+  "generatedAt": "2026-04-21T07:00:00.000Z",
+  "toolId": "grocy",
+  "badge": {
+    "label": "grocy health",
+    "message": "fail: config_missing",
+    "color": "red"
+  },
+  "summary": {
+    "status": "fail",
+    "failureCodes": [
+      "config_missing"
+    ],
+    "componentCount": 2
+  },
+  "components": [
+    {
+      "id": "config",
+      "status": "fail",
+      "code": "config_missing"
+    },
+    {
+      "id": "live_api",
+      "status": "skipped"
+    }
+  ]
+}

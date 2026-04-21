@@ -52,6 +52,7 @@ Then run the basic status and health checks:
 ```bash
 npm run grocy:config:status
 npm run grocy:health
+npm run grocy:health:badge
 npm run grocy:health:diagnostics
 ```
 
@@ -128,6 +129,22 @@ npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-
 ```
 
 ## Health And Diagnostics
+
+Run the compact badge command when CI, docs, or an agent receipt needs a stable machine-readable health summary:
+
+```bash
+npm run grocy:health:badge
+```
+
+By default, badge output is written to:
+
+```text
+data/grocy-health-badge.json
+```
+
+The badge artifact keeps only the top-level status, checked components, and short failure codes. It intentionally omits verbose diagnostics, Grocy record contents, API keys, local absolute paths, and live URL values.
+
+Use `--output <path>` to write the badge somewhere else.
 
 Run diagnostics when health checks fail or when an agent-readable troubleshooting artifact is useful.
 
@@ -335,6 +352,7 @@ The demo combines:
 ```bash
 npm run grocy:config:status
 npm run grocy:health
+npm run grocy:health:badge
 npm run grocy:health:diagnostics
 npm run grocy:desired-state:lint
 npm run grocy:compatibility:matrix

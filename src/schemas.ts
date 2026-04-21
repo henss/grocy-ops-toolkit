@@ -248,6 +248,32 @@ export const GrocyHealthDiagnosticsArtifactSchema = z.object({
   diagnostics: z.array(GrocyHealthDiagnosticSchema).default([]),
 });
 
+export const GrocyHealthBadgeArtifactSchema = z.object({
+  kind: z.literal("grocy_health_badge"),
+  version: z.literal(1),
+  generatedAt: z.string().min(1),
+  toolId: z.literal("grocy"),
+  badge: z.object({
+    label: z.literal("grocy health"),
+    message: z.string().min(1),
+    color: z.enum(["green", "red"]),
+  }),
+  summary: z.object({
+    status: z.enum(["pass", "fail"]),
+    failureCodes: z.array(GrocyHealthDiagnosticCodeSchema).default([]),
+    componentCount: z.number().int().nonnegative(),
+  }),
+  components: z
+    .array(
+      z.object({
+        id: z.enum(["config", "live_api"]),
+        status: z.enum(["pass", "fail", "skipped"]),
+        code: GrocyHealthDiagnosticCodeSchema.optional(),
+      }),
+    )
+    .default([]),
+});
+
 export const GrocyBackupRestoreFailureCategorySchema = z.enum([
   "archive_unreadable",
   "archive_format_unsupported",
@@ -333,6 +359,7 @@ export type GrocyConfigDriftTrendReport = z.infer<typeof GrocyConfigDriftTrendRe
 export type GrocyHealthDiagnosticCode = z.infer<typeof GrocyHealthDiagnosticCodeSchema>;
 export type GrocyHealthDiagnostic = z.infer<typeof GrocyHealthDiagnosticSchema>;
 export type GrocyHealthDiagnosticsArtifact = z.infer<typeof GrocyHealthDiagnosticsArtifactSchema>;
+export type GrocyHealthBadgeArtifact = z.infer<typeof GrocyHealthBadgeArtifactSchema>;
 export type GrocyBackupRestoreFailureCategory = z.infer<typeof GrocyBackupRestoreFailureCategorySchema>;
 export type GrocyBackupRecord = z.infer<typeof GrocyBackupRecordSchema>;
 export type GrocyBackupManifest = z.infer<typeof GrocyBackupManifestSchema>;

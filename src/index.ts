@@ -4,6 +4,7 @@ export * from "./compatibility-matrix.js";
 export * from "./deprecation-canary.js";
 export * from "./desired-state-lint.js";
 export * from "./grocy-live.js";
+export * from "./health-badge.js";
 export * from "./health-diagnostics.js";
 export * from "./mock-smoke.js";
 export * from "./redaction-audit.js";
