@@ -20,6 +20,7 @@ It can:
 - Audit generated public artifacts for private-path, URL, credential, and boundary-term leaks.
 - Generate an offline sanitized support bundle manifest from local generated artifacts.
 - Generate a synthetic Grocy API compatibility matrix for fixture-only API-shape review.
+- Generate a synthetic Grocy API deprecation canary report for upgrade-risk review.
 
 ## Requirements
 
@@ -176,6 +177,22 @@ data/grocy-api-compatibility-matrix.json
 
 The matrix uses synthetic fixtures only. It is intended to show expected API shapes and gaps, not to make live Grocy version support claims. For details, see [Grocy API Compatibility Matrix](docs/grocy-api-compatibility-matrix.md).
 
+## API Deprecation Canary Report
+
+Generate a synthetic canary report that interprets compatibility gaps as upgrade-risk signals:
+
+```bash
+npm run grocy:compatibility:deprecation-canary
+```
+
+By default, the canary report is written to:
+
+```text
+data/grocy-api-deprecation-canary-report.json
+```
+
+The report is derived from the fixture-only compatibility matrix and highlights `upgrade_review` or `breaking` signals where synthetic Grocy response shapes no longer match current toolkit assumptions. It does not inspect live Grocy data and does not make a public deprecation or version-support promise. For details, see [Grocy API Deprecation Canary Report](docs/grocy-api-deprecation-canary-report.md).
+
 ## Review Dashboard
 
 Render a Markdown dashboard from existing JSON artifacts:
@@ -321,6 +338,7 @@ npm run grocy:health
 npm run grocy:health:diagnostics
 npm run grocy:desired-state:lint
 npm run grocy:compatibility:matrix
+npm run grocy:compatibility:deprecation-canary
 npm run grocy:smoke:mock
 npm run grocy:export-config
 npm run grocy:diff-config

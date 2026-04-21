@@ -1,0 +1,84 @@
+{
+  "kind": "grocy_api_deprecation_canary_report",
+  "version": 1,
+  "generatedAt": "2026-04-21T08:00:00.000Z",
+  "scope": "synthetic_fixture_only",
+  "source": {
+    "kind": "grocy_api_compatibility_matrix",
+    "version": 1,
+    "fixtureCount": 3
+  },
+  "summary": {
+    "findingCount": 4,
+    "upgradeReview": 3,
+    "breaking": 1,
+    "highestRisk": "breaking"
+  },
+  "findings": [
+    {
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "apiShape": "Synthetic responses keep core object identifiers but omit some convenience fields.",
+      "surface": "stock",
+      "endpoint": "/stock",
+      "compatibilityStatus": "partial",
+      "riskLevel": "upgrade_review",
+      "canaryReason": "Optional compatibility fields are missing in this synthetic fixture, so richer diagnostics or review flows may degrade across an upgrade.",
+      "recommendedAction": "Review this surface before promoting a broader upgrade or compatibility claim.",
+      "compatibilityNotes": [
+        "Required fields are present.",
+        "Missing optional compatibility fields: product.min_stock_amount."
+      ]
+    },
+    {
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "apiShape": "Synthetic responses keep core object identifiers but omit some convenience fields.",
+      "surface": "quantity_units",
+      "endpoint": "/objects/quantity_units",
+      "compatibilityStatus": "partial",
+      "riskLevel": "upgrade_review",
+      "canaryReason": "Optional compatibility fields are missing in this synthetic fixture, so richer diagnostics or review flows may degrade across an upgrade.",
+      "recommendedAction": "Review this surface before promoting a broader upgrade or compatibility claim.",
+      "compatibilityNotes": [
+        "Required fields are present.",
+        "Missing optional compatibility fields: name_plural."
+      ]
+    },
+    {
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "apiShape": "Synthetic responses keep core object identifiers but omit some convenience fields.",
+      "surface": "shopping_list",
+      "endpoint": "/objects/shopping_list",
+      "compatibilityStatus": "partial",
+      "riskLevel": "upgrade_review",
+      "canaryReason": "Optional compatibility fields are missing in this synthetic fixture, so richer diagnostics or review flows may degrade across an upgrade.",
+      "recommendedAction": "Review this surface before promoting a broader upgrade or compatibility claim.",
+      "compatibilityNotes": [
+        "Required fields are present.",
+        "Missing optional compatibility fields: product_name, done."
+      ]
+    },
+    {
+      "fixtureId": "fixture-shopping-list-gap",
+      "fixtureLabel": "Shopping-list gap shape",
+      "apiShape": "Synthetic object API lacks the shopping-list collection endpoint.",
+      "surface": "shopping_list",
+      "endpoint": "/objects/shopping_list",
+      "compatibilityStatus": "unsupported",
+      "riskLevel": "breaking",
+      "canaryReason": "Required read fields are missing in this synthetic fixture, so a future Grocy shape change could break the current toolkit read path.",
+      "recommendedAction": "Treat this surface as upgrade-blocking until reviewed adapter evidence restores the required fields.",
+      "compatibilityNotes": [
+        "Missing required fields: id, product_id, amount.",
+        "Missing optional compatibility fields: product_name, done."
+      ]
+    }
+  ],
+  "reviewNotes": [
+    "This canary report is derived from synthetic compatibility fixtures and does not inspect a live Grocy instance.",
+    "Treat the report as upgrade-risk interpretation for current read assumptions, not as a public deprecation or version-support promise.",
+    "Promote any finding into a public compatibility claim only after reviewed live adapter evidence exists."
+  ]
+}
