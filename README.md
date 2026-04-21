@@ -10,6 +10,7 @@ It can:
 
 - Read Grocy stock, shopping-list, product, and master/config objects.
 - Export stable Grocy master/config records into a reviewable JSON manifest.
+- Lint desired-state manifests offline before config diff or apply review steps.
 - Diff a reviewed desired-state manifest against a live export.
 - Report config drift trends between two offline exports.
 - Apply only reviewed `repo_managed` creates and updates when explicitly confirmed.
@@ -63,6 +64,22 @@ npm run grocy:export-config
 ```
 
 ### 2. Diff Desired State Against Live State
+
+Lint the manifest first when you want a reviewable offline report. The diff command also runs the same gate automatically and fails before any live export when the manifest is not safe to use.
+
+```bash
+npm run grocy:desired-state:lint
+```
+
+By default, the lint report is written to:
+
+```text
+data/grocy-desired-state-manifest-lint-report.json
+```
+
+Use `--manifest <path>` to point at a different desired-state file, and `--output <path>` to write the report somewhere else.
+
+Then diff the desired state against the live export:
 
 ```bash
 npm run grocy:diff-config
@@ -285,6 +302,7 @@ The demo combines:
 npm run grocy:config:status
 npm run grocy:health
 npm run grocy:health:diagnostics
+npm run grocy:desired-state:lint
 npm run grocy:compatibility:matrix
 npm run grocy:smoke:mock
 npm run grocy:export-config

@@ -62,6 +62,35 @@ export const GrocyConfigManifestSchema = z.object({
   items: z.array(GrocyConfigItemSchema).default([]),
 });
 
+export const GrocyDesiredStateLintSeveritySchema = z.enum(["error", "warning"]);
+
+export const GrocyDesiredStateLintFindingSchema = z.object({
+  severity: GrocyDesiredStateLintSeveritySchema,
+  code: z.enum([
+    "duplicate_item_key",
+    "duplicate_match_candidate",
+    "duplicate_alias",
+    "volatile_field_declared",
+  ]),
+  message: z.string().min(1),
+  itemKey: z.string().min(1).optional(),
+  path: z.string().min(1),
+});
+
+export const GrocyDesiredStateManifestLintReportSchema = z.object({
+  kind: z.literal("grocy_desired_state_manifest_lint_report"),
+  version: z.literal(1),
+  generatedAt: z.string().min(1),
+  manifestPath: z.string().min(1),
+  summary: z.object({
+    itemCount: z.number().int().nonnegative(),
+    errorCount: z.number().int().nonnegative(),
+    warningCount: z.number().int().nonnegative(),
+    ready: z.boolean(),
+  }),
+  findings: z.array(GrocyDesiredStateLintFindingSchema).default([]),
+});
+
 export const GrocyConfigExportSchema = z.object({
   kind: z.literal("grocy_config_export"),
   version: z.literal(1),
@@ -258,6 +287,9 @@ export type GrocyConfigOwnership = z.infer<typeof GrocyConfigOwnershipSchema>;
 export type GrocyConfigProvenance = z.infer<typeof GrocyConfigProvenanceSchema>;
 export type GrocyConfigItem = z.infer<typeof GrocyConfigItemSchema>;
 export type GrocyConfigManifest = z.infer<typeof GrocyConfigManifestSchema>;
+export type GrocyDesiredStateLintSeverity = z.infer<typeof GrocyDesiredStateLintSeveritySchema>;
+export type GrocyDesiredStateLintFinding = z.infer<typeof GrocyDesiredStateLintFindingSchema>;
+export type GrocyDesiredStateManifestLintReport = z.infer<typeof GrocyDesiredStateManifestLintReportSchema>;
 export type GrocyConfigExport = z.infer<typeof GrocyConfigExportSchema>;
 export type GrocyConfigPlanAction = z.infer<typeof GrocyConfigPlanActionSchema>;
 export type GrocyConfigPlanChange = z.infer<typeof GrocyConfigPlanChangeSchema>;

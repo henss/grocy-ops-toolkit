@@ -11,6 +11,8 @@ Rules:
 
 Config sync examples use synthetic product names and IDs. `config-apply-dry-run-report.example.json` shows the report shape produced before any reviewed apply write.
 
+`grocy-desired-state-manifest-lint-report.example.json` shows the offline lint-gate report shape for a public-safe desired-state manifest.
+
 `config-export.previous.example.json` and `grocy-config-drift-trend-report.example.json` show the public-safe offline trend report shape for comparing two config exports.
 
 `grocy-health-diagnostics.example.json` shows the agent-readable health failure artifact shape. It uses only synthetic failure evidence and intentionally omits Grocy record contents, live URL values, and local absolute paths.

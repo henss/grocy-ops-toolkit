@@ -1,0 +1,13 @@
+{
+  "kind": "grocy_desired_state_manifest_lint_report",
+  "version": 1,
+  "generatedAt": "2026-04-21T09:05:00.000Z",
+  "manifestPath": "examples/desired-state.example.json",
+  "summary": {
+    "itemCount": 1,
+    "errorCount": 0,
+    "warningCount": 0,
+    "ready": true
+  },
+  "findings": []
+}

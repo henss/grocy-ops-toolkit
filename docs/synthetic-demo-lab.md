@@ -56,6 +56,14 @@ Expected result: the summary reports `pass` with checks for `health`, `export`, 
 
 ## Config Diff
 
+Lint the public desired-state example first. This is an offline safety gate and should pass before any diff step.
+
+```bash
+npm run grocy:desired-state:lint -- --manifest examples/desired-state.example.json --output data/demo-desired-state-lint-report.json --force
+```
+
+Expected result: the generated lint report is `ready: true` with zero findings.
+
 Create a synthetic sync plan from the public desired-state and export examples.
 
 ```bash

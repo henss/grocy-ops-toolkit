@@ -9,13 +9,17 @@ import {
   GROCY_CONFIG_EXPORT_PATH,
   GROCY_CONFIG_PREVIOUS_EXPORT_PATH,
   loadGrocyConfigExport,
-  loadGrocyConfigManifest,
   loadGrocyConfigSyncPlan,
   recordGrocyConfigDriftTrendReport,
   recordGrocyConfigApplyDryRunReport,
   recordGrocyConfigExport,
   recordGrocyConfigSyncPlan,
 } from "./config-sync.js";
+import {
+  assertGrocyDesiredStateManifestLintReady,
+  lintGrocyDesiredStateManifestFile,
+  recordGrocyDesiredStateManifestLintReport,
+} from "./desired-state-lint.js";
 import { createGrocyBackupSnapshot, verifyGrocyBackupSnapshot } from "./backups.js";
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
@@ -84,12 +88,27 @@ async function main(): Promise<void> {
     printJson({ outputPath, exportedAt: exportData.exportedAt, counts: exportData.counts, items: exportData.items.length });
     return;
   }
+  if (command === "grocy:desired-state:lint") {
+    const manifestPath = parseFlag("--manifest");
+    const { report } = lintGrocyDesiredStateManifestFile(process.cwd(), manifestPath);
+    const outputPath = recordGrocyDesiredStateManifestLintReport(report, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: report.summary });
+    if (!report.summary.ready) {
+      process.exitCode = 1;
+    }
+    return;
+  }
   if (command === "grocy:diff-config") {
     const manifestPath = parseFlag("--manifest");
+    const { manifest, report } = lintGrocyDesiredStateManifestFile(process.cwd(), manifestPath);
+    assertGrocyDesiredStateManifestLintReady(report);
     const exportPath = parseFlag("--export");
     const liveExport = exportPath ? loadGrocyConfigExport(exportPath) : await exportGrocyConfig(process.cwd());
     const plan = createGrocyConfigSyncPlan({
-      manifest: loadGrocyConfigManifest(process.cwd(), manifestPath),
+      manifest,
       liveExport,
       manifestPath: manifestPath ?? "registry/grocy/desired-state.json",
       exportPath,

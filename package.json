@@ -35,6 +35,7 @@
     "grocy:config:status": "tsx src/cli.ts grocy:config:status",
     "grocy:health": "tsx src/cli.ts grocy:health",
     "grocy:health:diagnostics": "tsx src/cli.ts grocy:health:diagnostics",
+    "grocy:desired-state:lint": "tsx src/cli.ts grocy:desired-state:lint",
     "grocy:compatibility:matrix": "tsx src/cli.ts grocy:compatibility:matrix",
     "grocy:smoke:mock": "tsx src/cli.ts grocy:smoke:mock",
     "grocy:export-config": "tsx src/cli.ts grocy:export-config",
