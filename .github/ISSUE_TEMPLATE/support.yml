@@ -1,0 +1,99 @@
+name: Support request
+description: Report a public-safe toolkit support problem with sanitized steps and synthetic examples only.
+title: "[Support]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for public toolkit support only.
+
+        Do not include credentials, API keys, tokens, live hostnames, local machine paths, backup archives, Grocy record payloads, household details, shopping workflows, pantry-monitoring policy, or calendar/task integrations.
+
+        Prefer synthetic examples and attach only sanitized outputs such as `data/grocy-public-artifact-redaction-audit.json` and `data/grocy-support-bundle.json`.
+
+  - type: checkboxes
+    id: safety-checks
+    attributes:
+      label: Public safety checks
+      description: Confirm the issue is safe to discuss in public.
+      options:
+        - label: I removed secrets, personal data, private hostnames, and absolute local paths.
+          required: true
+        - label: I used synthetic examples or sanitized toolkit artifacts instead of live Grocy data.
+          required: true
+        - label: I ran `npm run grocy:artifacts:audit-redaction` before sharing generated artifacts.
+          required: true
+
+  - type: input
+    id: toolkit-version
+    attributes:
+      label: Toolkit version
+      description: Enter the package version, git commit, or local checkout state.
+      placeholder: 0.1.0 or main@<short-sha>
+    validations:
+      required: true
+
+  - type: input
+    id: runtime
+    attributes:
+      label: Runtime details
+      description: Include Node.js version, operating system, and shell when relevant.
+      placeholder: Node 20.x on Ubuntu 24.04, PowerShell 7
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or workflow
+      description: Show the npm-first command surface you ran.
+      placeholder: |
+        npm install
+        npm run typecheck
+        npm run build
+        npm test
+        npm run grocy:support:bundle
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the support problem and what you expected instead.
+      placeholder: |
+        I expected `npm run grocy:support:bundle` to produce a ready-to-share manifest from sanitized generated artifacts, but it exited non-zero after the redaction audit summary reported a failure.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide sanitized steps using generic repo-local paths such as `config/`, `data/`, or `backups/`.
+      placeholder: |
+        1. Copy `examples/grocy.local.example.json` to `config/grocy.local.json`.
+        2. Generate a synthetic artifact in `data/`.
+        3. Run `npm run grocy:artifacts:audit-redaction`.
+        4. Run `npm run grocy:support:bundle`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Sanitized logs or artifact summaries
+      description: Paste only redacted logs or summary fields from sanitized artifacts.
+      placeholder: |
+        - `data/grocy-public-artifact-redaction-audit.json`: `summary.result = "fail"`, `findingCodes = ["absolute_local_path"]`
+        - `data/grocy-support-bundle.json`: `summary.readiness = "needs_redaction_review"`
+        - Error: `Error: Redaction audit failed for one or more generated artifacts.`
+      render: text
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other public-safe context that would help reproduce or triage the issue.
+      placeholder: |
+        This reproduces in a clean checkout with only synthetic example files under `examples/` and generated reports under `data/`.
