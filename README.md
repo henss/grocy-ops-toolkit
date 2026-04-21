@@ -306,6 +306,12 @@ data/grocy-object-coverage-playground.json
 
 The playground repackages the synthetic compatibility fixtures as explicit object-coverage scenarios so you can inspect which surfaces are currently `covered`, `degraded`, or `missing` without implying live Grocy certification. For details, see [Synthetic Object Coverage Playground](docs/synthetic-object-coverage-playground.md).
 
+## Read-Only Pantry Boundary Probe
+
+For the current public-safe inventory boundary, see [Read-Only Pantry Boundary Probe](docs/read-only-pantry-boundary-probe.md).
+
+That note records the bounded Wave 2 proposal for stock-and-product pantry reads, explains why shopping-list reads stay outside the pantry-safe slice for now, and keeps the boundary explicit without changing the runtime API.
+
 ## Review Dashboard
 
 Render a Markdown dashboard from existing JSON artifacts:
