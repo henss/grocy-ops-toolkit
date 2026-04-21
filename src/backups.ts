@@ -4,13 +4,17 @@ import path from "node:path";
 import {
   GrocyBackupManifestSchema,
   GrocyBackupRecordSchema,
+  GrocyBackupRestorePlanDryRunReportSchema,
   type GrocyBackupManifest,
   type GrocyBackupRecord,
   type GrocyBackupRestoreFailureCategory,
+  type GrocyBackupRestorePlanDryRunReport,
+  type GrocyBackupRestorePlanDryRunReportItem,
 } from "./schemas.js";
 
 export const GROCY_BACKUP_CONFIG_PATH = path.join("config", "grocy-backup.local.json");
 export const GROCY_BACKUP_MANIFEST_PATH = path.join("data", "grocy-backup-manifest.json");
+export const GROCY_BACKUP_RESTORE_PLAN_DRY_RUN_REPORT_PATH = path.join("data", "grocy-backup-restore-plan-dry-run-report.json");
 
 interface GrocyBackupLocalConfig {
   sourcePath: string;
@@ -184,6 +188,15 @@ function loadBackupManifest(baseDir: string, manifestPath = GROCY_BACKUP_MANIFES
   return GrocyBackupManifestSchema.parse(readJsonFile(absoluteManifestPath));
 }
 
+function loadBackupRecord(
+  manifest: GrocyBackupManifest,
+  archivePath?: string,
+): GrocyBackupRecord | undefined {
+  return archivePath
+    ? manifest.records.find((record) => path.resolve(record.archivePath) === path.resolve(archivePath))
+    : manifest.records[0];
+}
+
 function recordBackupManifest(baseDir: string, record: GrocyBackupRecord, manifestPath = GROCY_BACKUP_MANIFEST_PATH): string {
   const absoluteManifestPath = path.resolve(baseDir, manifestPath);
   const current = loadBackupManifest(baseDir, manifestPath);
@@ -275,9 +288,7 @@ export function verifyGrocyBackupSnapshot(
   const config = loadBackupConfig(baseDir, options.configPath);
   const passphrase = requirePassphrase(config);
   const manifest = loadBackupManifest(baseDir, options.manifestPath);
-  const latest = options.archivePath
-    ? manifest.records.find((record) => path.resolve(record.archivePath) === path.resolve(options.archivePath!))
-    : manifest.records[0];
+  const latest = loadBackupRecord(manifest, options.archivePath);
   if (!latest) {
     throw new Error("No Grocy backup record found to verify.");
   }
@@ -336,4 +347,134 @@ export function verifyGrocyBackupSnapshot(
     }
     throw error;
   }
+}
+
+function writeJsonFileWithOverwrite(filePath: string, value: unknown, overwrite: boolean): string {
+  if (!overwrite && fs.existsSync(filePath)) {
+    throw new Error(`Refusing to overwrite existing file at ${filePath}`);
+  }
+  writeJsonFile(filePath, value);
+  return filePath;
+}
+
+function normalizeDisplayPath(filePath: string): string {
+  return filePath.replace(/\\/g, "/");
+}
+
+function resolveRestorePlanItem(
+  restoreDirPath: string,
+  file: BackupBundleFile,
+): GrocyBackupRestorePlanDryRunReportItem {
+  const targetPath = path.resolve(restoreDirPath, file.path);
+  if (!isPathInside(restoreDirPath, targetPath)) {
+    return {
+      action: "blocked_path_escape",
+      path: file.path,
+      targetPath: normalizeDisplayPath(targetPath),
+      size: file.size,
+      sha256: file.sha256,
+      reason: "Archive entry would escape the requested restore directory.",
+    };
+  }
+  const action = fs.existsSync(targetPath) ? "would_overwrite" : "would_create";
+  return {
+    action,
+    path: file.path,
+    targetPath: normalizeDisplayPath(targetPath),
+    size: file.size,
+    sha256: file.sha256,
+    reason: action === "would_overwrite"
+      ? "Existing file would be replaced during a confirmed restore."
+      : "File would be written during a confirmed restore.",
+  };
+}
+
+function summarizeRestorePlan(
+  items: GrocyBackupRestorePlanDryRunReportItem[],
+): GrocyBackupRestorePlanDryRunReport["summary"] {
+  const summary: GrocyBackupRestorePlanDryRunReport["summary"] = {
+    result: "ready",
+    checksumVerified: true,
+    fileCount: items.length,
+    totalBytes: items.reduce((sum, item) => sum + item.size, 0),
+    wouldCreate: 0,
+    wouldOverwrite: 0,
+    blocked: 0,
+  };
+  for (const item of items) {
+    if (item.action === "would_create") {
+      summary.wouldCreate += 1;
+      continue;
+    }
+    if (item.action === "would_overwrite") {
+      summary.wouldOverwrite += 1;
+      continue;
+    }
+    summary.blocked += 1;
+  }
+  if (summary.blocked > 0) {
+    summary.result = "blocked";
+  }
+  return summary;
+}
+
+export function createGrocyBackupRestorePlanDryRunReport(
+  baseDir: string = process.cwd(),
+  options: {
+    archivePath?: string;
+    restoreDir: string;
+    configPath?: string;
+    manifestPath?: string;
+    generatedAt?: string;
+  },
+): GrocyBackupRestorePlanDryRunReport {
+  const config = loadBackupConfig(baseDir, options.configPath);
+  const passphrase = requirePassphrase(config);
+  const manifest = loadBackupManifest(baseDir, options.manifestPath);
+  const record = loadBackupRecord(manifest, options.archivePath);
+  if (!record) {
+    throw new Error("No Grocy backup record found to plan a restore.");
+  }
+  const archivePath = path.resolve(record.archivePath);
+  let archive: Buffer;
+  try {
+    archive = fs.readFileSync(archivePath);
+  } catch (error) {
+    throw new GrocyBackupRestoreError("archive_unreadable", `Grocy backup archive could not be read at ${archivePath}.`, { cause: error });
+  }
+  const bundle = decryptBundle(archive, passphrase);
+  const checksumVerified = sha256(archive) === record.checksumSha256;
+  if (!checksumVerified) {
+    throw new GrocyBackupRestoreError("manifest_checksum_mismatch", `Grocy backup checksum verification failed for ${archivePath}.`);
+  }
+  const restoreDirPath = path.resolve(baseDir, options.restoreDir);
+  const items = bundle.files.map((file) => resolveRestorePlanItem(restoreDirPath, file));
+  return GrocyBackupRestorePlanDryRunReportSchema.parse({
+    kind: "grocy_backup_restore_plan_dry_run_report",
+    version: 1,
+    generatedAt: options.generatedAt ?? new Date().toISOString(),
+    archivePath,
+    archiveRecordId: record.id,
+    restoreDir: normalizeDisplayPath(restoreDirPath),
+    summary: {
+      ...summarizeRestorePlan(items),
+      checksumVerified,
+    },
+    notes: [
+      "This report inspects an existing encrypted archive and restore target without writing files.",
+      "A real restore still requires an explicit follow-up verify command with --confirm-restore-write.",
+    ],
+    items,
+  });
+}
+
+export function recordGrocyBackupRestorePlanDryRunReport(
+  report: GrocyBackupRestorePlanDryRunReport,
+  options: { baseDir?: string; outputPath?: string; overwrite?: boolean } = {},
+): string {
+  return writeJsonFileWithOverwrite(
+    path.resolve(options.baseDir ?? process.cwd(), options.outputPath ?? GROCY_BACKUP_RESTORE_PLAN_DRY_RUN_REPORT_PATH),
+    report,
+    options.overwrite ?? true,
+  );
 }

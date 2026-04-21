@@ -15,6 +15,7 @@ It can:
 - Report config drift trends between two offline exports.
 - Apply only reviewed `repo_managed` creates and updates when explicitly confirmed.
 - Create and verify encrypted local backup bundles.
+- Generate a no-write restore-plan dry-run report before a confirmed restore.
 - Render a Markdown review dashboard from generated artifacts.
 - Audit generated public artifacts for private-path, URL, credential, and boundary-term leaks.
 - Generate an offline sanitized support bundle manifest from local generated artifacts.
@@ -264,6 +265,20 @@ npm run grocy:backup:snapshot
 npm run grocy:backup:verify
 ```
 
+Generate a restore-plan dry-run report before a confirmed restore write:
+
+```bash
+npm run grocy:backup:restore-plan -- --restore-dir restore/grocy-backup-check
+```
+
+By default, the restore-plan dry-run report is written to:
+
+```text
+data/grocy-backup-restore-plan-dry-run-report.json
+```
+
+The report inspects the latest encrypted archive, verifies the manifest checksum, and records which files would be created or overwritten in the requested restore directory. It does not write restore files. Use `--archive <path>` to point at a different archive record and `--output <path>` to write the report somewhere else.
+
 To verify by restoring into a local restore directory, explicitly confirm the restore write:
 
 ```bash
@@ -311,6 +326,7 @@ npm run grocy:config:drift-trend -- --previous data/grocy-config-export.previous
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --dry-run
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
 npm run grocy:backup:snapshot
+npm run grocy:backup:restore-plan -- --restore-dir restore/grocy-backup-check
 npm run grocy:backup:verify
 npm run grocy:backup:verify -- --restore-dir restore/grocy-backup-check --confirm-restore-write
 npm run grocy:review:dashboard

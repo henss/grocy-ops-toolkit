@@ -1,0 +1,47 @@
+{
+  "kind": "grocy_backup_restore_plan_dry_run_report",
+  "version": 1,
+  "generatedAt": "2026-04-19T10:16:00.000Z",
+  "archivePath": "./backups/grocy/grocy-backup-20260419101000.grocy-backup.enc",
+  "archiveRecordId": "grocy-backup-20260419101000",
+  "restoreDir": "./restore/demo-grocy-backup-check",
+  "summary": {
+    "result": "ready",
+    "checksumVerified": true,
+    "fileCount": 3,
+    "totalBytes": 476,
+    "wouldCreate": 2,
+    "wouldOverwrite": 1,
+    "blocked": 0
+  },
+  "notes": [
+    "This report inspects an existing encrypted archive and restore target without writing files.",
+    "A real restore still requires an explicit follow-up verify command with --confirm-restore-write."
+  ],
+  "items": [
+    {
+      "action": "would_overwrite",
+      "path": "config.php",
+      "targetPath": "./restore/demo-grocy-backup-check/config.php",
+      "size": 141,
+      "sha256": "a93305d3b93e6b5f9c2c7cd5dcc1dbad03297466c548b79e757b3380c8d9acfb",
+      "reason": "Existing file would be replaced during a confirmed restore."
+    },
+    {
+      "action": "would_create",
+      "path": "data/grocy-demo.json",
+      "targetPath": "./restore/demo-grocy-backup-check/data/grocy-demo.json",
+      "size": 240,
+      "sha256": "b1c2af938e63548dad0ee3c2035fe0bd1a9607b9946ef2487f077dea8f2692d9",
+      "reason": "File would be written during a confirmed restore."
+    },
+    {
+      "action": "would_create",
+      "path": "data/storage/stock-log.json",
+      "targetPath": "./restore/demo-grocy-backup-check/data/storage/stock-log.json",
+      "size": 95,
+      "sha256": "43f4c9d2773de2f2eafe66f1394f60fce7b4280595570e07742c08f364275f87",
+      "reason": "File would be written during a confirmed restore."
+    }
+  ]
+}

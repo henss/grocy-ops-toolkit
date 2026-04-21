@@ -108,15 +108,16 @@ Copy-Item examples/grocy-backup.local.example.json config/grocy-backup.local.jso
 $env:GROCY_BACKUP_PASSPHRASE = "synthetic-demo-passphrase"
 ```
 
-Create and verify an encrypted backup bundle from `examples/synthetic-grocy-backup-source`:
+Create an encrypted backup bundle from `examples/synthetic-grocy-backup-source`, then render a no-write restore plan before the confirmed restore check:
 
 ```bash
 npm run grocy:backup:snapshot
+npm run grocy:backup:restore-plan -- --restore-dir restore/demo-grocy-backup-check --output data/demo-backup-restore-plan-dry-run-report.json --force
 npm run grocy:backup:verify
 npm run grocy:backup:verify -- --restore-dir restore/demo-grocy-backup-check --confirm-restore-write
 ```
 
-Expected result: verification reports `checksumVerified: true`, and the restore check writes only the synthetic fixture files.
+Expected result: the dry-run report shows which synthetic files would be created or overwritten, verification reports `checksumVerified: true`, and the restore check writes only the synthetic fixture files.
 
 ## Review Dashboard
 

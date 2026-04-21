@@ -282,6 +282,35 @@ export const GrocyBackupManifestSchema = z.object({
   records: z.array(GrocyBackupRecordSchema).default([]),
 });
 
+export const GrocyBackupRestorePlanDryRunReportItemSchema = z.object({
+  action: z.enum(["would_create", "would_overwrite", "blocked_path_escape"]),
+  path: z.string().min(1),
+  targetPath: z.string().min(1),
+  size: z.number().int().nonnegative(),
+  sha256: z.string().min(1),
+  reason: z.string().min(1),
+});
+
+export const GrocyBackupRestorePlanDryRunReportSchema = z.object({
+  kind: z.literal("grocy_backup_restore_plan_dry_run_report"),
+  version: z.literal(1),
+  generatedAt: z.string().min(1),
+  archivePath: z.string().min(1),
+  archiveRecordId: z.string().min(1).optional(),
+  restoreDir: z.string().min(1),
+  summary: z.object({
+    result: z.enum(["ready", "blocked"]),
+    checksumVerified: z.boolean(),
+    fileCount: z.number().int().nonnegative(),
+    totalBytes: z.number().int().nonnegative(),
+    wouldCreate: z.number().int().nonnegative(),
+    wouldOverwrite: z.number().int().nonnegative(),
+    blocked: z.number().int().nonnegative(),
+  }),
+  notes: z.array(z.string().min(1)).default([]),
+  items: z.array(GrocyBackupRestorePlanDryRunReportItemSchema).default([]),
+});
+
 export type GrocyConfigEntity = z.infer<typeof GrocyConfigEntitySchema>;
 export type GrocyConfigOwnership = z.infer<typeof GrocyConfigOwnershipSchema>;
 export type GrocyConfigProvenance = z.infer<typeof GrocyConfigProvenanceSchema>;
@@ -307,3 +336,5 @@ export type GrocyHealthDiagnosticsArtifact = z.infer<typeof GrocyHealthDiagnosti
 export type GrocyBackupRestoreFailureCategory = z.infer<typeof GrocyBackupRestoreFailureCategorySchema>;
 export type GrocyBackupRecord = z.infer<typeof GrocyBackupRecordSchema>;
 export type GrocyBackupManifest = z.infer<typeof GrocyBackupManifestSchema>;
+export type GrocyBackupRestorePlanDryRunReportItem = z.infer<typeof GrocyBackupRestorePlanDryRunReportItemSchema>;
+export type GrocyBackupRestorePlanDryRunReport = z.infer<typeof GrocyBackupRestorePlanDryRunReportSchema>;

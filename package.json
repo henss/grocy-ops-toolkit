@@ -44,6 +44,7 @@
     "grocy:apply-config": "tsx src/cli.ts grocy:apply-config",
     "grocy:backup:snapshot": "tsx src/cli.ts grocy:backup:snapshot",
     "grocy:backup:verify": "tsx src/cli.ts grocy:backup:verify",
+    "grocy:backup:restore-plan": "tsx src/cli.ts grocy:backup:restore-plan",
     "grocy:review:dashboard": "tsx src/cli.ts grocy:review:dashboard",
     "grocy:artifacts:audit-redaction": "tsx src/cli.ts grocy:artifacts:audit-redaction",
     "grocy:support:bundle": "tsx src/cli.ts grocy:support:bundle",

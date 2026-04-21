@@ -20,7 +20,12 @@ import {
   lintGrocyDesiredStateManifestFile,
   recordGrocyDesiredStateManifestLintReport,
 } from "./desired-state-lint.js";
-import { createGrocyBackupSnapshot, verifyGrocyBackupSnapshot } from "./backups.js";
+import {
+  createGrocyBackupRestorePlanDryRunReport,
+  createGrocyBackupSnapshot,
+  recordGrocyBackupRestorePlanDryRunReport,
+  verifyGrocyBackupSnapshot,
+} from "./backups.js";
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
 import { createGrocyApiCompatibilityMatrix, recordGrocyApiCompatibilityMatrix } from "./compatibility-matrix.js";
@@ -168,6 +173,25 @@ async function main(): Promise<void> {
       restoreDir: parseFlag("--restore-dir"),
       confirmRestoreWrite: process.argv.includes("--confirm-restore-write"),
     }));
+    return;
+  }
+  if (command === "grocy:backup:restore-plan") {
+    const restoreDir = parseFlag("--restore-dir");
+    if (!restoreDir) {
+      throw new Error("Usage: grocy:backup:restore-plan -- --restore-dir <path>");
+    }
+    const report = createGrocyBackupRestorePlanDryRunReport(process.cwd(), {
+      archivePath: parseFlag("--archive"),
+      restoreDir,
+    });
+    const outputPath = recordGrocyBackupRestorePlanDryRunReport(report, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: report.summary });
+    if (report.summary.result !== "ready") {
+      process.exitCode = 1;
+    }
     return;
   }
   if (command === "grocy:review:dashboard") {

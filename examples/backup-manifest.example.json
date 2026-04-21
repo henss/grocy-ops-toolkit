@@ -10,8 +10,8 @@
       "archivePath": "./backups/grocy/grocy-backup-20260419101000.grocy-backup.enc",
       "locationLabel": "synthetic-local-encrypted",
       "checksumSha256": "example-checksum-placeholder",
-      "fileCount": 2,
-      "totalBytes": 381,
+      "fileCount": 3,
+      "totalBytes": 476,
       "restoreTestStatus": "not_tested",
       "notes": [
         "Synthetic backup metadata only."

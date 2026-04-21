@@ -2,7 +2,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createGrocyBackupSnapshot, GrocyBackupRestoreError, verifyGrocyBackupSnapshot } from "../src/backups.js";
+import {
+  createGrocyBackupRestorePlanDryRunReport,
+  createGrocyBackupSnapshot,
+  GrocyBackupRestoreError,
+  recordGrocyBackupRestorePlanDryRunReport,
+  verifyGrocyBackupSnapshot,
+} from "../src/backups.js";
 
 const envName = "GROCY_TEST_BACKUP_PASSPHRASE";
 const fixtureSourcePath = path.resolve("examples", "synthetic-grocy-backup-source");
@@ -45,6 +51,22 @@ function writeBackupConfig(baseDir: string): void {
   process.env[envName] = "synthetic-passphrase";
 }
 
+function setupFixtureBackupBase(prefix: string): {
+  baseDir: string;
+  sourceContents: Record<string, string>;
+  sourceFileCount: number;
+} {
+  const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
+  fs.cpSync(fixtureSourcePath, path.join(baseDir, "source"), { recursive: true });
+  writeBackupConfig(baseDir);
+  const sourceContents = readTreeContents(path.join(baseDir, "source"));
+  return {
+    baseDir,
+    sourceContents,
+    sourceFileCount: Object.keys(sourceContents).length,
+  };
+}
+
 function readTreeContents(rootPath: string): Record<string, string> {
   const entries: Record<string, string> = {};
   function walk(currentPath: string): void {
@@ -68,6 +90,67 @@ function readRestoreState(baseDir: string): { restoreTestStatus: string; restore
   return manifest.records[0];
 }
 
+function expectRecordedRestorePlanReport(baseDir: string, sourceFileCount: number): void {
+  const outputPath = path.join(baseDir, "data", "grocy-backup-restore-plan-dry-run-report.json");
+  expect(path.relative(baseDir, outputPath)).toBe(path.join("data", "grocy-backup-restore-plan-dry-run-report.json"));
+  expect(JSON.parse(fs.readFileSync(outputPath, "utf8"))).toMatchObject({
+    kind: "grocy_backup_restore_plan_dry_run_report",
+    summary: {
+      result: "ready",
+      fileCount: sourceFileCount,
+      wouldOverwrite: 1,
+    },
+  });
+}
+
+function expectVerifiedFixtureRestore(params: {
+  baseDir: string;
+  sourceContents: Record<string, string>;
+  sourceFileCount: number;
+  record: { fileCount: number; totalBytes: number; archivePath: string };
+  verification: { checksumVerified: boolean; fileCount: number; restoredTo?: string };
+}): void {
+  const { baseDir, sourceContents, sourceFileCount, record, verification } = params;
+  const expectedBytes = Object.values(sourceContents).reduce((sum, content) => sum + Buffer.byteLength(content, "utf8"), 0);
+  const archiveText = fs.readFileSync(record.archivePath, "utf8");
+  expect(record.fileCount).toBe(sourceFileCount);
+  expect(record.totalBytes).toBe(expectedBytes);
+  expect(archiveText).toContain("grocy_backup_archive");
+  expect(archiveText).not.toContain("Example oats");
+  expect(archiveText).not.toContain("FEATURE_FLAG_SYNTHETIC_FIXTURE");
+  expect(verification.checksumVerified).toBe(true);
+  expect(verification.fileCount).toBe(sourceFileCount);
+  expect(verification.restoredTo).toBe(path.join(baseDir, "restore"));
+  expect(readTreeContents(path.join(baseDir, "restore"))).toEqual(sourceContents);
+  const manifest = JSON.parse(fs.readFileSync(path.join(baseDir, "data", "grocy-backup-manifest.json"), "utf8")) as {
+    records: Array<{ restoreTestStatus: string; restoreTestedAt?: string }>;
+  };
+  expect(manifest.records[0].restoreTestStatus).toBe("verified");
+  expect(manifest.records[0].restoreTestedAt).toBeDefined();
+}
+
+function expectRestorePlanReport(params: {
+  baseDir: string;
+  sourceFileCount: number;
+  report: ReturnType<typeof createGrocyBackupRestorePlanDryRunReport>;
+  existingRestorePath: string;
+}): void {
+  const { baseDir, sourceFileCount, report, existingRestorePath } = params;
+  expect(report.summary).toEqual({
+    result: "ready",
+    checksumVerified: true,
+    fileCount: sourceFileCount,
+    totalBytes: report.items.reduce((sum, item) => sum + item.size, 0),
+    wouldCreate: sourceFileCount - 1,
+    wouldOverwrite: 1,
+    blocked: 0,
+  });
+  expect(report.items.map((item) => `${item.action}:${item.path}`)).toContain("would_overwrite:config.php");
+  expect(report.items.filter((item) => item.action === "would_create")).toHaveLength(sourceFileCount - 1);
+  expect(fs.readFileSync(existingRestorePath, "utf8")).toBe("<?php return ['old' => true];\n");
+  expectRecordedRestorePlanReport(baseDir, sourceFileCount);
+}
+
 describe("Grocy backups", () => {
   it("creates and verifies encrypted backup archives", () => {
     const baseDir = setupBackupBase();
@@ -83,35 +166,33 @@ describe("Grocy backups", () => {
   });
 
   it("snapshots, verifies, and restores the public synthetic encrypted fixture loop", () => {
-    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-backup-fixture-"));
-    fs.cpSync(fixtureSourcePath, path.join(baseDir, "source"), { recursive: true });
-    writeBackupConfig(baseDir);
-
+    const { baseDir, sourceContents, sourceFileCount } = setupFixtureBackupBase("grocy-backup-fixture-");
     const record = createGrocyBackupSnapshot(baseDir, {
       createdAt: "2026-04-19T10:10:00.000Z",
     });
-    const sourceContents = readTreeContents(path.join(baseDir, "source"));
-    const expectedBytes = Object.values(sourceContents).reduce((sum, content) => sum + Buffer.byteLength(content, "utf8"), 0);
-    const archiveText = fs.readFileSync(record.archivePath, "utf8");
     const verification = verifyGrocyBackupSnapshot(baseDir, {
       restoreDir: "restore",
       confirmRestoreWrite: true,
     });
+    expectVerifiedFixtureRestore({ baseDir, sourceContents, sourceFileCount, record, verification });
+  });
 
-    expect(record.fileCount).toBe(2);
-    expect(record.totalBytes).toBe(expectedBytes);
-    expect(archiveText).toContain("grocy_backup_archive");
-    expect(archiveText).not.toContain("Example oats");
-    expect(archiveText).not.toContain("FEATURE_FLAG_SYNTHETIC_FIXTURE");
-    expect(verification.checksumVerified).toBe(true);
-    expect(verification.fileCount).toBe(2);
-    expect(verification.restoredTo).toBe(path.join(baseDir, "restore"));
-    expect(readTreeContents(path.join(baseDir, "restore"))).toEqual(sourceContents);
-    const manifest = JSON.parse(fs.readFileSync(path.join(baseDir, "data", "grocy-backup-manifest.json"), "utf8")) as {
-      records: Array<{ restoreTestStatus: string; restoreTestedAt?: string }>;
-    };
-    expect(manifest.records[0].restoreTestStatus).toBe("verified");
-    expect(manifest.records[0].restoreTestedAt).toBeDefined();
+  it("creates a no-write restore plan dry-run report for the synthetic fixture loop", () => {
+    const { baseDir, sourceFileCount } = setupFixtureBackupBase("grocy-backup-restore-plan-");
+    createGrocyBackupSnapshot(baseDir, {
+      createdAt: "2026-04-19T10:15:00.000Z",
+    });
+
+    const existingRestorePath = path.join(baseDir, "restore", "config.php");
+    fs.mkdirSync(path.dirname(existingRestorePath), { recursive: true });
+    fs.writeFileSync(existingRestorePath, "<?php return ['old' => true];\n", "utf8");
+
+    const report = createGrocyBackupRestorePlanDryRunReport(baseDir, {
+      restoreDir: path.join("restore"),
+      generatedAt: "2026-04-19T10:16:00.000Z",
+    });
+    recordGrocyBackupRestorePlanDryRunReport(report, { baseDir });
+    expectRestorePlanReport({ baseDir, sourceFileCount, report, existingRestorePath });
   });
 
   it("rejects invalid archives during verification", () => {

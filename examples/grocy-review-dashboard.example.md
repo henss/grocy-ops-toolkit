@@ -45,7 +45,7 @@ Result: fail; failures: 1; warnings: 0.
 
 ## Backup Verification
 
-Latest record: grocy-backup-20260419101000; files: 2; bytes: 381; restore test: not_tested.
+Latest record: grocy-backup-20260419101000; files: 3; bytes: 476; restore test: not_tested.
 Location label: synthetic-local-encrypted.
 
 ## Mock Smoke Check
