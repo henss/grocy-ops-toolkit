@@ -135,14 +135,14 @@ function buildReport(absolutePath: string, args: ParsedArgs): FileReport {
 
 function collectReports(args: ParsedArgs): FileReport[] {
   const changedFiles = listChangedFiles(args);
-  const absoluteFiles =
-    changedFiles.length > 0
-      ? changedFiles.map(toAbsolutePath).filter((candidate) => fs.existsSync(candidate))
-      : (() => {
-          const discovered: string[] = [];
-          walk(repoRoot, discovered);
-          return discovered;
-        })();
+  const changedOnly = args.staged || Boolean(args.changedAgainst) || args.files.length > 0;
+  const absoluteFiles = changedOnly
+    ? changedFiles.map(toAbsolutePath).filter((candidate) => fs.existsSync(candidate))
+    : (() => {
+        const discovered: string[] = [];
+        walk(repoRoot, discovered);
+        return discovered;
+      })();
   return absoluteFiles
     .map((absolutePath) => buildReport(absolutePath, args))
     .filter((report) => isTrackedSurface(report.filePath))
