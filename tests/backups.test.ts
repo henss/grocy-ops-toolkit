@@ -51,6 +51,10 @@ function writeBackupConfig(baseDir: string): void {
   process.env[envName] = "synthetic-passphrase";
 }
 
+function setBackupPassphrase(passphrase: string): void {
+  process.env[envName] = passphrase;
+}
+
 function setupFixtureBackupBase(prefix: string): {
   baseDir: string;
   sourceContents: Record<string, string>;
@@ -151,6 +155,20 @@ function expectRestorePlanReport(params: {
   expectRecordedRestorePlanReport(baseDir, sourceFileCount);
 }
 
+function expectWrongPassphraseFailure(baseDir: string): void {
+  setBackupPassphrase("synthetic-passphrase-rotated");
+  expect(() => verifyGrocyBackupSnapshot(baseDir)).toThrow("could not be decrypted");
+  expect(readRestoreState(baseDir)).toMatchObject({
+    restoreTestStatus: "failed",
+    restoreFailureCategory: "archive_decryption_failed",
+  });
+}
+
+function expectRecoveredVerification(baseDir: string): void {
+  setBackupPassphrase("synthetic-passphrase");
+  expect(verifyGrocyBackupSnapshot(baseDir).checksumVerified).toBe(true);
+}
+
 describe("Grocy backups", () => {
   it("creates and verifies encrypted backup archives", () => {
     const baseDir = setupBackupBase();
@@ -194,7 +212,9 @@ describe("Grocy backups", () => {
     recordGrocyBackupRestorePlanDryRunReport(report, { baseDir });
     expectRestorePlanReport({ baseDir, sourceFileCount, report, existingRestorePath });
   });
+});
 
+describe("Grocy backup failure handling", () => {
   it("rejects invalid archives during verification", () => {
     const baseDir = setupBackupBase();
     const record = createGrocyBackupSnapshot(baseDir, {
@@ -236,6 +256,15 @@ describe("Grocy backups", () => {
     });
   });
 
+  it("records archive_decryption_failed when verification uses the wrong passphrase", () => {
+    const baseDir = setupBackupBase();
+    createGrocyBackupSnapshot(baseDir, {
+      createdAt: "2026-04-19T10:00:00.000Z",
+    });
+    expectWrongPassphraseFailure(baseDir);
+    expectRecoveredVerification(baseDir);
+  });
+
   it("requires confirmation before writing restore files", () => {
     const baseDir = setupBackupBase();
     createGrocyBackupSnapshot(baseDir, {
@@ -248,7 +277,9 @@ describe("Grocy backups", () => {
       restoreFailureCategory: "restore_write_unconfirmed",
     });
   });
+});
 
+describe("Grocy backup custom layouts", () => {
   it("uses caller-provided config and manifest paths for custom repo layouts", () => {
     const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-backup-custom-layout-"));
     fs.mkdirSync(path.join(baseDir, "source"), { recursive: true });

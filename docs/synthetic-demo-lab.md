@@ -119,6 +119,8 @@ npm run grocy:backup:verify -- --restore-dir restore/demo-grocy-backup-check --c
 
 Expected result: the dry-run report shows which synthetic files would be created or overwritten, verification reports `checksumVerified: true`, and the restore check writes only the synthetic fixture files.
 
+For the synthetic passphrase-rotation failure rehearsal, see [Synthetic Backup Passphrase Rotation Rehearsal](synthetic-backup-passphrase-rotation-rehearsal.md).
+
 ## Review Dashboard
 
 Render one Markdown review surface from the generated lab artifacts:
