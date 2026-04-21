@@ -21,6 +21,7 @@ It can:
 - Generate an offline sanitized support bundle manifest from local generated artifacts.
 - Generate a synthetic Grocy API compatibility matrix for fixture-only API-shape review.
 - Generate a synthetic Grocy API deprecation canary report for upgrade-risk review.
+- Generate a synthetic Grocy object coverage playground for fixture-only endpoint coverage review.
 
 ## Requirements
 
@@ -289,6 +290,22 @@ data/grocy-api-deprecation-canary-report.json
 
 The report is derived from the fixture-only compatibility matrix and highlights `upgrade_review` or `breaking` signals where synthetic Grocy response shapes no longer match current toolkit assumptions. It does not inspect live Grocy data and does not make a public deprecation or version-support promise. For details, see [Grocy API Deprecation Canary Report](docs/grocy-api-deprecation-canary-report.md).
 
+## Object Coverage Playground
+
+Generate a fixture-only object coverage playground for the Grocy read surfaces the toolkit exercises:
+
+```bash
+npm run grocy:coverage:playground
+```
+
+By default, the playground is written to:
+
+```text
+data/grocy-object-coverage-playground.json
+```
+
+The playground repackages the synthetic compatibility fixtures as explicit object-coverage scenarios so you can inspect which surfaces are currently `covered`, `degraded`, or `missing` without implying live Grocy certification. For details, see [Synthetic Object Coverage Playground](docs/synthetic-object-coverage-playground.md).
+
 ## Review Dashboard
 
 Render a Markdown dashboard from existing JSON artifacts:
@@ -436,6 +453,7 @@ npm run grocy:health:diagnostics
 npm run grocy:desired-state:lint
 npm run grocy:compatibility:matrix
 npm run grocy:compatibility:deprecation-canary
+npm run grocy:coverage:playground
 npm run grocy:smoke:mock
 npm run grocy:export-config
 npm run grocy:diff-config

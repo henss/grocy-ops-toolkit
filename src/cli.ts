@@ -32,6 +32,7 @@ import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from 
 import { createGrocyApiCompatibilityMatrix, recordGrocyApiCompatibilityMatrix } from "./compatibility-matrix.js";
 import { createGrocyApiDeprecationCanaryReport, recordGrocyApiDeprecationCanaryReport } from "./deprecation-canary.js";
 import { recordGrocyMockSmokeReport, runGrocyMockSmokeTest } from "./mock-smoke.js";
+import { createGrocyObjectCoveragePlayground, recordGrocyObjectCoveragePlayground } from "./object-coverage-playground.js";
 import { auditGrocyPublicArtifacts, recordGrocyPublicArtifactRedactionAudit } from "./redaction-audit.js";
 import { createGrocyReviewDashboardFromArtifacts, recordGrocyReviewDashboard } from "./review-dashboard.js";
 import { createGrocyMockSmokeRunReceipt, recordGrocyToolkitRunReceipt } from "./run-receipt.js";
@@ -112,6 +113,15 @@ async function main(): Promise<void> {
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
     printJson({ outputPath, summary: report.summary });
+    return;
+  }
+  if (command === "grocy:coverage:playground") {
+    const playground = createGrocyObjectCoveragePlayground();
+    const outputPath = recordGrocyObjectCoveragePlayground(playground, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: playground.summary });
     return;
   }
   if (command === "grocy:export-config") {

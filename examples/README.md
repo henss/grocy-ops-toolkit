@@ -27,6 +27,8 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-api-deprecation-canary-report.example.json` shows the synthetic upgrade-risk report emitted by `npm run grocy:compatibility:deprecation-canary`.
 
+`grocy-object-coverage-playground.example.json` shows the fixture-only object coverage playground emitted by `npm run grocy:coverage:playground`.
+
 `grocy-review-dashboard.example.md` shows the public-safe Markdown dashboard shape rendered from existing synthetic JSON artifacts.
 
 `grocy-public-artifact-redaction-audit.example.json` shows a passing public-boundary audit report for generated JSON and Markdown artifacts.

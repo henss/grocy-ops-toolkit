@@ -39,6 +39,7 @@
     "grocy:desired-state:lint": "tsx src/cli.ts grocy:desired-state:lint",
     "grocy:compatibility:matrix": "tsx src/cli.ts grocy:compatibility:matrix",
     "grocy:compatibility:deprecation-canary": "tsx src/cli.ts grocy:compatibility:deprecation-canary",
+    "grocy:coverage:playground": "tsx src/cli.ts grocy:coverage:playground",
     "grocy:smoke:mock": "tsx src/cli.ts grocy:smoke:mock",
     "grocy:export-config": "tsx src/cli.ts grocy:export-config",
     "grocy:diff-config": "tsx src/cli.ts grocy:diff-config",

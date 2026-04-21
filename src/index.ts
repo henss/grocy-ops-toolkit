@@ -7,6 +7,7 @@ export * from "./grocy-live.js";
 export * from "./health-badge.js";
 export * from "./health-diagnostics.js";
 export * from "./mock-smoke.js";
+export * from "./object-coverage-playground.js";
 export * from "./redaction-audit.js";
 export * from "./review-dashboard.js";
 export * from "./schemas.js";

@@ -308,6 +308,55 @@ export const GrocyToolkitRunReceiptSchema = z.object({
   reviewNotes: z.array(z.string().min(1)).default([]),
 });
 
+export const GrocyObjectCoveragePlaygroundScenarioSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  fixtureId: z.string().min(1),
+  focus: z.string().min(1),
+  notes: z.array(z.string().min(1)).default([]),
+});
+
+export const GrocyObjectCoveragePlaygroundEntrySchema = z.object({
+  scenarioId: z.string().min(1),
+  fixtureId: z.string().min(1),
+  fixtureLabel: z.string().min(1),
+  surface: z.enum([
+    "system_info",
+    "stock",
+    "products",
+    "product_groups",
+    "locations",
+    "quantity_units",
+    "product_barcodes",
+    "shopping_lists",
+    "shopping_list",
+  ]),
+  endpoint: z.string().min(1),
+  compatibilityStatus: z.enum(["supported", "partial", "unsupported"]),
+  playgroundStatus: z.enum(["covered", "degraded", "missing"]),
+  requiredFields: z.array(z.string().min(1)).default([]),
+  observedFields: z.array(z.string().min(1)).default([]),
+  notes: z.array(z.string().min(1)).default([]),
+});
+
+export const GrocyObjectCoveragePlaygroundSchema = z.object({
+  kind: z.literal("grocy_object_coverage_playground"),
+  version: z.literal(1),
+  generatedAt: z.string().min(1),
+  scope: z.literal("synthetic_fixture_only"),
+  summary: z.object({
+    scenarioCount: z.number().int().nonnegative(),
+    fixtureCount: z.number().int().nonnegative(),
+    surfaceCount: z.number().int().nonnegative(),
+    covered: z.number().int().nonnegative(),
+    degraded: z.number().int().nonnegative(),
+    missing: z.number().int().nonnegative(),
+  }),
+  scenarios: z.array(GrocyObjectCoveragePlaygroundScenarioSchema).default([]),
+  entries: z.array(GrocyObjectCoveragePlaygroundEntrySchema).default([]),
+  reviewNotes: z.array(z.string().min(1)).default([]),
+});
+
 export const GrocyBackupRestoreFailureCategorySchema = z.enum([
   "archive_unreadable",
   "archive_format_unsupported",
@@ -395,6 +444,9 @@ export type GrocyHealthDiagnostic = z.infer<typeof GrocyHealthDiagnosticSchema>;
 export type GrocyHealthDiagnosticsArtifact = z.infer<typeof GrocyHealthDiagnosticsArtifactSchema>;
 export type GrocyHealthBadgeArtifact = z.infer<typeof GrocyHealthBadgeArtifactSchema>;
 export type GrocyToolkitRunReceipt = z.infer<typeof GrocyToolkitRunReceiptSchema>;
+export type GrocyObjectCoveragePlaygroundScenario = z.infer<typeof GrocyObjectCoveragePlaygroundScenarioSchema>;
+export type GrocyObjectCoveragePlaygroundEntry = z.infer<typeof GrocyObjectCoveragePlaygroundEntrySchema>;
+export type GrocyObjectCoveragePlayground = z.infer<typeof GrocyObjectCoveragePlaygroundSchema>;
 export type GrocyBackupRestoreFailureCategory = z.infer<typeof GrocyBackupRestoreFailureCategorySchema>;
 export type GrocyBackupRecord = z.infer<typeof GrocyBackupRecordSchema>;
 export type GrocyBackupManifest = z.infer<typeof GrocyBackupManifestSchema>;

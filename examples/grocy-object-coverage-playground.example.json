@@ -1,0 +1,632 @@
+{
+  "kind": "grocy_object_coverage_playground",
+  "version": 1,
+  "generatedAt": "2026-04-21T17:35:32.140Z",
+  "scope": "synthetic_fixture_only",
+  "summary": {
+    "scenarioCount": 3,
+    "fixtureCount": 3,
+    "surfaceCount": 9,
+    "covered": 23,
+    "degraded": 3,
+    "missing": 1
+  },
+  "scenarios": [
+    {
+      "id": "scenario-current-object-api",
+      "label": "Current object API shape",
+      "fixtureId": "fixture-current-object-api",
+      "focus": "Preferred synthetic read coverage for stock, config objects, and shopping-list reads.",
+      "notes": [
+        "Use this scenario when validating the preferred synthetic read path across Grocy stock and object endpoints."
+      ]
+    },
+    {
+      "id": "scenario-minimal-read-api",
+      "label": "Minimal read API shape",
+      "fixtureId": "fixture-minimal-read-api",
+      "focus": "Degraded-but-readable object coverage when optional compatibility fields drop out.",
+      "notes": [
+        "Use this scenario to confirm the toolkit still reads core objects when convenience fields are missing."
+      ]
+    },
+    {
+      "id": "scenario-shopping-list-gap",
+      "label": "Shopping-list gap shape",
+      "fixtureId": "fixture-shopping-list-gap",
+      "focus": "Explicit missing-surface drill for shopping-list object coverage.",
+      "notes": [
+        "Use this scenario to inspect explicit endpoint gaps without widening the public support claim beyond synthetic fixtures."
+      ]
+    }
+  ],
+  "entries": [
+    {
+      "scenarioId": "scenario-current-object-api",
+      "fixtureId": "fixture-current-object-api",
+      "fixtureLabel": "Current object API shape",
+      "surface": "system_info",
+      "endpoint": "/system/info",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "grocy_version"
+      ],
+      "observedFields": [
+        "grocy_version"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-current-object-api",
+      "fixtureId": "fixture-current-object-api",
+      "fixtureLabel": "Current object API shape",
+      "surface": "stock",
+      "endpoint": "/stock",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "product_id",
+        "product_name",
+        "amount_aggregated"
+      ],
+      "observedFields": [
+        "amount_aggregated",
+        "product",
+        "product_id",
+        "product_name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-current-object-api",
+      "fixtureId": "fixture-current-object-api",
+      "fixtureLabel": "Current object API shape",
+      "surface": "products",
+      "endpoint": "/objects/products",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "min_stock_amount",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-current-object-api",
+      "fixtureId": "fixture-current-object-api",
+      "fixtureLabel": "Current object API shape",
+      "surface": "product_groups",
+      "endpoint": "/objects/product_groups",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-current-object-api",
+      "fixtureId": "fixture-current-object-api",
+      "fixtureLabel": "Current object API shape",
+      "surface": "locations",
+      "endpoint": "/objects/locations",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-current-object-api",
+      "fixtureId": "fixture-current-object-api",
+      "fixtureLabel": "Current object API shape",
+      "surface": "quantity_units",
+      "endpoint": "/objects/quantity_units",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name",
+        "name_plural"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-current-object-api",
+      "fixtureId": "fixture-current-object-api",
+      "fixtureLabel": "Current object API shape",
+      "surface": "product_barcodes",
+      "endpoint": "/objects/product_barcodes",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "product_id",
+        "barcode"
+      ],
+      "observedFields": [
+        "barcode",
+        "id",
+        "product_id"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-current-object-api",
+      "fixtureId": "fixture-current-object-api",
+      "fixtureLabel": "Current object API shape",
+      "surface": "shopping_lists",
+      "endpoint": "/objects/shopping_lists",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-current-object-api",
+      "fixtureId": "fixture-current-object-api",
+      "fixtureLabel": "Current object API shape",
+      "surface": "shopping_list",
+      "endpoint": "/objects/shopping_list",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "product_id",
+        "amount"
+      ],
+      "observedFields": [
+        "amount",
+        "done",
+        "id",
+        "product_id",
+        "product_name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-minimal-read-api",
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "surface": "system_info",
+      "endpoint": "/system/info",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "grocy_version"
+      ],
+      "observedFields": [
+        "grocy_version"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-minimal-read-api",
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "surface": "stock",
+      "endpoint": "/stock",
+      "compatibilityStatus": "partial",
+      "playgroundStatus": "degraded",
+      "requiredFields": [
+        "product_id",
+        "product_name",
+        "amount_aggregated"
+      ],
+      "observedFields": [
+        "amount_aggregated",
+        "product_id",
+        "product_name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "Missing optional compatibility fields: product.min_stock_amount."
+      ]
+    },
+    {
+      "scenarioId": "scenario-minimal-read-api",
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "surface": "products",
+      "endpoint": "/objects/products",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-minimal-read-api",
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "surface": "product_groups",
+      "endpoint": "/objects/product_groups",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-minimal-read-api",
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "surface": "locations",
+      "endpoint": "/objects/locations",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-minimal-read-api",
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "surface": "quantity_units",
+      "endpoint": "/objects/quantity_units",
+      "compatibilityStatus": "partial",
+      "playgroundStatus": "degraded",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "Missing optional compatibility fields: name_plural."
+      ]
+    },
+    {
+      "scenarioId": "scenario-minimal-read-api",
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "surface": "product_barcodes",
+      "endpoint": "/objects/product_barcodes",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "product_id",
+        "barcode"
+      ],
+      "observedFields": [
+        "barcode",
+        "id",
+        "product_id"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-minimal-read-api",
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "surface": "shopping_lists",
+      "endpoint": "/objects/shopping_lists",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-minimal-read-api",
+      "fixtureId": "fixture-minimal-read-api",
+      "fixtureLabel": "Minimal read API shape",
+      "surface": "shopping_list",
+      "endpoint": "/objects/shopping_list",
+      "compatibilityStatus": "partial",
+      "playgroundStatus": "degraded",
+      "requiredFields": [
+        "id",
+        "product_id",
+        "amount"
+      ],
+      "observedFields": [
+        "amount",
+        "id",
+        "product_id"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "Missing optional compatibility fields: product_name, done."
+      ]
+    },
+    {
+      "scenarioId": "scenario-shopping-list-gap",
+      "fixtureId": "fixture-shopping-list-gap",
+      "fixtureLabel": "Shopping-list gap shape",
+      "surface": "system_info",
+      "endpoint": "/system/info",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "grocy_version"
+      ],
+      "observedFields": [
+        "grocy_version"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-shopping-list-gap",
+      "fixtureId": "fixture-shopping-list-gap",
+      "fixtureLabel": "Shopping-list gap shape",
+      "surface": "stock",
+      "endpoint": "/stock",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "product_id",
+        "product_name",
+        "amount_aggregated"
+      ],
+      "observedFields": [
+        "amount_aggregated",
+        "product",
+        "product_id",
+        "product_name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-shopping-list-gap",
+      "fixtureId": "fixture-shopping-list-gap",
+      "fixtureLabel": "Shopping-list gap shape",
+      "surface": "products",
+      "endpoint": "/objects/products",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-shopping-list-gap",
+      "fixtureId": "fixture-shopping-list-gap",
+      "fixtureLabel": "Shopping-list gap shape",
+      "surface": "product_groups",
+      "endpoint": "/objects/product_groups",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-shopping-list-gap",
+      "fixtureId": "fixture-shopping-list-gap",
+      "fixtureLabel": "Shopping-list gap shape",
+      "surface": "locations",
+      "endpoint": "/objects/locations",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-shopping-list-gap",
+      "fixtureId": "fixture-shopping-list-gap",
+      "fixtureLabel": "Shopping-list gap shape",
+      "surface": "quantity_units",
+      "endpoint": "/objects/quantity_units",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name",
+        "name_plural"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-shopping-list-gap",
+      "fixtureId": "fixture-shopping-list-gap",
+      "fixtureLabel": "Shopping-list gap shape",
+      "surface": "product_barcodes",
+      "endpoint": "/objects/product_barcodes",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "product_id",
+        "barcode"
+      ],
+      "observedFields": [
+        "barcode",
+        "id",
+        "product_id"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-shopping-list-gap",
+      "fixtureId": "fixture-shopping-list-gap",
+      "fixtureLabel": "Shopping-list gap shape",
+      "surface": "shopping_lists",
+      "endpoint": "/objects/shopping_lists",
+      "compatibilityStatus": "supported",
+      "playgroundStatus": "covered",
+      "requiredFields": [
+        "id",
+        "name"
+      ],
+      "observedFields": [
+        "id",
+        "name"
+      ],
+      "notes": [
+        "Required fields are present.",
+        "No optional compatibility gaps detected."
+      ]
+    },
+    {
+      "scenarioId": "scenario-shopping-list-gap",
+      "fixtureId": "fixture-shopping-list-gap",
+      "fixtureLabel": "Shopping-list gap shape",
+      "surface": "shopping_list",
+      "endpoint": "/objects/shopping_list",
+      "compatibilityStatus": "unsupported",
+      "playgroundStatus": "missing",
+      "requiredFields": [
+        "id",
+        "product_id",
+        "amount"
+      ],
+      "observedFields": [],
+      "notes": [
+        "Missing required fields: id, product_id, amount.",
+        "Missing optional compatibility fields: product_name, done."
+      ]
+    }
+  ],
+  "reviewNotes": [
+    "This playground is fixture-only and is meant for synthetic object coverage review, not live Grocy certification.",
+    "Use it to inspect covered, degraded, and missing object surfaces before making any broader API compatibility claim.",
+    "Keep fixture values synthetic and omit personal details, private purchasing workflows, and private operating policy."
+  ]
+}
