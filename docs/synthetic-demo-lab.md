@@ -2,6 +2,15 @@
 
 This lab exercises the public toolkit with synthetic data only. It is intended for a clean checkout, CI review, or agent validation when no live Grocy credentials are available.
 
+Use this lab as the canonical fresh-agent cold-start loop for the public toolkit. A successful run should produce:
+
+- a `fail` diagnostics artifact that only reports the missing local live config
+- a passing mock smoke report
+- an offline lint report, sync plan, drift trend report, and apply dry-run report built from synthetic examples
+- a synthetic encrypted backup, restore-plan dry run, restore verification result, and Markdown review dashboard
+
+The loop should finish without live Grocy credentials, household data, or private local paths in the generated artifacts.
+
 The lab uses conventional local paths:
 
 - `config/` for local-only configuration copied from examples.

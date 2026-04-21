@@ -41,6 +41,18 @@ npm run build
 npm test
 ```
 
+Create the conventional local directories used by the toolkit:
+
+```bash
+mkdir -p config data restore
+```
+
+PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force config, data, restore | Out-Null
+```
+
 Create a local Grocy config from the example:
 
 ```bash
@@ -55,6 +67,20 @@ npm run grocy:health
 npm run grocy:health:badge
 npm run grocy:health:diagnostics
 ```
+
+## Fresh-Agent Cold-Start Loop
+
+When you need a clean-checkout validation path that uses synthetic data only, run this public-safe loop:
+
+1. Create local directories with `mkdir -p config data restore` or `New-Item -ItemType Directory -Force config, data, restore | Out-Null`.
+2. Run `npm run grocy:health:diagnostics -- --output data/demo-health-diagnostics.json --force` and confirm it writes a `fail` artifact that only reports the missing local config.
+3. Run `npm run grocy:smoke:mock -- --output data/demo-mock-smoke-report.json --force` and confirm the summary is `pass`.
+4. Run the offline config-review path with `npm run grocy:desired-state:lint`, `npm run grocy:diff-config`, `npm run grocy:config:drift-trend`, and `npm run grocy:apply-config -- --dry-run`, each pointing at the synthetic example files.
+5. Copy `examples/grocy-backup.local.example.json` into `config/grocy-backup.local.json`, set `GROCY_BACKUP_PASSPHRASE` to a synthetic value for the current shell, and run `npm run grocy:backup:snapshot`, `npm run grocy:backup:restore-plan`, `npm run grocy:backup:verify`, and `npm run grocy:review:dashboard`.
+
+Expected result: the loop completes without live Grocy credentials, uses only synthetic fixtures, and leaves a reviewable set of JSON and Markdown artifacts under `data/`.
+
+For the exact commands and expected outputs, see [Synthetic Grocy Demo Lab](docs/synthetic-demo-lab.md).
 
 ## No-Install Example Preview
 
