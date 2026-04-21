@@ -249,7 +249,13 @@ By default, the mock smoke report is written to:
 data/grocy-mock-smoke-report.json
 ```
 
-Use `--output <path>` to write the report somewhere else.
+The command also writes a compact run receipt to:
+
+```text
+data/grocy-mock-smoke-receipt.json
+```
+
+The receipt records the command id, synthetic fixture set, generated artifact paths, rerun command, and pass/fail result so an agent can hand over concise evidence without replaying logs. Use `--output <path>` to write the report somewhere else and `--receipt-output <path>` to override the receipt path.
 
 ## API Compatibility Matrix
 

@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { execFileSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -28,6 +29,27 @@ describe("Grocy mock smoke test", () => {
     expect(JSON.parse(fs.readFileSync(outputPath, "utf8"))).toMatchObject({
       kind: "grocy_mock_smoke_report",
       summary: { result: "pass" },
+    });
+  });
+
+  it("emits a run receipt alongside the CLI smoke report", () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-mock-smoke-cli-"));
+    const nodeCommand = process.execPath;
+    const cliEntrypoint = path.join(process.cwd(), "src", "cli.ts");
+
+    const stdout = execFileSync(nodeCommand, [path.join(process.cwd(), "node_modules", "tsx", "dist", "cli.mjs"), cliEntrypoint, "grocy:smoke:mock"], {
+      cwd: baseDir,
+      encoding: "utf8",
+    });
+
+    expect(JSON.parse(stdout)).toMatchObject({
+      outputPath: expect.stringContaining(path.join("data", "grocy-mock-smoke-report.json")),
+      receiptPath: expect.stringContaining(path.join("data", "grocy-mock-smoke-receipt.json")),
+      summary: { result: "pass" },
+    });
+    expect(JSON.parse(fs.readFileSync(path.join(baseDir, "data", "grocy-mock-smoke-receipt.json"), "utf8"))).toMatchObject({
+      kind: "grocy_toolkit_run_receipt",
+      result: { status: "pass", checkCount: 4, failureCount: 0 },
     });
   });
 });

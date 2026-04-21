@@ -151,6 +151,9 @@ describe("packed npm install smoke test", () => {
 
       expect(exportOutput.trim()).toBe("pass");
       expect(JSON.parse(smokeOutput)).toMatchObject({ summary: { result: "pass" } });
+      expect(JSON.parse(smokeOutput)).toMatchObject({
+        receiptPath: expect.stringContaining(path.join("data", "grocy-mock-smoke-receipt.json")),
+      });
       expect(JSON.parse(healthBadgeOutput)).toMatchObject({
         outputPath: expect.stringContaining(path.join("data", "health-badge.json")),
         summary: { status: "fail", failureCodes: ["config_missing"] },
@@ -171,6 +174,10 @@ describe("packed npm install smoke test", () => {
       expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "data", "smoke.json"), "utf8"))).toMatchObject({
         kind: "grocy_mock_smoke_report",
         summary: { result: "pass" },
+      });
+      expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "data", "grocy-mock-smoke-receipt.json"), "utf8"))).toMatchObject({
+        kind: "grocy_toolkit_run_receipt",
+        verification: { command: "npm run grocy:smoke:mock", status: "pass" },
       });
       expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "data", "health-badge.json"), "utf8"))).toMatchObject({
         kind: "grocy_health_badge",

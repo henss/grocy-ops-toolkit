@@ -274,6 +274,40 @@ export const GrocyHealthBadgeArtifactSchema = z.object({
     .default([]),
 });
 
+export const GrocyToolkitRunReceiptSchema = z.object({
+  kind: z.literal("grocy_toolkit_run_receipt"),
+  version: z.literal(1),
+  generatedAt: z.string().min(1),
+  command: z.object({
+    id: z.literal("grocy:smoke:mock"),
+    cli: z.literal("npm run grocy:smoke:mock"),
+  }),
+  fixtureSet: z.object({
+    id: z.literal("synthetic_mock_smoke"),
+    scope: z.literal("synthetic_fixture_only"),
+    notes: z.array(z.string().min(1)).default([]),
+  }),
+  artifacts: z.array(z.object({
+    role: z.enum(["primary_report", "derived_plan", "derived_dry_run_report"]),
+    kind: z.enum([
+      "grocy_mock_smoke_report",
+      "grocy_config_sync_plan",
+      "grocy_config_apply_dry_run_report",
+    ]),
+    path: z.string().min(1),
+  })).default([]),
+  verification: z.object({
+    command: z.literal("npm run grocy:smoke:mock"),
+    status: z.enum(["pass", "fail"]),
+  }),
+  result: z.object({
+    status: z.enum(["pass", "fail"]),
+    checkCount: z.number().int().nonnegative(),
+    failureCount: z.number().int().nonnegative(),
+  }),
+  reviewNotes: z.array(z.string().min(1)).default([]),
+});
+
 export const GrocyBackupRestoreFailureCategorySchema = z.enum([
   "archive_unreadable",
   "archive_format_unsupported",
@@ -360,6 +394,7 @@ export type GrocyHealthDiagnosticCode = z.infer<typeof GrocyHealthDiagnosticCode
 export type GrocyHealthDiagnostic = z.infer<typeof GrocyHealthDiagnosticSchema>;
 export type GrocyHealthDiagnosticsArtifact = z.infer<typeof GrocyHealthDiagnosticsArtifactSchema>;
 export type GrocyHealthBadgeArtifact = z.infer<typeof GrocyHealthBadgeArtifactSchema>;
+export type GrocyToolkitRunReceipt = z.infer<typeof GrocyToolkitRunReceiptSchema>;
 export type GrocyBackupRestoreFailureCategory = z.infer<typeof GrocyBackupRestoreFailureCategorySchema>;
 export type GrocyBackupRecord = z.infer<typeof GrocyBackupRecordSchema>;
 export type GrocyBackupManifest = z.infer<typeof GrocyBackupManifestSchema>;

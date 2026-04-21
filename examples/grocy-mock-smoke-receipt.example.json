@@ -1,0 +1,47 @@
+{
+  "kind": "grocy_toolkit_run_receipt",
+  "version": 1,
+  "generatedAt": "2026-04-21T08:00:00.000Z",
+  "command": {
+    "id": "grocy:smoke:mock",
+    "cli": "npm run grocy:smoke:mock"
+  },
+  "fixtureSet": {
+    "id": "synthetic_mock_smoke",
+    "scope": "synthetic_fixture_only",
+    "notes": [
+      "Uses only synthetic Grocy response fixtures and a temporary local config.",
+      "Does not require live Grocy credentials, household data, or private workflow state."
+    ]
+  },
+  "artifacts": [
+    {
+      "role": "primary_report",
+      "kind": "grocy_mock_smoke_report",
+      "path": "data/grocy-mock-smoke-report.json"
+    },
+    {
+      "role": "derived_plan",
+      "kind": "grocy_config_sync_plan",
+      "path": "data/grocy-config-sync-plan.json"
+    },
+    {
+      "role": "derived_dry_run_report",
+      "kind": "grocy_config_apply_dry_run_report",
+      "path": "data/grocy-config-apply-dry-run-report.json"
+    }
+  ],
+  "verification": {
+    "command": "npm run grocy:smoke:mock",
+    "status": "pass"
+  },
+  "result": {
+    "status": "pass",
+    "checkCount": 4,
+    "failureCount": 0
+  },
+  "reviewNotes": [
+    "Inspect this receipt instead of rereading terminal logs when the synthetic smoke path is enough evidence.",
+    "Treat this receipt as command-local evidence, not as a broader CI replacement or public support claim."
+  ]
+}

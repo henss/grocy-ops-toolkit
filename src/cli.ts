@@ -34,6 +34,7 @@ import { createGrocyApiDeprecationCanaryReport, recordGrocyApiDeprecationCanaryR
 import { recordGrocyMockSmokeReport, runGrocyMockSmokeTest } from "./mock-smoke.js";
 import { auditGrocyPublicArtifacts, recordGrocyPublicArtifactRedactionAudit } from "./redaction-audit.js";
 import { createGrocyReviewDashboardFromArtifacts, recordGrocyReviewDashboard } from "./review-dashboard.js";
+import { createGrocyMockSmokeRunReceipt, recordGrocyToolkitRunReceipt } from "./run-receipt.js";
 import { createGrocySupportBundle, recordGrocySupportBundle } from "./support-bundle.js";
 
 function parseFlag(flag: string): string | undefined {
@@ -83,7 +84,16 @@ async function main(): Promise<void> {
       outputPath: parseFlag("--output"),
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
-    printJson({ outputPath, summary: report.summary });
+    const receipt = createGrocyMockSmokeRunReceipt({
+      baseDir: process.cwd(),
+      report,
+      reportPath: outputPath,
+    });
+    const receiptPath = recordGrocyToolkitRunReceipt(receipt, {
+      outputPath: parseFlag("--receipt-output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--receipt-output"),
+    });
+    printJson({ outputPath, receiptPath, summary: report.summary });
     return;
   }
   if (command === "grocy:compatibility:matrix") {
