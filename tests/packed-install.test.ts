@@ -50,12 +50,38 @@ function installPackedPackage(consumerDir: string, npmEnv: NodeJS.ProcessEnv): v
   run(npmCommand, ["install", "--no-audit", "--no-fund", tarballPath], consumerDir, npmEnv);
 }
 
+function writeSyntheticBackupFixture(consumerDir: string, passphraseEnvName: string): void {
+  fs.mkdirSync(path.join(consumerDir, "config"), { recursive: true });
+  fs.mkdirSync(path.join(consumerDir, "source", "data"), { recursive: true });
+  fs.writeFileSync(path.join(consumerDir, "source", "config.php"), "<?php return ['mode' => 'synthetic'];\n", "utf8");
+  fs.writeFileSync(
+    path.join(consumerDir, "source", "data", "grocy-demo.json"),
+    `${JSON.stringify({
+      products: [
+        { id: "example-coffee", name: "Example Coffee" },
+      ],
+    }, null, 2)}\n`,
+    "utf8",
+  );
+  fs.writeFileSync(
+    path.join(consumerDir, "config", "grocy-backup.local.json"),
+    `${JSON.stringify({
+      sourcePath: "source",
+      backupDir: path.join("backups", "grocy"),
+      passphraseEnv: passphraseEnvName,
+      locationLabel: "synthetic-package-preview",
+    }, null, 2)}\n`,
+    "utf8",
+  );
+}
+
 describe("packed npm install smoke test", () => {
   it(
-    "installs the packed package and exercises the public export and bin",
+    "installs the packed package and exercises the public export and no-install preview bin commands",
     () => {
       const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-packed-install-"));
       const consumerDir = path.join(tempDir, "consumer");
+      const backupPassphraseEnv = "GROCY_PACKAGE_PREVIEW_PASSPHRASE";
       fs.mkdirSync(consumerDir, { recursive: true });
       const npmEnv = {
         npm_config_cache: path.join(tempDir, "npm-cache"),
@@ -72,6 +98,7 @@ describe("packed npm install smoke test", () => {
 
       run(npmCommand, ["run", "build"], repoRoot, npmEnv);
       installPackedPackage(consumerDir, npmEnv);
+      writeSyntheticBackupFixture(consumerDir, backupPassphraseEnv);
 
       const exportOutput = run(
         "node",
@@ -82,18 +109,80 @@ describe("packed npm install smoke test", () => {
         ],
         consumerDir,
       );
-      const binOutput = run(
+      const smokeOutput = run(
         npxCommand,
         ["--no-install", "grocy-ops-toolkit", "grocy:smoke:mock", "--output", "data/smoke.json"],
         consumerDir,
         npmEnv,
       );
+      const healthBadgeOutput = run(
+        npxCommand,
+        ["--no-install", "grocy-ops-toolkit", "grocy:health:badge", "--output", "data/health-badge.json", "--force"],
+        consumerDir,
+        npmEnv,
+      );
+      const healthDiagnosticsOutput = run(
+        npxCommand,
+        ["--no-install", "grocy-ops-toolkit", "grocy:health:diagnostics", "--output", "data/health-diagnostics.json", "--force"],
+        consumerDir,
+        npmEnv,
+      );
+      const backupSnapshotOutput = run(
+        npxCommand,
+        ["--no-install", "grocy-ops-toolkit", "grocy:backup:snapshot"],
+        consumerDir,
+        { ...npmEnv, [backupPassphraseEnv]: "synthetic-package-preview-passphrase" },
+      );
+      const backupRestorePlanOutput = run(
+        npxCommand,
+        [
+          "--no-install",
+          "grocy-ops-toolkit",
+          "grocy:backup:restore-plan",
+          "--restore-dir",
+          "restore/preview-backup-check",
+          "--output",
+          "data/backup-restore-plan.json",
+          "--force",
+        ],
+        consumerDir,
+        { ...npmEnv, [backupPassphraseEnv]: "synthetic-package-preview-passphrase" },
+      );
 
       expect(exportOutput.trim()).toBe("pass");
-      expect(JSON.parse(binOutput)).toMatchObject({ summary: { result: "pass" } });
+      expect(JSON.parse(smokeOutput)).toMatchObject({ summary: { result: "pass" } });
+      expect(JSON.parse(healthBadgeOutput)).toMatchObject({
+        outputPath: expect.stringContaining(path.join("data", "health-badge.json")),
+        summary: { status: "fail", failureCodes: ["config_missing"] },
+        badge: { label: "grocy health", color: "red" },
+      });
+      expect(JSON.parse(healthDiagnosticsOutput)).toMatchObject({
+        outputPath: expect.stringContaining(path.join("data", "health-diagnostics.json")),
+        summary: { result: "fail", failureCount: 1 },
+      });
+      expect(JSON.parse(backupSnapshotOutput)).toMatchObject({
+        locationLabel: "synthetic-package-preview",
+        fileCount: 2,
+      });
+      expect(JSON.parse(backupRestorePlanOutput)).toMatchObject({
+        outputPath: expect.stringContaining(path.join("data", "backup-restore-plan.json")),
+        summary: { result: "ready", fileCount: 2, wouldCreate: 2, wouldOverwrite: 0 },
+      });
       expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "data", "smoke.json"), "utf8"))).toMatchObject({
         kind: "grocy_mock_smoke_report",
         summary: { result: "pass" },
+      });
+      expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "data", "health-badge.json"), "utf8"))).toMatchObject({
+        kind: "grocy_health_badge",
+        summary: { status: "fail", failureCodes: ["config_missing"] },
+      });
+      expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "data", "health-diagnostics.json"), "utf8"))).toMatchObject({
+        kind: "grocy_health_diagnostics",
+        summary: { result: "fail", failureCount: 1 },
+      });
+      expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "data", "backup-restore-plan.json"), "utf8"))).toMatchObject({
+        kind: "grocy_backup_restore_plan_dry_run_report",
+        summary: { result: "ready", fileCount: 2, wouldCreate: 2, wouldOverwrite: 0 },
       });
     },
     60_000,

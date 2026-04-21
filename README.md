@@ -56,6 +56,53 @@ npm run grocy:health:badge
 npm run grocy:health:diagnostics
 ```
 
+## No-Install Example Preview
+
+When you want to preview the public health and backup example shapes from a built checkout without adding a global install step, use the package bin through `npx --no-install`.
+
+Build the package edge first:
+
+```bash
+npm install
+npm run build
+mkdir -p config data restore
+```
+
+PowerShell:
+
+```powershell
+New-Item -ItemType Directory -Force config, data, restore | Out-Null
+```
+
+Preview the health example artifacts without live Grocy credentials:
+
+```bash
+npx --no-install grocy-ops-toolkit grocy:health:badge --output data/preview-health-badge.json --force
+npx --no-install grocy-ops-toolkit grocy:health:diagnostics --output data/preview-health-diagnostics.json --force
+```
+
+Expected result: both commands complete with public-safe `fail` outputs that match the same artifact families as `examples/grocy-health-badge.example.json` and `examples/grocy-health-diagnostics.example.json`.
+
+Preview the backup example flow with the synthetic fixture source:
+
+```bash
+cp examples/grocy-backup.local.example.json config/grocy-backup.local.json
+export GROCY_BACKUP_PASSPHRASE="synthetic-preview-passphrase"
+npx --no-install grocy-ops-toolkit grocy:backup:snapshot
+npx --no-install grocy-ops-toolkit grocy:backup:restore-plan --restore-dir restore/preview-backup-check --output data/preview-backup-restore-plan-dry-run-report.json --force
+```
+
+PowerShell:
+
+```powershell
+Copy-Item examples/grocy-backup.local.example.json config/grocy-backup.local.json
+$env:GROCY_BACKUP_PASSPHRASE = "synthetic-preview-passphrase"
+npx --no-install grocy-ops-toolkit grocy:backup:snapshot
+npx --no-install grocy-ops-toolkit grocy:backup:restore-plan --restore-dir restore/preview-backup-check --output data/preview-backup-restore-plan-dry-run-report.json --force
+```
+
+Expected result: the restore-plan report stays no-write, records the synthetic files that would be restored, and matches the same artifact family as `examples/grocy-backup-restore-plan-dry-run-report.example.json`.
+
 ## Configuration Workflow
 
 Use this workflow to export Grocy configuration, review changes, and apply only explicitly approved writes.
