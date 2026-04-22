@@ -2,7 +2,6 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   GrocyConfigApplyDryRunReportSchema,
-  GrocyConfigEntitySchema,
   GrocyConfigDriftTrendReportSchema,
   type GrocyConfigApplyDryRunReport,
   type GrocyConfigApplyDryRunReportItem,
@@ -11,7 +10,6 @@ import {
   type GrocyConfigEntity,
   type GrocyConfigExport,
   type GrocyConfigItem,
-  type GrocyConfigPlanChange,
   type GrocyConfigPlanItem,
   type GrocyConfigSyncPlan,
   type GrocyJsonValue,
