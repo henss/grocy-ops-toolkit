@@ -55,6 +55,18 @@ Expected result: the command writes:
 - `data/grocy-backup-restore-plan-dry-run-report.json`
 - synthetic restored files under `restore/fixture-only-restore-drill`
 
+## Validate The Artifact
+
+Use Node's built-in JSON parsing to turn the checkpoint rules into a pass/fail gate:
+
+```bash
+node --input-type=module -e "import fs from 'node:fs'; const report = JSON.parse(fs.readFileSync('data/fixture-only-restore-drill-report.json', 'utf8')); const expected = ['snapshot_created', 'restore_plan_ready', 'restore_verification_succeeded']; const actual = report.checkpoints?.map((checkpoint) => checkpoint.id) ?? []; if (report.summary?.result !== 'pass' || report.summary?.checkpointCount !== 3 || report.summary?.passedCount !== 3 || JSON.stringify(actual) !== JSON.stringify(expected)) { throw new Error('Restore drill checkpoint validation failed.'); } console.log('Restore drill checkpoints validated.');"
+```
+
+PowerShell uses the same command.
+
+Expected result: the command prints `Restore drill checkpoints validated.` and exits zero.
+
 ## Checkpoints
 
 The canonical drill artifact is `data/fixture-only-restore-drill-report.json`.
