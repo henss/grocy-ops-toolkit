@@ -53,6 +53,32 @@ function resolveExistingPath(baseDir: string, targetPath: string): string | unde
   return fs.existsSync(absolutePath) ? absolutePath : undefined;
 }
 
+function readOptionalArtifact(
+  baseDir: string,
+  targetPath: string,
+): { ok: true; absolutePath: string; value: unknown } | { ok: false; message: string } {
+  const absolutePath = path.resolve(baseDir, targetPath);
+  if (!fs.existsSync(absolutePath)) {
+    return {
+      ok: false,
+      message: `Expected proof artifact is missing at ${toPublicSafePath(baseDir, absolutePath)}.`,
+    };
+  }
+
+  try {
+    return {
+      ok: true,
+      absolutePath,
+      value: readJsonFile(absolutePath),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      message: `Proof artifact at ${toPublicSafePath(baseDir, absolutePath)} could not be read as JSON: ${error instanceof Error ? error.message : String(error)}`,
+    };
+  }
+}
+
 function loadBackupManifest(baseDir: string, manifestPath: string): GrocyBackupManifest {
   const absoluteManifestPath = path.resolve(baseDir, manifestPath);
   if (!fs.existsSync(absoluteManifestPath)) {
@@ -277,35 +303,45 @@ export function verifyGrocyBackupIntegrityReceipt(
 
   const restorePlanPath = options.restorePlanReportPath ?? receipt.artifacts.restorePlanReportPath;
   if (restorePlanPath) {
-    const restorePlan = GrocyBackupRestorePlanDryRunReportSchema.parse(readJsonFile(path.resolve(baseDir, restorePlanPath)));
-    const restorePlanMatches = restorePlan.summary.result === "ready"
-      && restorePlan.summary.checksumVerified
-      && restorePlan.archiveRecordId === receipt.archive.recordId
-      && restorePlan.summary.fileCount === receipt.archive.fileCount
-      && restorePlan.summary.totalBytes === receipt.archive.totalBytes;
-    checks.push(buildVerificationCheck(
-      "restore_plan_reviewed",
-      restorePlanMatches ? "pass" : "fail",
-      restorePlanMatches
-        ? "Restore-plan dry-run evidence still matches the receipt archive record and summary."
-        : "Restore-plan dry-run evidence no longer matches the receipt archive record or summary.",
-    ));
+    const restorePlanArtifact = readOptionalArtifact(baseDir, restorePlanPath);
+    if (!restorePlanArtifact.ok) {
+      checks.push(buildVerificationCheck("restore_plan_reviewed", "fail", restorePlanArtifact.message));
+    } else {
+      const restorePlan = GrocyBackupRestorePlanDryRunReportSchema.parse(restorePlanArtifact.value);
+      const restorePlanMatches = restorePlan.summary.result === "ready"
+        && restorePlan.summary.checksumVerified
+        && restorePlan.archiveRecordId === receipt.archive.recordId
+        && restorePlan.summary.fileCount === receipt.archive.fileCount
+        && restorePlan.summary.totalBytes === receipt.archive.totalBytes;
+      checks.push(buildVerificationCheck(
+        "restore_plan_reviewed",
+        restorePlanMatches ? "pass" : "fail",
+        restorePlanMatches
+          ? "Restore-plan dry-run evidence still matches the receipt archive record and summary."
+          : "Restore-plan dry-run evidence no longer matches the receipt archive record or summary.",
+      ));
+    }
   }
 
   const restoreDrillPath = options.restoreDrillReportPath ?? receipt.artifacts.restoreDrillReportPath;
   if (restoreDrillPath) {
-    const restoreDrill = GrocyBackupRestoreDrillReportSchema.parse(readJsonFile(path.resolve(baseDir, restoreDrillPath)));
-    const restoreDrillMatches = restoreDrill.summary.result === "pass"
-      && restoreDrill.summary.fileCount === receipt.archive.fileCount
-      && restoreDrill.summary.totalBytes === receipt.archive.totalBytes
-      && restoreDrill.checkpoints.every((checkpoint) => checkpoint.status === "pass");
-    checks.push(buildVerificationCheck(
-      "restore_drill_verified",
-      restoreDrillMatches ? "pass" : "fail",
-      restoreDrillMatches
-        ? "Restore-drill evidence still confirms the recorded backup through passing checkpoints."
-        : "Restore-drill evidence no longer confirms the recorded backup through passing checkpoints.",
-    ));
+    const restoreDrillArtifact = readOptionalArtifact(baseDir, restoreDrillPath);
+    if (!restoreDrillArtifact.ok) {
+      checks.push(buildVerificationCheck("restore_drill_verified", "fail", restoreDrillArtifact.message));
+    } else {
+      const restoreDrill = GrocyBackupRestoreDrillReportSchema.parse(restoreDrillArtifact.value);
+      const restoreDrillMatches = restoreDrill.summary.result === "pass"
+        && restoreDrill.summary.fileCount === receipt.archive.fileCount
+        && restoreDrill.summary.totalBytes === receipt.archive.totalBytes
+        && restoreDrill.checkpoints.every((checkpoint) => checkpoint.status === "pass");
+      checks.push(buildVerificationCheck(
+        "restore_drill_verified",
+        restoreDrillMatches ? "pass" : "fail",
+        restoreDrillMatches
+          ? "Restore-drill evidence still confirms the recorded backup through passing checkpoints."
+          : "Restore-drill evidence no longer confirms the recorded backup through passing checkpoints.",
+      ));
+    }
   }
 
   const passedCount = checks.filter((check) => check.status === "pass").length;
