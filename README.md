@@ -459,6 +459,8 @@ The demo combines:
 - Backup verification.
 - Dashboard rendering.
 
+For guidance on which recovery-confidence path to run for a given review question, see [Recovery Confidence Routing Review](docs/recovery-confidence-routing-review.md).
+
 ## Common Commands
 
 ```bash
