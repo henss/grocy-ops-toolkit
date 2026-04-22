@@ -168,24 +168,9 @@ describe("Grocy backup integrity receipt", () => {
 
   it("keeps the public example receipt fixtures schema-valid", () => {
     const receiptExample = JSON.parse(fs.readFileSync(path.join(process.cwd(), "examples", "grocy-backup-integrity-receipt.example.json"), "utf8")) as unknown;
-    const verificationExample = {
-      kind: "grocy_backup_integrity_receipt_verification",
-      version: 1,
-      verifiedAt: "2026-04-22T17:45:00.000Z",
-      receiptPath: "data/grocy-backup-integrity-receipt.json",
-      summary: {
-        status: "pass",
-        checkCount: 5,
-        passedCount: 5,
-      },
-      checks: [
-        { id: "receipt_schema_valid", status: "pass", message: "Receipt parsed successfully against the published schema." },
-        { id: "archive_record_present", status: "pass", message: "Manifest record grocy-backup-20260422171000 still matches the receipt metadata." },
-        { id: "archive_verification_passed", status: "pass", message: "Archive verification reran successfully and matched the receipt counts." },
-        { id: "restore_plan_reviewed", status: "pass", message: "Restore-plan dry-run evidence still matches the receipt archive record and summary." },
-        { id: "restore_drill_verified", status: "pass", message: "Restore-drill evidence still confirms the recorded backup through passing checkpoints." },
-      ],
-    };
+    const verificationExample = JSON.parse(
+      fs.readFileSync(path.join(process.cwd(), "examples", "grocy-backup-integrity-receipt-verification.example.json"), "utf8"),
+    ) as unknown;
 
     expect(GrocyBackupIntegrityReceiptSchema.parse(receiptExample)).toMatchObject({
       kind: "grocy_backup_integrity_receipt",

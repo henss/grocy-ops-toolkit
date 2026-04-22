@@ -449,6 +449,8 @@ npm run grocy:backup:receipt:verify
 
 The verifier reruns schema validation, checks the manifest record, reruns `grocy:backup:verify` without restore writes, and compares any referenced restore-plan or restore-drill artifacts. It exits non-zero when the receipt no longer matches current evidence.
 
+See `examples/grocy-backup-integrity-receipt.example.json` for the receipt shape and `examples/grocy-backup-integrity-receipt-verification.example.json` for the matching verifier result shape.
+
 To verify by restoring into a local restore directory, explicitly confirm the restore write:
 
 ```bash
