@@ -222,4 +222,25 @@ describe("Grocy review dashboard", () => {
     expect(dashboard).toContain("- Config sync plan: <external-path>");
     expect(dashboard).not.toContain("elsewhere");
   });
+
+  it("keeps an explicit plan-plus-dry-run review scoped to the requested artifacts", () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-review-dashboard-explicit-"));
+    writeJson(baseDir, path.join("data", "session-plan.json"), plan);
+    writeJson(baseDir, path.join("data", "session-dry-run.json"), dryRunReport);
+    writeJson(baseDir, path.join("data", "grocy-backup-manifest.json"), backupManifest);
+
+    const dashboard = createGrocyReviewDashboardFromArtifacts(baseDir, {
+      generatedAt: "2026-04-19T10:30:00.000Z",
+      planPath: path.join("data", "session-plan.json"),
+      applyDryRunReportPath: path.join("data", "session-dry-run.json"),
+    });
+
+    expect(dashboard).toContain("- Config sync plan: data/session-plan.json");
+    expect(dashboard).toContain("- Apply dry-run report: data/session-dry-run.json");
+    expect(dashboard).toContain("- Backup manifest: not loaded");
+    expect(dashboard).not.toContain("## Backup Verification");
+    expect(dashboard).not.toContain("## Config Drift Trend");
+    expect(dashboard).not.toContain("## Health Diagnostics");
+    expect(dashboard).not.toContain("## Mock Smoke Check");
+  });
 });

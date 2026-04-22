@@ -243,6 +243,10 @@ function renderSmoke(report: GrocyMockSmokeReport | undefined): string[] {
   ];
 }
 
+function createSection(title: string, lines: string[]): string[] {
+  return ["", `## ${title}`, "", ...lines];
+}
+
 export function createGrocyReviewDashboard(input: GrocyReviewDashboardInput = {}): string {
   const generatedAt = input.generatedAt ?? new Date().toISOString();
   const baseDir = input.baseDir ?? process.cwd();
@@ -260,6 +264,26 @@ export function createGrocyReviewDashboard(input: GrocyReviewDashboardInput = {}
     : input.applyDryRunReport?.summary.manualReview || input.plan?.summary.manualReview
       ? "needs review"
       : "reviewable";
+
+  const sections: string[] = [];
+  if (input.applyDryRunReport) {
+    sections.push(...createSection("Planned Apply Review", renderApplyItems(input.applyDryRunReport)));
+  }
+  if (input.plan) {
+    sections.push(...createSection("Manual Review Reasons", renderManualReview(input.plan)));
+  }
+  if (input.driftTrendReport) {
+    sections.push(...createSection("Config Drift Trend", renderDriftTrend(input.driftTrendReport)));
+  }
+  if (input.diagnostics) {
+    sections.push(...createSection("Health Diagnostics", renderDiagnostics(input.diagnostics)));
+  }
+  if (input.backupManifest) {
+    sections.push(...createSection("Backup Verification", renderBackups(input.backupManifest)));
+  }
+  if (input.mockSmokeReport) {
+    sections.push(...createSection("Mock Smoke Check", renderSmoke(input.mockSmokeReport)));
+  }
 
   return [
     "# Grocy Review Dashboard",
@@ -280,30 +304,7 @@ export function createGrocyReviewDashboard(input: GrocyReviewDashboardInput = {}
     `- Health diagnostics: ${displayArtifactPath(baseDir, input.artifactPaths?.diagnosticsPath) ?? "not loaded"}`,
     `- Backup manifest: ${displayArtifactPath(baseDir, input.artifactPaths?.backupManifestPath) ?? "not loaded"}`,
     `- Mock smoke report: ${displayArtifactPath(baseDir, input.artifactPaths?.mockSmokeReportPath) ?? "not loaded"}`,
-    "",
-    "## Planned Apply Review",
-    "",
-    ...renderApplyItems(input.applyDryRunReport),
-    "",
-    "## Manual Review Reasons",
-    "",
-    ...renderManualReview(input.plan),
-    "",
-    "## Config Drift Trend",
-    "",
-    ...renderDriftTrend(input.driftTrendReport),
-    "",
-    "## Health Diagnostics",
-    "",
-    ...renderDiagnostics(input.diagnostics),
-    "",
-    "## Backup Verification",
-    "",
-    ...renderBackups(input.backupManifest),
-    "",
-    "## Mock Smoke Check",
-    "",
-    ...renderSmoke(input.mockSmokeReport),
+    ...sections,
     "",
   ].join("\n");
 }
@@ -312,28 +313,51 @@ export function createGrocyReviewDashboardFromArtifacts(
   baseDir: string = process.cwd(),
   options: GrocyReviewDashboardArtifactPaths & { generatedAt?: string } = {},
 ): string {
+  const useDefaults = [
+    options.planPath,
+    options.applyDryRunReportPath,
+    options.driftTrendReportPath,
+    options.diagnosticsPath,
+    options.backupManifestPath,
+    options.mockSmokeReportPath,
+  ].every((value) => value === undefined);
   const artifacts: GrocyReviewDashboardArtifacts = {
-    plan: loadOptionalArtifact(baseDir, options.planPath, GROCY_CONFIG_PLAN_PATH, GrocyConfigSyncPlanSchema),
+    plan: loadOptionalArtifact(
+      baseDir,
+      options.planPath,
+      useDefaults ? GROCY_CONFIG_PLAN_PATH : "__explicit_only__",
+      GrocyConfigSyncPlanSchema,
+    ),
     applyDryRunReport: loadOptionalArtifact(
       baseDir,
       options.applyDryRunReportPath,
-      GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH,
+      useDefaults ? GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH : "__explicit_only__",
       GrocyConfigApplyDryRunReportSchema,
     ),
     driftTrendReport: loadOptionalArtifact(
       baseDir,
       options.driftTrendReportPath,
-      GROCY_CONFIG_DRIFT_TREND_REPORT_PATH,
+      useDefaults ? GROCY_CONFIG_DRIFT_TREND_REPORT_PATH : "__explicit_only__",
       GrocyConfigDriftTrendReportSchema,
     ),
     diagnostics: loadOptionalArtifact(
       baseDir,
       options.diagnosticsPath,
-      GROCY_HEALTH_DIAGNOSTICS_PATH,
+      useDefaults ? GROCY_HEALTH_DIAGNOSTICS_PATH : "__explicit_only__",
       GrocyHealthDiagnosticsArtifactSchema,
     ),
-    backupManifest: loadOptionalArtifact(baseDir, options.backupManifestPath, GROCY_BACKUP_MANIFEST_PATH, GrocyBackupManifestSchema),
-    mockSmokeReport: loadOptionalArtifact(baseDir, options.mockSmokeReportPath, GROCY_MOCK_SMOKE_REPORT_PATH, GrocyMockSmokeReportSchema),
+    backupManifest: loadOptionalArtifact(
+      baseDir,
+      options.backupManifestPath,
+      useDefaults ? GROCY_BACKUP_MANIFEST_PATH : "__explicit_only__",
+      GrocyBackupManifestSchema,
+    ),
+    mockSmokeReport: loadOptionalArtifact(
+      baseDir,
+      options.mockSmokeReportPath,
+      useDefaults ? GROCY_MOCK_SMOKE_REPORT_PATH : "__explicit_only__",
+      GrocyMockSmokeReportSchema,
+    ),
   };
 
   return createGrocyReviewDashboard({

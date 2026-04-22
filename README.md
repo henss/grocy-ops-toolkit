@@ -345,6 +345,8 @@ Use these options to point at specific local artifacts:
 - `--smoke-report`
 - `--output <path>`
 
+When you pass one or more explicit artifact flags, the dashboard stays scoped to those requested inputs instead of auto-loading other default artifacts from `data/`. This keeps a config diff plus apply dry-run review focused on the exact files under review.
+
 ## Public Artifact Redaction Audit
 
 Audit generated JSON and Markdown artifacts before sharing or committing public examples:
