@@ -473,7 +473,7 @@ By default, the restore drill report is written to:
 data/grocy-backup-restore-drill-report.json
 ```
 
-The report stays inside a fixture-only boundary and records three machine-checkable checkpoints: snapshot creation, dry-run restore planning, and confirmed restore verification.
+The report stays inside a fixture-only boundary and records three machine-checkable checkpoints: snapshot creation, dry-run restore planning, and confirmed restore verification. The walkthrough also shows a JSON gate that checks the synthetic scope, passing checkpoint statuses, zero overwrite expectation, and the expected proof artifact paths.
 
 When restore verification fails, the backup manifest records `restoreTestStatus: "failed"` and a public-safe `restoreFailureCategory` when a backup record is available. Categories intentionally describe the failure class without storing file contents, Grocy records, credentials, live URLs, or private local paths:
 

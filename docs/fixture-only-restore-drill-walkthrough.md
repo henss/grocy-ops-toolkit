@@ -60,7 +60,7 @@ Expected result: the command writes:
 Use Node's built-in JSON parsing to turn the checkpoint rules into a pass/fail gate:
 
 ```bash
-node --input-type=module -e "import fs from 'node:fs'; const report = JSON.parse(fs.readFileSync('data/fixture-only-restore-drill-report.json', 'utf8')); const expected = ['snapshot_created', 'restore_plan_ready', 'restore_verification_succeeded']; const actual = report.checkpoints?.map((checkpoint) => checkpoint.id) ?? []; if (report.summary?.result !== 'pass' || report.summary?.checkpointCount !== 3 || report.summary?.passedCount !== 3 || JSON.stringify(actual) !== JSON.stringify(expected)) { throw new Error('Restore drill checkpoint validation failed.'); } console.log('Restore drill checkpoints validated.');"
+node --input-type=module -e "import fs from 'node:fs'; const report = JSON.parse(fs.readFileSync('data/fixture-only-restore-drill-report.json', 'utf8')); const expectedIds = ['snapshot_created', 'restore_plan_ready', 'restore_verification_succeeded']; const actualIds = report.checkpoints?.map((checkpoint) => checkpoint.id) ?? []; const checkpointStatusesPass = report.checkpoints?.every((checkpoint) => checkpoint.status === 'pass') ?? false; const artifactPathsMatch = report.artifacts?.manifestPath === 'data/grocy-backup-manifest.json' && report.artifacts?.restorePlanReportPath === 'data/grocy-backup-restore-plan-dry-run-report.json' && report.checkpoints?.[0]?.artifactPath === 'data/grocy-backup-manifest.json' && report.checkpoints?.[1]?.artifactPath === 'data/grocy-backup-restore-plan-dry-run-report.json' && report.checkpoints?.[2]?.artifactPath === 'restore/fixture-only-restore-drill'; if (report.scope !== 'synthetic_fixture_only' || report.summary?.result !== 'pass' || report.summary?.checkpointCount !== 3 || report.summary?.passedCount !== 3 || report.summary?.wouldOverwrite !== 0 || JSON.stringify(actualIds) !== JSON.stringify(expectedIds) || !checkpointStatusesPass || !artifactPathsMatch) { throw new Error('Restore drill checkpoint validation failed.'); } console.log('Restore drill checkpoints validated.');"
 ```
 
 PowerShell uses the same command.
@@ -73,14 +73,22 @@ The canonical drill artifact is `data/fixture-only-restore-drill-report.json`.
 
 Treat these fields as the machine-checkable signoff surface:
 
+- `scope` must be `synthetic_fixture_only`
 - `summary.result` must be `pass`
 - `summary.checkpointCount` must be `3`
 - `summary.passedCount` must be `3`
+- `summary.wouldOverwrite` must be `0`
 - `checkpoints[0].id` must be `snapshot_created`
+- `checkpoints[0].status` must be `pass`
 - `checkpoints[1].id` must be `restore_plan_ready`
+- `checkpoints[1].status` must be `pass`
 - `checkpoints[2].id` must be `restore_verification_succeeded`
-- `artifacts.manifestPath` should point at the generated backup manifest
-- `artifacts.restorePlanReportPath` should point at the generated dry-run restore plan
+- `checkpoints[2].status` must be `pass`
+- `checkpoints[0].artifactPath` must be `data/grocy-backup-manifest.json`
+- `checkpoints[1].artifactPath` must be `data/grocy-backup-restore-plan-dry-run-report.json`
+- `checkpoints[2].artifactPath` must be `restore/fixture-only-restore-drill`
+- `artifacts.manifestPath` must be `data/grocy-backup-manifest.json`
+- `artifacts.restorePlanReportPath` must be `data/grocy-backup-restore-plan-dry-run-report.json`
 
 For a representative public-safe shape, see [`examples/grocy-backup-restore-drill-report.example.json`](../examples/grocy-backup-restore-drill-report.example.json).
 
@@ -91,5 +99,6 @@ This drill proves recovery understanding with evidence instead of memory:
 - the snapshot checkpoint proves the encrypted archive exists and was recorded in the manifest
 - the restore-plan checkpoint proves the no-write preview was clean before any restore write happened
 - the restore-verification checkpoint proves the confirmed restore wrote only synthetic fixture files
+- the zero-overwrite summary proves the rehearsal started from a clean restore target instead of silently replacing prior output
 
 Because the artifact records each checkpoint with its rerun command and evidence, future contributors can validate the recovery loop without reverse-engineering the backup flow from several docs or logs.

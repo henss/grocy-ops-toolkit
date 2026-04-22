@@ -18,6 +18,11 @@ describe("Fixture-only restore drill walkthrough", () => {
     expect(walkthrough).toContain("node --input-type=module -e");
     expect(walkthrough).toContain("data/fixture-only-restore-drill-report.json");
     expect(walkthrough).toContain("Restore drill checkpoints validated.");
+    expect(walkthrough).toContain("report.scope !== 'synthetic_fixture_only'");
+    expect(walkthrough).toContain("report.summary?.wouldOverwrite !== 0");
+    expect(walkthrough).toContain("checkpoint.status === 'pass'");
+    expect(walkthrough).toContain("report.artifacts?.manifestPath === 'data/grocy-backup-manifest.json'");
+    expect(walkthrough).toContain("report.checkpoints?.[2]?.artifactPath === 'restore/fixture-only-restore-drill'");
     expect(walkthrough).toContain("snapshot_created");
     expect(walkthrough).toContain("restore_plan_ready");
     expect(walkthrough).toContain("restore_verification_succeeded");
