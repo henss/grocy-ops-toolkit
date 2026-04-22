@@ -21,6 +21,11 @@ import {
   recordGrocyDesiredStateManifestLintReport,
 } from "./desired-state-lint.js";
 import {
+  createGrocyBackupIntegrityReceipt,
+  recordGrocyBackupIntegrityReceipt,
+  verifyGrocyBackupIntegrityReceipt,
+} from "./backup-integrity-receipt.js";
+import {
   createGrocyBackupRestorePlanDryRunReport,
   createGrocyBackupSnapshot,
   recordGrocyBackupRestorePlanDryRunReport,
@@ -218,6 +223,36 @@ async function main(): Promise<void> {
       restoreDir: parseFlag("--restore-dir"),
       confirmRestoreWrite: process.argv.includes("--confirm-restore-write"),
     }));
+    return;
+  }
+  if (command === "grocy:backup:receipt") {
+    const receipt = createGrocyBackupIntegrityReceipt(process.cwd(), {
+      archivePath: parseFlag("--archive"),
+      manifestPath: parseFlag("--manifest"),
+      restorePlanReportPath: parseFlag("--restore-plan-report"),
+      restoreDrillReportPath: parseFlag("--restore-drill-report"),
+    });
+    const outputPath = recordGrocyBackupIntegrityReceipt(receipt, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: receipt.summary });
+    if (receipt.summary.status !== "pass") {
+      process.exitCode = 1;
+    }
+    return;
+  }
+  if (command === "grocy:backup:receipt:verify") {
+    const verification = verifyGrocyBackupIntegrityReceipt(process.cwd(), {
+      receiptPath: parseFlag("--receipt"),
+      manifestPath: parseFlag("--manifest"),
+      restorePlanReportPath: parseFlag("--restore-plan-report"),
+      restoreDrillReportPath: parseFlag("--restore-drill-report"),
+    });
+    printJson(verification);
+    if (verification.summary.status !== "pass") {
+      process.exitCode = 1;
+    }
     return;
   }
   if (command === "grocy:backup:restore-plan") {

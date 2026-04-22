@@ -1,0 +1,80 @@
+{
+  "kind": "grocy_backup_integrity_receipt",
+  "version": 1,
+  "generatedAt": "2026-04-22T17:11:00.000Z",
+  "scope": "public_safe_metadata",
+  "archive": {
+    "recordId": "grocy-backup-20260422171000",
+    "createdAt": "2026-04-22T17:10:00.000Z",
+    "sourcePath": "examples/synthetic-grocy-backup-source",
+    "archivePath": "backups/grocy-backup-20260422171000.grocy-backup.enc",
+    "locationLabel": "synthetic-local-encrypted",
+    "checksumSha256": "7c66a8f4658d4977898ee66332144028aee89a368ac27fb3e83b3f58f8f63187",
+    "fileCount": 3,
+    "totalBytes": 476,
+    "restoreTestStatus": "verified"
+  },
+  "verification": {
+    "command": "npm run grocy:backup:verify",
+    "status": "pass",
+    "checksumVerified": true,
+    "fileCount": 3,
+    "totalBytes": 476
+  },
+  "summary": {
+    "status": "pass",
+    "checkCount": 4,
+    "passedCount": 4
+  },
+  "artifacts": {
+    "manifestPath": "data/grocy-backup-manifest.json",
+    "restorePlanReportPath": "data/grocy-backup-restore-plan-dry-run-report.json",
+    "restoreDrillReportPath": "data/grocy-backup-restore-drill-report.json"
+  },
+  "checks": [
+    {
+      "id": "archive_record_present",
+      "status": "pass",
+      "artifactPath": "data/grocy-backup-manifest.json",
+      "evidence": [
+        "Manifest record grocy-backup-20260422171000 points to 3 files and 476 total bytes.",
+        "Location label is synthetic-local-encrypted.",
+        "Archive checksum fingerprint is 7c66a8f4658d4977898ee66332144028aee89a368ac27fb3e83b3f58f8f63187."
+      ]
+    },
+    {
+      "id": "archive_verification_passed",
+      "status": "pass",
+      "evidence": [
+        "Archive verification used npm run grocy:backup:verify without restore writes.",
+        "Checksum verified=true.",
+        "Archive decrypt and embedded file checks covered 3 files and 476 total bytes."
+      ]
+    },
+    {
+      "id": "restore_plan_reviewed",
+      "status": "pass",
+      "artifactPath": "data/grocy-backup-restore-plan-dry-run-report.json",
+      "evidence": [
+        "Restore plan result=ready with checksumVerified=true.",
+        "Dry-run wouldCreate=3, wouldOverwrite=0, blocked=0.",
+        "Restore plan archive record id=grocy-backup-20260422171000 was checked against manifest record grocy-backup-20260422171000."
+      ]
+    },
+    {
+      "id": "restore_drill_verified",
+      "status": "pass",
+      "artifactPath": "data/grocy-backup-restore-drill-report.json",
+      "evidence": [
+        "Restore drill result=pass with 3/3 checkpoints passing.",
+        "Confirmed restore proof covers 3 files and 476 total bytes.",
+        "Checkpoint ids recorded: snapshot_created, restore_plan_ready, restore_verification_succeeded."
+      ]
+    }
+  ],
+  "reviewNotes": [
+    "This receipt keeps only public-safe metadata and redacts archive or source paths that fall outside the current repo root.",
+    "Treat the receipt as bounded backup evidence tied to the referenced manifest and optional restore-plan or restore-drill artifacts.",
+    "Regenerate the receipt after new snapshots or restore drills so the recorded checksum, counts, and proof paths stay current."
+  ]
+}

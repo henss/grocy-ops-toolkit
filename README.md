@@ -15,6 +15,7 @@ It can:
 - Report config drift trends between two offline exports.
 - Apply only reviewed `repo_managed` creates and updates when explicitly confirmed.
 - Create and verify encrypted local backup bundles.
+- Emit a compact backup integrity receipt that ties a snapshot to checksum, restore-plan, and restore-drill evidence.
 - Generate a no-write restore-plan dry-run report before a confirmed restore.
 - Run a fixture-only restore drill that records machine-checkable recovery checkpoints.
 - Render a Markdown review dashboard from generated artifacts.
@@ -426,6 +427,28 @@ data/grocy-backup-restore-plan-dry-run-report.json
 
 The report inspects the latest encrypted archive, verifies the manifest checksum, and records which files would be created or overwritten in the requested restore directory. It does not write restore files. Use `--archive <path>` to point at a different archive record and `--output <path>` to write the report somewhere else.
 
+Generate a compact integrity receipt after snapshot verification and any available restore evidence:
+
+```bash
+npm run grocy:backup:receipt
+```
+
+By default, the receipt is written to:
+
+```text
+data/grocy-backup-integrity-receipt.json
+```
+
+The receipt records public-safe metadata about the latest backup record, reruns archive verification without restore writes, and links any conventional restore-plan or restore-drill artifacts that are already present. Use `--output <path>` to write the receipt somewhere else, `--archive <path>` to target a specific manifest record, and `--restore-plan-report` or `--restore-drill-report` to point at non-default evidence files.
+
+Verify an existing receipt against the current manifest and proof artifacts:
+
+```bash
+npm run grocy:backup:receipt:verify
+```
+
+The verifier reruns schema validation, checks the manifest record, reruns `grocy:backup:verify` without restore writes, and compares any referenced restore-plan or restore-drill artifacts. It exits non-zero when the receipt no longer matches current evidence.
+
 To verify by restoring into a local restore directory, explicitly confirm the restore write:
 
 ```bash
@@ -497,6 +520,8 @@ npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --dry-run
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
 npm run grocy:backup:snapshot
 npm run grocy:backup:restore-plan -- --restore-dir restore/grocy-backup-check
+npm run grocy:backup:receipt
+npm run grocy:backup:receipt:verify
 npm run grocy:backup:restore-drill -- --restore-dir restore/fixture-only-restore-drill
 npm run grocy:backup:verify
 npm run grocy:backup:verify -- --restore-dir restore/grocy-backup-check --confirm-restore-write

@@ -1,3 +1,5 @@
+export * from "./backup-integrity-receipt.js";
+export * from "./backup-integrity-receipt-schema.js";
 export * from "./backup-restore-drill.js";
 export * from "./backups.js";
 export * from "./config-sync.js";
