@@ -258,6 +258,12 @@ data/grocy-mock-smoke-receipt.json
 
 The receipt records the command id, synthetic fixture set, generated artifact paths, rerun command, and pass/fail result so an agent can hand over concise evidence without replaying logs. Use `--output <path>` to write the report somewhere else and `--receipt-output <path>` to override the receipt path.
 
+The repo's GitHub Actions CI workflow runs this command after `npm run typecheck`, `npm run build`, and `npm test`, then uploads the generated smoke report and receipt as workflow artifacts. The committed CI path uses:
+
+```bash
+npm run grocy:smoke:mock -- --output data/ci-mock-smoke-report.json --receipt-output data/ci-mock-smoke-receipt.json --force
+```
+
 ## API Compatibility Matrix
 
 Generate a fixture-only compatibility matrix for the Grocy API response shapes the toolkit reads:

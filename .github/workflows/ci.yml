@@ -1,20 +1,45 @@
 name: CI
 
 on:
-  pull_request:
   push:
     branches:
       - main
+  pull_request:
 
 jobs:
-  test:
+  verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
         with:
           node-version: 20
-      - run: npm install
-      - run: npm run typecheck
-      - run: npm run build
-      - run: npm test
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Run synthetic mock smoke harness
+        run: npm run grocy:smoke:mock -- --output data/ci-mock-smoke-report.json --receipt-output data/ci-mock-smoke-receipt.json --force
+
+      - name: Upload mock smoke artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: grocy-mock-smoke-artifacts
+          if-no-files-found: ignore
+          path: |
+            data/ci-mock-smoke-report.json
+            data/ci-mock-smoke-receipt.json
