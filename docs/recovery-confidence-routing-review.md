@@ -47,7 +47,7 @@ Evidence produced:
 
 Use this route when you need execution confidence across the public package surface, especially for CI-backed review or npm-installed package checks.
 
-## Route 3: Backup Snapshot, Restore Plan, And Restore Verification
+## Route 3: Backup Snapshot, Integrity Receipt, Restore Plan, And Restore Verification
 
 Use the backup path when the risk is "I changed local backup or recovery logic and need evidence that synthetic files can be archived, inspected, and restored safely."
 
@@ -57,8 +57,10 @@ Run:
 cp examples/grocy-backup.local.example.json config/grocy-backup.local.json
 export GROCY_BACKUP_PASSPHRASE="synthetic-routing-review-passphrase"
 npm run grocy:backup:snapshot
+npm run grocy:backup:receipt
 npm run grocy:backup:restore-plan -- --restore-dir restore/routing-review-check --output data/review-backup-restore-plan.json --force
 npm run grocy:backup:verify
+npm run grocy:backup:receipt:verify
 npm run grocy:backup:verify -- --restore-dir restore/routing-review-check --confirm-restore-write
 ```
 
@@ -68,15 +70,19 @@ PowerShell:
 Copy-Item examples/grocy-backup.local.example.json config/grocy-backup.local.json
 $env:GROCY_BACKUP_PASSPHRASE = "synthetic-routing-review-passphrase"
 npm run grocy:backup:snapshot
+npm run grocy:backup:receipt
 npm run grocy:backup:restore-plan -- --restore-dir restore/routing-review-check --output data/review-backup-restore-plan.json --force
 npm run grocy:backup:verify
+npm run grocy:backup:receipt:verify
 npm run grocy:backup:verify -- --restore-dir restore/routing-review-check --confirm-restore-write
 ```
 
 Evidence produced:
 
 - `grocy_backup_manifest` records the synthetic archive metadata and latest restore verification state.
+- `grocy_backup_integrity_receipt` ties checksum verification to the manifest plus optional restore-plan and restore-drill evidence in one public-safe artifact.
 - `grocy_backup_restore_plan_dry_run_report` shows what would be written before any restore write happens.
+- `grocy_backup_integrity_receipt_verification` proves the stored receipt still matches the current manifest and proof artifacts.
 - Verified restore status or a public-safe failure category shows whether recovery assumptions still hold.
 
 Use this route when you need recovery confidence, not just config preview confidence.

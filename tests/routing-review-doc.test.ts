@@ -34,7 +34,7 @@ describe("Recovery confidence routing review doc", () => {
     expect(fs.existsSync(routingReviewPath)).toBe(true);
     expect(routingReview).toContain("## Route 1: Config Diff And Apply Dry Run");
     expect(routingReview).toContain("## Route 2: Mock Smoke");
-    expect(routingReview).toContain("## Route 3: Backup Snapshot, Restore Plan, And Restore Verification");
+    expect(routingReview).toContain("## Route 3: Backup Snapshot, Integrity Receipt, Restore Plan, And Restore Verification");
     expect(routingReview).toContain("npm run grocy:review:dashboard");
     expect(routingReview).toContain("The dashboard is the aggregation surface.");
 
@@ -44,8 +44,10 @@ describe("Recovery confidence routing review doc", () => {
       "grocy:apply-config",
       "grocy:smoke:mock",
       "grocy:backup:snapshot",
+      "grocy:backup:receipt",
       "grocy:backup:restore-plan",
       "grocy:backup:verify",
+      "grocy:backup:receipt:verify",
       "grocy:review:dashboard",
     ]) {
       expect(routingReview).toContain(`npm run ${scriptName}`);
@@ -63,5 +65,8 @@ describe("Recovery confidence routing review doc", () => {
     ]) {
       expect(routingReview).toContain(artifactPath);
     }
+
+    expect(routingReview).toContain("grocy_backup_integrity_receipt");
+    expect(routingReview).toContain("grocy_backup_integrity_receipt_verification");
   });
 });
