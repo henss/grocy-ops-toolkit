@@ -37,6 +37,10 @@ describe("Recovery confidence routing review doc", () => {
     expect(routingReview).toContain("## Route 3: Backup Snapshot, Integrity Receipt, Restore Plan, And Restore Verification");
     expect(routingReview).toContain("npm run grocy:review:dashboard");
     expect(routingReview).toContain("The dashboard is the aggregation surface.");
+    expect(routingReview).toContain("[Fixture-Only Restore Drill Walkthrough](fixture-only-restore-drill-walkthrough.md)");
+    expect(routingReview).toContain(
+      "[Synthetic Backup Passphrase Rotation Rehearsal](synthetic-backup-passphrase-rotation-rehearsal.md)",
+    );
 
     for (const scriptName of [
       "grocy:desired-state:lint",

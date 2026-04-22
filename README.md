@@ -463,6 +463,8 @@ For a synthetic passphrase-rotation rehearsal that intentionally verifies the wr
 
 For a single command walkthrough that records explicit recovery checkpoints, see [Fixture-Only Restore Drill Walkthrough](docs/fixture-only-restore-drill-walkthrough.md).
 
+For route selection guidance across config preview, mock smoke, and backup recovery evidence, see [Recovery Confidence Routing Review](docs/recovery-confidence-routing-review.md).
+
 Run the drill with:
 
 ```bash
