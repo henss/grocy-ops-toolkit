@@ -7,16 +7,10 @@ import {
   type GrocyObjectRecord,
 } from "./grocy-live.js";
 import {
-  GrocyConfigApplyDryRunReportSchema,
   GrocyConfigEntitySchema,
-  GrocyConfigDriftTrendReportSchema,
   GrocyConfigExportSchema,
   GrocyConfigManifestSchema,
   GrocyConfigSyncPlanSchema,
-  type GrocyConfigApplyDryRunReport,
-  type GrocyConfigApplyDryRunReportItem,
-  type GrocyConfigDriftTrendChange,
-  type GrocyConfigDriftTrendReport,
   type GrocyConfigEntity,
   type GrocyConfigExport,
   type GrocyConfigItem,
@@ -26,13 +20,19 @@ import {
   type GrocyConfigSyncPlan,
   type GrocyJsonValue,
 } from "./schemas.js";
+export {
+  createGrocyConfigApplyDryRunReport,
+  createGrocyConfigDriftTrendReport,
+  GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH,
+  GROCY_CONFIG_DRIFT_TREND_REPORT_PATH,
+  recordGrocyConfigApplyDryRunReport,
+  recordGrocyConfigDriftTrendReport,
+} from "./config-review.js";
 
 export const GROCY_CONFIG_MANIFEST_PATH = path.join("config", "desired-state.json");
 export const GROCY_CONFIG_EXPORT_PATH = path.join("data", "grocy-config-export.json");
 export const GROCY_CONFIG_PREVIOUS_EXPORT_PATH = path.join("data", "grocy-config-export.previous.json");
 export const GROCY_CONFIG_PLAN_PATH = path.join("data", "grocy-config-sync-plan.json");
-export const GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH = path.join("data", "grocy-config-apply-dry-run-report.json");
-export const GROCY_CONFIG_DRIFT_TREND_REPORT_PATH = path.join("data", "grocy-config-drift-trend-report.json");
 
 const CONFIG_ENTITIES: GrocyConfigEntity[] = [
   "products",
@@ -183,25 +183,6 @@ function summarizePlan(actions: GrocyConfigPlanItem[]): GrocyConfigSyncPlan["sum
 
 function itemPayload(item: GrocyConfigItem): Record<string, GrocyJsonValue> {
   return { name: item.name, ...item.fields };
-}
-
-function itemIdentity(item: GrocyConfigItem): string {
-  return `${item.entity}\0${item.key}`;
-}
-
-function emptyDriftEntityBreakdown(): GrocyConfigDriftTrendReport["entityBreakdown"] {
-  return Object.fromEntries(
-    CONFIG_ENTITIES.map((entity) => [entity, { added: 0, removed: 0, changed: 0, unchanged: 0 }]),
-  ) as GrocyConfigDriftTrendReport["entityBreakdown"];
-}
-
-function driftChangesBetween(previous: GrocyConfigItem, current: GrocyConfigItem): GrocyConfigDriftTrendChange[] {
-  const previousPayload = itemPayload(previous);
-  const currentPayload = itemPayload(current);
-  const keys = Array.from(new Set([...Object.keys(previousPayload), ...Object.keys(currentPayload)])).sort();
-  return keys
-    .filter((key) => stableStringify(previousPayload[key]) !== stableStringify(currentPayload[key]))
-    .map((key) => ({ field: key, previous: previousPayload[key], current: currentPayload[key] }));
 }
 
 function changesBetween(desired: GrocyConfigItem, live: GrocyConfigItem): GrocyConfigPlanChange[] {
@@ -386,155 +367,6 @@ export function recordGrocyConfigSyncPlan(
 
 export function loadGrocyConfigSyncPlan(planPath: string): GrocyConfigSyncPlan {
   return GrocyConfigSyncPlanSchema.parse(readJsonFile(planPath));
-}
-
-function applyDryRunAction(item: GrocyConfigPlanItem): GrocyConfigApplyDryRunReportItem["action"] {
-  if (item.action === "create" && item.ownership === "repo_managed" && item.desired) {
-    return "would_create";
-  }
-  if (item.action === "update" && item.ownership === "repo_managed" && item.desired && item.liveId) {
-    return "would_update";
-  }
-  return item.action === "noop" ? "skipped" : "manual_review";
-}
-
-function summarizeApplyDryRun(items: GrocyConfigApplyDryRunReportItem[]): GrocyConfigApplyDryRunReport["summary"] {
-  return {
-    wouldCreate: items.filter((item) => item.action === "would_create").length,
-    wouldUpdate: items.filter((item) => item.action === "would_update").length,
-    skipped: items.filter((item) => item.action === "skipped").length,
-    manualReview: items.filter((item) => item.action === "manual_review").length,
-  };
-}
-
-export function createGrocyConfigApplyDryRunReport(input: {
-  plan: GrocyConfigSyncPlan;
-  planPath: string;
-  generatedAt?: string;
-}): GrocyConfigApplyDryRunReport {
-  const items = input.plan.actions.map((item): GrocyConfigApplyDryRunReportItem => ({
-    action: applyDryRunAction(item),
-    key: item.key,
-    entity: item.entity,
-    name: item.name,
-    ownership: item.ownership,
-    liveId: item.liveId,
-    reason: item.reason,
-    changes: item.changes,
-  }));
-
-  return GrocyConfigApplyDryRunReportSchema.parse({
-    kind: "grocy_config_apply_dry_run_report",
-    version: 1,
-    generatedAt: input.generatedAt ?? new Date().toISOString(),
-    planPath: input.planPath,
-    summary: summarizeApplyDryRun(items),
-    items,
-  });
-}
-
-export function recordGrocyConfigApplyDryRunReport(
-  report: GrocyConfigApplyDryRunReport,
-  options: { baseDir?: string; outputPath?: string; overwrite?: boolean } = {},
-): string {
-  return writeJsonFile(
-    path.resolve(options.baseDir ?? process.cwd(), options.outputPath ?? GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH),
-    report,
-    options.overwrite ?? true,
-  );
-}
-
-export function createGrocyConfigDriftTrendReport(input: {
-  previousExport: GrocyConfigExport;
-  currentExport: GrocyConfigExport;
-  previousExportPath: string;
-  currentExportPath: string;
-  generatedAt?: string;
-}): GrocyConfigDriftTrendReport {
-  const previousItems = new Map(input.previousExport.items.map((item) => [itemIdentity(item), item]));
-  const currentItems = new Map(input.currentExport.items.map((item) => [itemIdentity(item), item]));
-  const identities = Array.from(new Set([...previousItems.keys(), ...currentItems.keys()])).sort();
-  const entityBreakdown = emptyDriftEntityBreakdown();
-  const summary: GrocyConfigDriftTrendReport["summary"] = { added: 0, removed: 0, changed: 0, unchanged: 0 };
-  const items: GrocyConfigDriftTrendReport["items"] = [];
-
-  for (const identity of identities) {
-    const previous = previousItems.get(identity);
-    const current = currentItems.get(identity);
-
-    if (!previous && current) {
-      summary.added += 1;
-      entityBreakdown[current.entity].added += 1;
-      items.push({
-        status: "added",
-        key: current.key,
-        entity: current.entity,
-        name: current.name,
-        changedFields: [],
-        changes: [],
-      });
-      continue;
-    }
-
-    if (previous && !current) {
-      summary.removed += 1;
-      entityBreakdown[previous.entity].removed += 1;
-      items.push({
-        status: "removed",
-        key: previous.key,
-        entity: previous.entity,
-        name: previous.name,
-        changedFields: [],
-        changes: [],
-      });
-      continue;
-    }
-
-    if (previous && current) {
-      const changes = driftChangesBetween(previous, current);
-      if (changes.length > 0) {
-        summary.changed += 1;
-        entityBreakdown[current.entity].changed += 1;
-        items.push({
-          status: "changed",
-          key: current.key,
-          entity: current.entity,
-          name: current.name,
-          changedFields: changes.map((change) => change.field),
-          changes,
-        });
-      } else {
-        summary.unchanged += 1;
-        entityBreakdown[current.entity].unchanged += 1;
-      }
-    }
-  }
-
-  return GrocyConfigDriftTrendReportSchema.parse({
-    kind: "grocy_config_drift_trend_report",
-    version: 1,
-    generatedAt: input.generatedAt ?? new Date().toISOString(),
-    previousExportPath: input.previousExportPath,
-    currentExportPath: input.currentExportPath,
-    period: {
-      previousExportedAt: input.previousExport.exportedAt,
-      currentExportedAt: input.currentExport.exportedAt,
-    },
-    summary,
-    entityBreakdown,
-    items,
-  });
-}
-
-export function recordGrocyConfigDriftTrendReport(
-  report: GrocyConfigDriftTrendReport,
-  options: { baseDir?: string; outputPath?: string; overwrite?: boolean } = {},
-): string {
-  return writeJsonFile(
-    path.resolve(options.baseDir ?? process.cwd(), options.outputPath ?? GROCY_CONFIG_DRIFT_TREND_REPORT_PATH),
-    report,
-    options.overwrite ?? true,
-  );
 }
 
 export async function applyGrocyConfigSyncPlan(

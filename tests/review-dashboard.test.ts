@@ -40,6 +40,11 @@ const dryRunReport: GrocyConfigApplyDryRunReport = {
   generatedAt: "2026-04-19T10:10:00.000Z",
   planPath: "examples/config-sync-plan.example.json",
   summary: { wouldCreate: 1, wouldUpdate: 1, skipped: 1, manualReview: 1 },
+  reviewNotes: [
+    "This dry-run report is generated from an existing config sync plan and does not send live Grocy write requests.",
+    "Review the plan at examples/config-sync-plan.example.json before confirming any create or update actions.",
+    "A real apply still requires an explicit follow-up run with grocy:apply-config -- --confirm-reviewed-write.",
+  ],
   items: [
     {
       action: "would_create",

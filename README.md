@@ -178,6 +178,8 @@ data/grocy-config-apply-dry-run-report.json
 
 Use `--output <path>` to write the report somewhere else.
 
+The report includes explicit review notes that restate the no-write boundary and point back to the reviewed plan path before any confirmed apply step.
+
 ### 4. Compare Exports Over Time
 
 Render a longitudinal drift report from two existing config exports. This is offline and does not require live Grocy credentials.

@@ -168,6 +168,7 @@ export const GrocyConfigApplyDryRunReportSchema = z.object({
     manualReview: z.number().int().nonnegative(),
   }),
   items: z.array(GrocyConfigApplyDryRunReportItemSchema).default([]),
+  reviewNotes: z.array(z.string().min(1)).default([]),
 });
 
 export const GrocyConfigDriftTrendStatusSchema = z.enum(["added", "removed", "changed"]);

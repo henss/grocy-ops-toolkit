@@ -9,6 +9,11 @@
     "skipped": 0,
     "manualReview": 0
   },
+  "reviewNotes": [
+    "This dry-run report is generated from an existing config sync plan and does not send live Grocy write requests.",
+    "Review the plan at examples/config-sync-plan.example.json before confirming any create or update actions.",
+    "A real apply still requires an explicit follow-up run with grocy:apply-config -- --confirm-reviewed-write."
+  ],
   "items": [
     {
       "action": "would_update",
