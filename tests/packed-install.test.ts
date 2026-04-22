@@ -6,7 +6,6 @@ import { describe, expect, it } from "vitest";
 
 const repoRoot = process.cwd();
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
 const tscCommand = process.platform === "win32"
   ? path.join(repoRoot, "node_modules", ".bin", "tsc.cmd")
   : path.join(repoRoot, "node_modules", ".bin", "tsc");
@@ -75,9 +74,15 @@ function writeSyntheticBackupFixture(consumerDir: string, passphraseEnvName: str
   );
 }
 
+function resolveInstalledBinCommand(consumerDir: string): string {
+  return process.platform === "win32"
+    ? path.join(consumerDir, "node_modules", ".bin", "grocy-ops-toolkit.cmd")
+    : path.join(consumerDir, "node_modules", ".bin", "grocy-ops-toolkit");
+}
+
 describe("packed npm install smoke test", () => {
   it(
-    "installs the packed package and exercises the public export and no-install preview bin commands",
+    "installs the packed package and exercises the public export and installed bin commands",
     () => {
       const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-packed-install-"));
       const consumerDir = path.join(tempDir, "consumer");
@@ -99,6 +104,7 @@ describe("packed npm install smoke test", () => {
       run(npmCommand, ["run", "build"], repoRoot, npmEnv);
       installPackedPackage(consumerDir, npmEnv);
       writeSyntheticBackupFixture(consumerDir, backupPassphraseEnv);
+      const installedBinCommand = resolveInstalledBinCommand(consumerDir);
 
       const exportOutput = run(
         "node",
@@ -110,34 +116,32 @@ describe("packed npm install smoke test", () => {
         consumerDir,
       );
       const smokeOutput = run(
-        npxCommand,
-        ["--no-install", "grocy-ops-toolkit", "grocy:smoke:mock", "--output", "data/smoke.json"],
+        installedBinCommand,
+        ["grocy:smoke:mock", "--output", "data/smoke.json"],
         consumerDir,
         npmEnv,
       );
       const healthBadgeOutput = run(
-        npxCommand,
-        ["--no-install", "grocy-ops-toolkit", "grocy:health:badge", "--output", "data/health-badge.json", "--force"],
+        installedBinCommand,
+        ["grocy:health:badge", "--output", "data/health-badge.json", "--force"],
         consumerDir,
         npmEnv,
       );
       const healthDiagnosticsOutput = run(
-        npxCommand,
-        ["--no-install", "grocy-ops-toolkit", "grocy:health:diagnostics", "--output", "data/health-diagnostics.json", "--force"],
+        installedBinCommand,
+        ["grocy:health:diagnostics", "--output", "data/health-diagnostics.json", "--force"],
         consumerDir,
         npmEnv,
       );
       const backupSnapshotOutput = run(
-        npxCommand,
-        ["--no-install", "grocy-ops-toolkit", "grocy:backup:snapshot"],
+        installedBinCommand,
+        ["grocy:backup:snapshot"],
         consumerDir,
         { ...npmEnv, [backupPassphraseEnv]: "synthetic-package-preview-passphrase" },
       );
       const backupRestorePlanOutput = run(
-        npxCommand,
+        installedBinCommand,
         [
-          "--no-install",
-          "grocy-ops-toolkit",
           "grocy:backup:restore-plan",
           "--restore-dir",
           "restore/preview-backup-check",
