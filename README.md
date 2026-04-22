@@ -16,6 +16,7 @@ It can:
 - Apply only reviewed `repo_managed` creates and updates when explicitly confirmed.
 - Create and verify encrypted local backup bundles.
 - Generate a no-write restore-plan dry-run report before a confirmed restore.
+- Run a fixture-only restore drill that records machine-checkable recovery checkpoints.
 - Render a Markdown review dashboard from generated artifacts.
 - Audit generated public artifacts for private-path, URL, credential, and boundary-term leaks.
 - Generate an offline sanitized support bundle manifest from local generated artifacts.
@@ -435,6 +436,22 @@ The example backup source under `examples/synthetic-grocy-backup-source` is inte
 
 For a synthetic passphrase-rotation rehearsal that intentionally verifies the wrong-passphrase failure mode before creating a fresh archive, see [Synthetic Backup Passphrase Rotation Rehearsal](docs/synthetic-backup-passphrase-rotation-rehearsal.md).
 
+For a single command walkthrough that records explicit recovery checkpoints, see [Fixture-Only Restore Drill Walkthrough](docs/fixture-only-restore-drill-walkthrough.md).
+
+Run the drill with:
+
+```bash
+npm run grocy:backup:restore-drill -- --restore-dir restore/fixture-only-restore-drill
+```
+
+By default, the restore drill report is written to:
+
+```text
+data/grocy-backup-restore-drill-report.json
+```
+
+The report stays inside a fixture-only boundary and records three machine-checkable checkpoints: snapshot creation, dry-run restore planning, and confirmed restore verification.
+
 When restore verification fails, the backup manifest records `restoreTestStatus: "failed"` and a public-safe `restoreFailureCategory` when a backup record is available. Categories intentionally describe the failure class without storing file contents, Grocy records, credentials, live URLs, or private local paths:
 
 - `archive_unreadable`: the encrypted archive file could not be read or parsed.
@@ -480,6 +497,7 @@ npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --dry-run
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
 npm run grocy:backup:snapshot
 npm run grocy:backup:restore-plan -- --restore-dir restore/grocy-backup-check
+npm run grocy:backup:restore-drill -- --restore-dir restore/fixture-only-restore-drill
 npm run grocy:backup:verify
 npm run grocy:backup:verify -- --restore-dir restore/grocy-backup-check --confirm-restore-write
 npm run grocy:review:dashboard

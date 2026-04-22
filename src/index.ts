@@ -1,3 +1,4 @@
+export * from "./backup-restore-drill.js";
 export * from "./backups.js";
 export * from "./config-sync.js";
 export * from "./compatibility-matrix.js";

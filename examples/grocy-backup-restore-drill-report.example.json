@@ -1,0 +1,61 @@
+{
+  "kind": "grocy_backup_restore_drill_report",
+  "version": 1,
+  "generatedAt": "2026-04-22T15:40:00.000Z",
+  "scope": "synthetic_fixture_only",
+  "sourcePath": "examples/synthetic-grocy-backup-source",
+  "restoreDir": "restore/fixture-only-restore-drill",
+  "summary": {
+    "result": "pass",
+    "checkpointCount": 3,
+    "passedCount": 3,
+    "fileCount": 3,
+    "totalBytes": 476,
+    "wouldCreate": 3,
+    "wouldOverwrite": 0
+  },
+  "checkpoints": [
+    {
+      "id": "snapshot_created",
+      "status": "pass",
+      "command": "npm run grocy:backup:snapshot",
+      "artifactPath": "data/grocy-backup-manifest.json",
+      "evidence": [
+        "Created encrypted archive record grocy-backup-20260422154000.",
+        "Manifest recorded restoreTestStatus=not_tested.",
+        "Archive captured 3 files and 476 total bytes."
+      ]
+    },
+    {
+      "id": "restore_plan_ready",
+      "status": "pass",
+      "command": "npm run grocy:backup:restore-plan -- --restore-dir restore/fixture-only-restore-drill",
+      "artifactPath": "data/grocy-backup-restore-plan-dry-run-report.json",
+      "evidence": [
+        "Restore plan summary result=ready.",
+        "Dry-run checksumVerified=true and blocked=0.",
+        "Dry-run wouldCreate=3 and wouldOverwrite=0."
+      ]
+    },
+    {
+      "id": "restore_verification_succeeded",
+      "status": "pass",
+      "command": "npm run grocy:backup:verify -- --restore-dir restore/fixture-only-restore-drill --confirm-restore-write",
+      "artifactPath": "restore/fixture-only-restore-drill",
+      "evidence": [
+        "Restore verification checksumVerified=true.",
+        "Confirmed restore wrote 3 files into restore/fixture-only-restore-drill.",
+        "Manifest restore status is now verified after the confirmed fixture-only restore check."
+      ]
+    }
+  ],
+  "artifacts": {
+    "manifestPath": "data/grocy-backup-manifest.json",
+    "restorePlanReportPath": "data/grocy-backup-restore-plan-dry-run-report.json"
+  },
+  "reviewNotes": [
+    "This restore drill stays inside a fixture-only boundary and uses synthetic backup source files only.",
+    "Use the checkpoint evidence to confirm snapshot creation, no-write restore planning, and confirmed restore verification without relying on narrative-only review.",
+    "Keep config, restore, and backup paths conventional so future agents can rerun the drill with npm-first commands."
+  ]
+}

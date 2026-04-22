@@ -26,6 +26,11 @@ import {
   recordGrocyBackupRestorePlanDryRunReport,
   verifyGrocyBackupSnapshot,
 } from "./backups.js";
+import {
+  createGrocyBackupRestoreDrillReport,
+  DEFAULT_GROCY_BACKUP_RESTORE_DRILL_DIR,
+  recordGrocyBackupRestoreDrillReport,
+} from "./backup-restore-drill.js";
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
 import { recordGrocyHealthBadgeArtifact, runGrocyHealthBadge } from "./health-badge.js";
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
@@ -230,6 +235,20 @@ async function main(): Promise<void> {
     });
     printJson({ outputPath, summary: report.summary });
     if (report.summary.result !== "ready") {
+      process.exitCode = 1;
+    }
+    return;
+  }
+  if (command === "grocy:backup:restore-drill") {
+    const report = createGrocyBackupRestoreDrillReport(process.cwd(), {
+      restoreDir: parseFlag("--restore-dir") ?? DEFAULT_GROCY_BACKUP_RESTORE_DRILL_DIR,
+    });
+    const outputPath = recordGrocyBackupRestoreDrillReport(report, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: report.summary });
+    if (report.summary.result !== "pass") {
       process.exitCode = 1;
     }
     return;

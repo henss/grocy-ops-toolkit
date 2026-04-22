@@ -421,6 +421,42 @@ export const GrocyBackupRestorePlanDryRunReportSchema = z.object({
   items: z.array(GrocyBackupRestorePlanDryRunReportItemSchema).default([]),
 });
 
+export const GrocyBackupRestoreDrillCheckpointSchema = z.object({
+  id: z.enum([
+    "snapshot_created",
+    "restore_plan_ready",
+    "restore_verification_succeeded",
+  ]),
+  status: z.enum(["pass", "fail"]),
+  command: z.string().min(1),
+  artifactPath: z.string().min(1).optional(),
+  evidence: z.array(z.string().min(1)).default([]),
+});
+
+export const GrocyBackupRestoreDrillReportSchema = z.object({
+  kind: z.literal("grocy_backup_restore_drill_report"),
+  version: z.literal(1),
+  generatedAt: z.string().min(1),
+  scope: z.literal("synthetic_fixture_only"),
+  sourcePath: z.string().min(1),
+  restoreDir: z.string().min(1),
+  summary: z.object({
+    result: z.enum(["pass", "fail"]),
+    checkpointCount: z.number().int().nonnegative(),
+    passedCount: z.number().int().nonnegative(),
+    fileCount: z.number().int().nonnegative(),
+    totalBytes: z.number().int().nonnegative(),
+    wouldCreate: z.number().int().nonnegative(),
+    wouldOverwrite: z.number().int().nonnegative(),
+  }),
+  checkpoints: z.array(GrocyBackupRestoreDrillCheckpointSchema).default([]),
+  artifacts: z.object({
+    manifestPath: z.string().min(1),
+    restorePlanReportPath: z.string().min(1),
+  }),
+  reviewNotes: z.array(z.string().min(1)).default([]),
+});
+
 export type GrocyConfigEntity = z.infer<typeof GrocyConfigEntitySchema>;
 export type GrocyConfigOwnership = z.infer<typeof GrocyConfigOwnershipSchema>;
 export type GrocyConfigProvenance = z.infer<typeof GrocyConfigProvenanceSchema>;
@@ -453,3 +489,5 @@ export type GrocyBackupRecord = z.infer<typeof GrocyBackupRecordSchema>;
 export type GrocyBackupManifest = z.infer<typeof GrocyBackupManifestSchema>;
 export type GrocyBackupRestorePlanDryRunReportItem = z.infer<typeof GrocyBackupRestorePlanDryRunReportItemSchema>;
 export type GrocyBackupRestorePlanDryRunReport = z.infer<typeof GrocyBackupRestorePlanDryRunReportSchema>;
+export type GrocyBackupRestoreDrillCheckpoint = z.infer<typeof GrocyBackupRestoreDrillCheckpointSchema>;
+export type GrocyBackupRestoreDrillReport = z.infer<typeof GrocyBackupRestoreDrillReportSchema>;
