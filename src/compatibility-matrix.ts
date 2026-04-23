@@ -1,27 +1,16 @@
 import fs from "node:fs";
 import path from "node:path";
+import {
+  type GrocyApiCompatibilitySurface,
+  type SyntheticGrocyFixtureMetadata,
+  getSyntheticGrocyFixture,
+  listSyntheticGrocyFixtures,
+} from "./synthetic-grocy-fixtures.js";
 
 export const GROCY_API_COMPATIBILITY_MATRIX_PATH = path.join("data", "grocy-api-compatibility-matrix.json");
 
 export type GrocyApiCompatibilityStatus = "supported" | "partial" | "unsupported";
-
-export type GrocyApiCompatibilitySurface =
-  | "system_info"
-  | "stock"
-  | "products"
-  | "product_groups"
-  | "locations"
-  | "quantity_units"
-  | "product_barcodes"
-  | "shopping_lists"
-  | "shopping_list";
-
-export interface GrocyApiCompatibilityFixture {
-  id: string;
-  label: string;
-  apiShape: string;
-  notes: string[];
-}
+export type GrocyApiCompatibilityFixture = SyntheticGrocyFixtureMetadata;
 
 export interface GrocyApiCompatibilityMatrixEntry {
   fixtureId: string;
@@ -54,10 +43,6 @@ interface SurfaceExpectation {
   endpoint: string;
   requiredFields: string[];
   partialFields?: string[];
-}
-
-interface FixtureDefinition extends GrocyApiCompatibilityFixture {
-  responses: Partial<Record<GrocyApiCompatibilitySurface, Record<string, unknown> | Array<Record<string, unknown>>>>;
 }
 
 const SURFACE_EXPECTATIONS: SurfaceExpectation[] = [
@@ -111,73 +96,6 @@ const SURFACE_EXPECTATIONS: SurfaceExpectation[] = [
   },
 ];
 
-const FIXTURES: FixtureDefinition[] = [
-  {
-    id: "fixture-current-object-api",
-    label: "Current object API shape",
-    apiShape: "Synthetic object endpoints include stable ids, names, and shopping-list records.",
-    notes: ["Models the toolkit's preferred read path without live Grocy credentials."],
-    responses: {
-      system_info: { grocy_version: "synthetic-current" },
-      stock: [
-        {
-          product_id: "1",
-          product_name: "Example Coffee",
-          amount_aggregated: 2,
-          product: { min_stock_amount: 1 },
-        },
-      ],
-      products: [{ id: "1", name: "Example Coffee", min_stock_amount: 1 }],
-      product_groups: [{ id: "1", name: "Example Staples" }],
-      locations: [{ id: "1", name: "Example Shelf" }],
-      quantity_units: [{ id: "1", name: "Example Unit", name_plural: "Example Units" }],
-      product_barcodes: [{ id: "1", product_id: "1", barcode: "0000000000000" }],
-      shopping_lists: [{ id: "1", name: "Example List" }],
-      shopping_list: [{ id: "1", product_id: "1", product_name: "Example Coffee", amount: 1, done: 0 }],
-    },
-  },
-  {
-    id: "fixture-minimal-read-api",
-    label: "Minimal read API shape",
-    apiShape: "Synthetic responses keep core object identifiers but omit some convenience fields.",
-    notes: ["Highlights where the toolkit can continue reading but should avoid stronger automation claims."],
-    responses: {
-      system_info: { grocy_version: "synthetic-minimal" },
-      stock: [{ product_id: "1", product_name: "Example Coffee", amount_aggregated: 2 }],
-      products: [{ id: "1", name: "Example Coffee" }],
-      product_groups: [{ id: "1", name: "Example Staples" }],
-      locations: [{ id: "1", name: "Example Shelf" }],
-      quantity_units: [{ id: "1", name: "Example Unit" }],
-      product_barcodes: [{ id: "1", product_id: "1", barcode: "0000000000000" }],
-      shopping_lists: [{ id: "1", name: "Example List" }],
-      shopping_list: [{ id: "1", product_id: "1", amount: 1 }],
-    },
-  },
-  {
-    id: "fixture-shopping-list-gap",
-    label: "Shopping-list gap shape",
-    apiShape: "Synthetic object API lacks the shopping-list collection endpoint.",
-    notes: ["Marks the specific surface as unsupported while keeping unrelated config reads scoped."],
-    responses: {
-      system_info: { grocy_version: "synthetic-shopping-list-gap" },
-      stock: [
-        {
-          product_id: "1",
-          product_name: "Example Coffee",
-          amount_aggregated: 2,
-          product: { min_stock_amount: 1 },
-        },
-      ],
-      products: [{ id: "1", name: "Example Coffee" }],
-      product_groups: [{ id: "1", name: "Example Staples" }],
-      locations: [{ id: "1", name: "Example Shelf" }],
-      quantity_units: [{ id: "1", name: "Example Unit", name_plural: "Example Units" }],
-      product_barcodes: [{ id: "1", product_id: "1", barcode: "0000000000000" }],
-      shopping_lists: [{ id: "1", name: "Example List" }],
-    },
-  },
-];
-
 function firstRecord(value: Record<string, unknown> | Array<Record<string, unknown>> | undefined): Record<string, unknown> | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -202,9 +120,10 @@ function observedFields(record: Record<string, unknown> | undefined): string[] {
 }
 
 function evaluateFixtureSurface(
-  fixture: FixtureDefinition,
+  fixtureId: string,
   expectation: SurfaceExpectation,
 ): GrocyApiCompatibilityMatrixEntry {
+  const fixture = getSyntheticGrocyFixture(fixtureId);
   const record = firstRecord(fixture.responses[expectation.surface]);
   const missingRequired = expectation.requiredFields.filter((field) => !hasField(record, field));
   const missingPartial = (expectation.partialFields ?? []).filter((field) => !hasField(record, field));
@@ -230,8 +149,9 @@ function evaluateFixtureSurface(
 }
 
 function summarize(entries: GrocyApiCompatibilityMatrixEntry[]): GrocyApiCompatibilityMatrix["summary"] {
+  const fixtures = listSyntheticGrocyFixtures();
   return {
-    fixtureCount: FIXTURES.length,
+    fixtureCount: fixtures.length,
     supported: entries.filter((entry) => entry.status === "supported").length,
     partial: entries.filter((entry) => entry.status === "partial").length,
     unsupported: entries.filter((entry) => entry.status === "unsupported").length,
@@ -250,8 +170,9 @@ function writeJsonFile(filePath: string, value: unknown, overwrite: boolean): st
 export function createGrocyApiCompatibilityMatrix(
   options: { generatedAt?: string } = {},
 ): GrocyApiCompatibilityMatrix {
-  const entries = FIXTURES.flatMap((fixture) =>
-    SURFACE_EXPECTATIONS.map((expectation) => evaluateFixtureSurface(fixture, expectation)),
+  const fixtures = listSyntheticGrocyFixtures();
+  const entries = fixtures.flatMap((fixture) =>
+    SURFACE_EXPECTATIONS.map((expectation) => evaluateFixtureSurface(fixture.id, expectation)),
   );
 
   return {
@@ -260,7 +181,7 @@ export function createGrocyApiCompatibilityMatrix(
     generatedAt: options.generatedAt ?? new Date().toISOString(),
     scope: "synthetic_fixture_only",
     summary: summarize(entries),
-    fixtures: FIXTURES.map(({ responses: _responses, ...fixture }) => fixture),
+    fixtures,
     entries,
     reviewNotes: [
       "This matrix is a fixture-only prototype and is not a live Grocy version support promise.",

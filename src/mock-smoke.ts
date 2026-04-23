@@ -10,6 +10,7 @@ import {
 } from "./config-sync.js";
 import { runGrocyHealthCheck } from "./grocy-live.js";
 import type { GrocyConfigEntity, GrocyConfigManifest } from "./schemas.js";
+import { createSyntheticGrocyFetch } from "./synthetic-grocy-fixtures.js";
 
 export const GROCY_MOCK_SMOKE_REPORT_PATH = path.join("data", "grocy-mock-smoke-report.json");
 
@@ -36,28 +37,6 @@ export interface GrocyMockSmokeReport {
 }
 
 const MOCK_BASE_URL = "https://grocy.example.test/api";
-
-const MOCK_OBJECTS: Record<GrocyConfigEntity, Array<Record<string, unknown>>> = {
-  products: [
-    { id: "1", name: "Example Coffee", min_stock_amount: 1, last_price: 12.34 },
-    { id: "2", name: "Example Tea", min_stock_amount: 1, last_price: 4.56 },
-  ],
-  product_groups: [{ id: "1", name: "Example Staples" }],
-  locations: [{ id: "1", name: "Example Shelf" }],
-  quantity_units: [{ id: "1", name: "Example Unit", name_plural: "Example Units" }],
-  product_barcodes: [{ id: "1", product_id: "1", barcode: "0000000000000" }],
-  shopping_lists: [{ id: "1", name: "Example List" }],
-  shopping_list: [
-    {
-      id: "1",
-      product_id: "2",
-      product_name: "Example Tea",
-      amount: 1,
-      note: "Synthetic pending item",
-      done: 0,
-    },
-  ],
-};
 
 const MOCK_MANIFEST: GrocyConfigManifest = {
   kind: "grocy_config_manifest",
@@ -104,38 +83,8 @@ function writeMockConfig(baseDir: string): void {
   );
 }
 
-function responseJson(value: unknown): Response {
-  return new Response(JSON.stringify(value), {
-    status: 200,
-    headers: { "Content-Type": "application/json" },
-  });
-}
-
 export function createMockGrocyFetch(): typeof fetch {
-  return (async (input: string | URL | Request) => {
-    const url = new URL(String(input));
-    const relativePath = url.pathname.replace(/^\/api/, "");
-
-    if (relativePath === "/system/info") {
-      return responseJson({ grocy_version: "mock-ci" });
-    }
-    if (relativePath === "/stock") {
-      return responseJson([
-        {
-          product_id: "1",
-          product_name: "Example Coffee",
-          amount_aggregated: 2,
-          location_name: "Example Shelf",
-          product: { min_stock_amount: 1, qu_id_stock: "1", qu_id_purchase: "1" },
-        },
-      ]);
-    }
-    if (relativePath.startsWith("/objects/")) {
-      const entity = relativePath.split("/")[2] as GrocyConfigEntity | undefined;
-      return entity && entity in MOCK_OBJECTS ? responseJson(MOCK_OBJECTS[entity]) : responseJson([]);
-    }
-    return new Response("Not found", { status: 404, statusText: "Not Found" });
-  }) as typeof fetch;
+  return createSyntheticGrocyFetch();
 }
 
 function assertCheck(condition: boolean, id: GrocyMockSmokeReportCheck["id"], message: string): GrocyMockSmokeReportCheck {

@@ -4,8 +4,8 @@ import {
   createGrocyApiCompatibilityMatrix,
   type GrocyApiCompatibilityMatrix,
   type GrocyApiCompatibilityStatus,
-  type GrocyApiCompatibilitySurface,
 } from "./compatibility-matrix.js";
+import type { GrocyApiCompatibilitySurface } from "./synthetic-grocy-fixtures.js";
 
 export const GROCY_OBJECT_COVERAGE_PLAYGROUND_PATH = path.join("data", "grocy-object-coverage-playground.json");
 

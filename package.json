@@ -41,6 +41,7 @@
     "grocy:compatibility:deprecation-canary": "tsx src/cli.ts grocy:compatibility:deprecation-canary",
     "grocy:coverage:playground": "tsx src/cli.ts grocy:coverage:playground",
     "grocy:smoke:mock": "tsx src/cli.ts grocy:smoke:mock",
+    "grocy:fixtures:serve": "tsx src/cli.ts grocy:fixtures:serve",
     "grocy:export-config": "tsx src/cli.ts grocy:export-config",
     "grocy:diff-config": "tsx src/cli.ts grocy:diff-config",
     "grocy:config:drift-trend": "tsx src/cli.ts grocy:config:drift-trend",

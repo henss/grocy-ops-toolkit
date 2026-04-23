@@ -41,6 +41,7 @@ import { recordGrocyHealthBadgeArtifact, runGrocyHealthBadge } from "./health-ba
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
 import { createGrocyApiCompatibilityMatrix, recordGrocyApiCompatibilityMatrix } from "./compatibility-matrix.js";
 import { createGrocyApiDeprecationCanaryReport, recordGrocyApiDeprecationCanaryReport } from "./deprecation-canary.js";
+import { startGrocyFixtureServer } from "./fixture-server.js";
 import { recordGrocyMockSmokeReport, runGrocyMockSmokeTest } from "./mock-smoke.js";
 import { createGrocyObjectCoveragePlayground, recordGrocyObjectCoveragePlayground } from "./object-coverage-playground.js";
 import { auditGrocyPublicArtifacts, recordGrocyPublicArtifactRedactionAudit } from "./redaction-audit.js";
@@ -55,6 +56,18 @@ function parseFlag(flag: string): string | undefined {
 
 function parseFlags(flag: string): string[] {
   return process.argv.flatMap((value, index) => value === flag && process.argv[index + 1] ? [process.argv[index + 1]] : []);
+}
+
+function parseNumberFlag(flag: string): number | undefined {
+  const value = parseFlag(flag);
+  if (!value) {
+    return undefined;
+  }
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    throw new Error(`Expected ${flag} to be a non-negative integer.`);
+  }
+  return parsed;
 }
 
 function printJson(value: unknown): void {
@@ -106,6 +119,28 @@ async function main(): Promise<void> {
     });
     printJson({ outputPath, receiptPath, summary: report.summary });
     return;
+  }
+  if (command === "grocy:fixtures:serve") {
+    const server = await startGrocyFixtureServer({
+      fixtureId: parseFlag("--fixture"),
+      host: parseFlag("--host"),
+      port: parseNumberFlag("--port"),
+    });
+    printJson({
+      status: "listening",
+      fixtureId: server.fixtureId,
+      host: server.host,
+      port: server.port,
+      baseUrl: server.baseUrl,
+      stop: "Press Ctrl+C to stop the synthetic fixture server.",
+    });
+    const shutdown = async (): Promise<void> => {
+      await server.close();
+      process.exit(0);
+    };
+    process.once("SIGINT", () => void shutdown());
+    process.once("SIGTERM", () => void shutdown());
+    return await new Promise<void>(() => {});
   }
   if (command === "grocy:compatibility:matrix") {
     const matrix = createGrocyApiCompatibilityMatrix();

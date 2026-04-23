@@ -24,6 +24,7 @@ It can:
 - Generate a synthetic Grocy API compatibility matrix for fixture-only API-shape review.
 - Generate a synthetic Grocy API deprecation canary report for upgrade-risk review.
 - Generate a synthetic Grocy object coverage playground for fixture-only endpoint coverage review.
+- Run a local synthetic Grocy API fixture server for read-only endpoint prototyping without live credentials.
 
 ## Requirements
 
@@ -267,6 +268,38 @@ The repo's GitHub Actions CI workflow runs this command after `npm run typecheck
 ```bash
 npm run grocy:smoke:mock -- --output data/ci-mock-smoke-report.json --receipt-output data/ci-mock-smoke-receipt.json --force
 ```
+
+## Synthetic Fixture Server
+
+Start a local read-only Grocy API fixture server when you need a stable HTTP target for integration prototyping without live Grocy credentials:
+
+```bash
+npm run grocy:fixtures:serve
+```
+
+By default, the server listens on:
+
+```text
+http://127.0.0.1:4010/api
+```
+
+It serves only synthetic responses for the current read surfaces:
+
+- `/api/system/info`
+- `/api/stock`
+- `/api/objects/products`
+- `/api/objects/product_groups`
+- `/api/objects/locations`
+- `/api/objects/quantity_units`
+- `/api/objects/product_barcodes`
+- `/api/objects/shopping_lists`
+- `/api/objects/shopping_list`
+
+Use `--fixture <id>` to select a different synthetic API shape such as `fixture-minimal-read-api` or `fixture-shopping-list-gap`, `--host <host>` to bind a different interface, and `--port <port>` to override the port. The command prints a JSON startup record and then stays running until interrupted with `Ctrl+C`.
+
+The fixture server is intentionally read-only and synthetic. It does not proxy a live Grocy instance, write records, store local paths, or expose household, shopping, or account data.
+
+For the exact server contract and fixture ids, see [Synthetic Grocy Fixture Server](docs/synthetic-fixture-server.md).
 
 ## API Compatibility Matrix
 
@@ -517,6 +550,7 @@ npm run grocy:compatibility:matrix
 npm run grocy:compatibility:deprecation-canary
 npm run grocy:coverage:playground
 npm run grocy:smoke:mock
+npm run grocy:fixtures:serve
 npm run grocy:export-config
 npm run grocy:diff-config
 npm run grocy:config:drift-trend -- --previous data/grocy-config-export.previous.json --current data/grocy-config-export.json
