@@ -10,6 +10,13 @@ const repoRoot = process.cwd();
 const readmePath = path.join(repoRoot, "README.md");
 const routingReviewPath = path.join(repoRoot, "docs", "recovery-confidence-routing-review.md");
 const quickstartFixtureGalleryPath = path.join(repoRoot, "docs", "quickstart-fixture-gallery.md");
+const syntheticGitopsDriftTemplatePath = path.join(repoRoot, "docs", "synthetic-gitops-drift-ci-template.md");
+const syntheticGitopsDriftWorkflowPath = path.join(
+  repoRoot,
+  ".github",
+  "workflows",
+  "synthetic-gitops-drift-template.yml",
+);
 const packageJsonPath = path.join(repoRoot, "package.json");
 
 function readText(filePath: string): string {
@@ -149,5 +156,58 @@ describe("Quickstart fixture gallery doc", () => {
     ]) {
       expect(gallery).toContain(examplePath);
     }
+  });
+});
+
+describe("Synthetic GitOps drift CI template", () => {
+  it("is linked from the public README surface", () => {
+    const readme = readText(readmePath);
+
+    expect(readme).toContain("[Synthetic GitOps Drift CI Template](docs/synthetic-gitops-drift-ci-template.md)");
+  });
+
+  it("documents and ships a real workflow that stays on the synthetic desired-state path", () => {
+    const templateDoc = readText(syntheticGitopsDriftTemplatePath);
+    const workflow = readText(syntheticGitopsDriftWorkflowPath);
+    const packageJson = parsePackageJson();
+    const scripts = packageJson.scripts ?? {};
+
+    expect(fs.existsSync(syntheticGitopsDriftTemplatePath)).toBe(true);
+    expect(fs.existsSync(syntheticGitopsDriftWorkflowPath)).toBe(true);
+    expect(templateDoc).toContain(
+      "[`.github/workflows/synthetic-gitops-drift-template.yml`](../.github/workflows/synthetic-gitops-drift-template.yml)",
+    );
+    expect(templateDoc).toContain("workflow_dispatch");
+    expect(templateDoc).toContain("workflow_call");
+    expect(templateDoc).toContain("data/ci-gitops-drift-review-dashboard.md");
+    expect(templateDoc).toContain("[Recovery Confidence Routing Review](recovery-confidence-routing-review.md)");
+
+    for (const scriptName of [
+      "grocy:desired-state:lint",
+      "grocy:diff-config",
+      "grocy:config:drift-trend",
+      "grocy:apply-config",
+      "grocy:review:dashboard",
+    ]) {
+      expect(templateDoc).toContain(`npm run ${scriptName}`);
+      expect(workflow).toContain(`npm run ${scriptName}`);
+      expect(scripts[scriptName]).toBeTruthy();
+    }
+
+    for (const artifactPath of [
+      "data/ci-desired-state-lint-report.json",
+      "data/ci-config-sync-plan.json",
+      "data/ci-config-drift-trend-report.json",
+      "data/ci-config-apply-dry-run-report.json",
+      "data/ci-gitops-drift-review-dashboard.md",
+    ]) {
+      expect(templateDoc).toContain(artifactPath);
+      expect(workflow).toContain(artifactPath);
+    }
+
+    expect(workflow).toContain("examples/desired-state.example.json");
+    expect(workflow).toContain("examples/config-export.example.json");
+    expect(workflow).toContain("examples/config-export.previous.example.json");
+    expect(workflow).toContain("uses: actions/upload-artifact@v4");
   });
 });

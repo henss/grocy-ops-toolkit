@@ -1,0 +1,72 @@
+name: Synthetic GitOps Drift Template
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  synthetic-gitops-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Lint synthetic desired state
+        run: >-
+          npm run grocy:desired-state:lint -- --manifest examples/desired-state.example.json
+          --output data/ci-desired-state-lint-report.json --force
+
+      - name: Create synthetic sync plan
+        run: >-
+          npm run grocy:diff-config -- --manifest examples/desired-state.example.json
+          --export examples/config-export.example.json
+          --output data/ci-config-sync-plan.json --force
+
+      - name: Create synthetic drift trend report
+        run: >-
+          npm run grocy:config:drift-trend -- --previous examples/config-export.previous.example.json
+          --current examples/config-export.example.json
+          --output data/ci-config-drift-trend-report.json --force
+
+      - name: Create synthetic apply dry-run report
+        run: >-
+          npm run grocy:apply-config -- --plan data/ci-config-sync-plan.json --dry-run
+          --output data/ci-config-apply-dry-run-report.json --force
+
+      - name: Render synthetic drift review dashboard
+        run: >-
+          npm run grocy:review:dashboard -- --plan data/ci-config-sync-plan.json
+          --dry-run-report data/ci-config-apply-dry-run-report.json
+          --drift-trend-report data/ci-config-drift-trend-report.json
+          --output data/ci-gitops-drift-review-dashboard.md --force
+
+      - name: Upload synthetic GitOps drift artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-gitops-drift-artifacts
+          if-no-files-found: ignore
+          path: |
+            data/ci-desired-state-lint-report.json
+            data/ci-config-sync-plan.json
+            data/ci-config-drift-trend-report.json
+            data/ci-config-apply-dry-run-report.json
+            data/ci-gitops-drift-review-dashboard.md

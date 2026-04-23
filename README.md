@@ -88,6 +88,8 @@ For the exact commands and expected outputs, see [Synthetic Grocy Demo Lab](docs
 
 For a smaller entrypoint that maps the main synthetic example families to their commands, docs, and example artifacts, see [Quickstart Fixture Gallery](docs/quickstart-fixture-gallery.md).
 
+For a reusable GitHub Actions path that turns the synthetic desired-state review flow into uploaded CI artifacts, see [Synthetic GitOps Drift CI Template](docs/synthetic-gitops-drift-ci-template.md).
+
 ## No-Install Example Preview
 
 When you want to preview the public health and backup example shapes from a built checkout without adding a global install step, use the package bin through `npx --no-install`.
