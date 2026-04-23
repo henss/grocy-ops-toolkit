@@ -6,9 +6,7 @@ import { describe, expect, it } from "vitest";
 
 const repoRoot = process.cwd();
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
-const tscCommand = process.platform === "win32"
-  ? path.join(repoRoot, "node_modules", ".bin", "tsc.cmd")
-  : path.join(repoRoot, "node_modules", ".bin", "tsc");
+const gitCommand = "git";
 
 function createChildEnv(overrides: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   const env = { ...process.env };
@@ -32,20 +30,28 @@ function run(command: string, args: string[], cwd: string, env: NodeJS.ProcessEn
   });
 }
 
-function installPackedPackage(consumerDir: string, npmEnv: NodeJS.ProcessEnv): void {
-  const tempDir = path.dirname(consumerDir);
-  const stageDir = path.join(tempDir, "stage");
+function packPackageFromCleanCheckout(tempDir: string, npmEnv: NodeJS.ProcessEnv): string {
+  const checkoutDir = path.join(tempDir, "packed-checkout");
   const packDir = path.join(tempDir, "pack");
-  fs.mkdirSync(stageDir, { recursive: true });
+  fs.mkdirSync(checkoutDir, { recursive: true });
   fs.mkdirSync(packDir, { recursive: true });
-  // Stage package files so local workspace hardlinks cannot change npm's tarball layout.
-  for (const entry of ["package.json", "README.md", "LICENSE", "dist"]) {
-    fs.cpSync(path.join(repoRoot, entry), path.join(stageDir, entry), { recursive: true });
-  }
-  const packOutput = run(npmCommand, ["pack", "--pack-destination", packDir, "--json"], stageDir, npmEnv);
-  const [packedPackage] = JSON.parse(packOutput) as Array<{ filename: string }>;
-  const tarballPath = path.join(packDir, packedPackage.filename);
 
+  // Pack from a clean checkout-shaped snapshot so the tarball matches an npm-first consumer path.
+  for (const entry of ["package.json", "README.md", "LICENSE", ".gitignore", "dist"]) {
+    fs.cpSync(path.join(repoRoot, entry), path.join(checkoutDir, entry), { recursive: true });
+  }
+  run(gitCommand, ["init"], checkoutDir);
+  run(gitCommand, ["config", "user.email", "grocy-ops-toolkit-tests@example.test"], checkoutDir);
+  run(gitCommand, ["config", "user.name", "grocy-ops-toolkit tests"], checkoutDir);
+  run(gitCommand, ["add", ".gitignore", "LICENSE", "README.md", "package.json"], checkoutDir);
+  run(gitCommand, ["commit", "-m", "fixture"], checkoutDir);
+
+  const packOutput = run(npmCommand, ["pack", "--pack-destination", packDir, "--json"], checkoutDir, npmEnv);
+  const [packedPackage] = JSON.parse(packOutput) as Array<{ filename: string }>;
+  return path.join(packDir, packedPackage.filename);
+}
+
+function installPackedPackage(consumerDir: string, tarballPath: string, npmEnv: NodeJS.ProcessEnv): void {
   run(npmCommand, ["install", "--no-audit", "--no-fund", tarballPath], consumerDir, npmEnv);
 }
 
@@ -246,7 +252,8 @@ describe("packed npm install smoke test", () => {
       );
 
       run(npmCommand, ["run", "build"], repoRoot, npmEnv);
-      installPackedPackage(consumerDir, npmEnv);
+      const tarballPath = packPackageFromCleanCheckout(path.dirname(consumerDir), npmEnv);
+      installPackedPackage(consumerDir, tarballPath, npmEnv);
       writeSyntheticBackupFixture(consumerDir, backupPassphraseEnv);
       const outputs = runInstalledPreviewScenario({ consumerDir, npmEnv, backupPassphraseEnv });
 
@@ -261,7 +268,15 @@ describe("packed npm install smoke test", () => {
       const { consumerDir, npmEnv } = setupPackedConsumer("grocy-package-consumer-");
       fs.writeFileSync(
         path.join(consumerDir, "package.json"),
-        JSON.stringify({ private: true, name: "synthetic-grocy-consumer", type: "module" }, null, 2),
+        JSON.stringify({
+          private: true,
+          name: "synthetic-grocy-consumer",
+          type: "module",
+          scripts: {
+            build: "tsc -p tsconfig.json",
+            smoke: "node dist/consumer-contract.js",
+          },
+        }, null, 2),
       );
       fs.writeFileSync(
         path.join(consumerDir, "tsconfig.json"),
@@ -385,11 +400,18 @@ console.log("contract-ok");
       );
 
       run(npmCommand, ["run", "build"], repoRoot, npmEnv);
-      installPackedPackage(consumerDir, npmEnv);
-      run(tscCommand, ["-p", "tsconfig.json"], consumerDir, npmEnv);
-      const output = run("node", [path.join("dist", "consumer-contract.js")], consumerDir, npmEnv);
+      const tarballPath = packPackageFromCleanCheckout(path.dirname(consumerDir), npmEnv);
+      installPackedPackage(consumerDir, tarballPath, npmEnv);
+      run(
+        npmCommand,
+        ["install", "--no-audit", "--no-fund", "--save-dev", path.join(repoRoot, "node_modules", "typescript")],
+        consumerDir,
+        npmEnv,
+      );
+      run(npmCommand, ["run", "build"], consumerDir, npmEnv);
+      const output = run(npmCommand, ["run", "smoke"], consumerDir, npmEnv);
 
-      expect(output.trim()).toBe("contract-ok");
+      expect(output).toContain("contract-ok");
     },
     60_000,
   );

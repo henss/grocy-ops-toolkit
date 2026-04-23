@@ -133,6 +133,123 @@ npx --no-install grocy-ops-toolkit grocy:backup:restore-plan --restore-dir resto
 
 Expected result: the restore-plan report stays no-write, records the synthetic files that would be restored, and matches the same artifact family as `examples/grocy-backup-restore-plan-dry-run-report.example.json`.
 
+## npm-First Sample Consumer Smoke Experiment
+
+When you need to prove that the public package edge works from a separate TypeScript consumer, run a local tarball smoke experiment from a clean checkout. Keep the sample synthetic and confined to conventional local paths such as `config/`, `data/`, and `restore/`.
+
+Build the package edge and create a tarball:
+
+```bash
+npm install
+npm run build
+npm pack
+```
+
+Create a sibling consumer and install the tarball with TypeScript:
+
+```bash
+mkdir -p ../grocy-ops-toolkit-consumer
+cd ../grocy-ops-toolkit-consumer
+npm init -y
+npm install --save-dev typescript
+npm install ../grocy-ops-toolkit/grocy-ops-toolkit-0.1.0.tgz
+```
+
+Add a minimal `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "dist"
+  },
+  "include": ["consumer-contract.ts"]
+}
+```
+
+Create `consumer-contract.ts` with a synthetic contract check:
+
+```ts
+import {
+  createGrocyConfigApplyDryRunReport,
+  createGrocyConfigSyncPlan,
+  createGrocyReviewDashboard,
+  runGrocyMockSmokeTest,
+  type GrocyConfigExport,
+  type GrocyConfigManifest,
+} from "grocy-ops-toolkit";
+
+const manifest: GrocyConfigManifest = {
+  kind: "grocy_config_manifest",
+  version: 1,
+  updatedAt: "2026-04-20T09:30:00.000Z",
+  notes: ["Synthetic package-consumer fixture."],
+  items: [
+    {
+      key: "products.example-cocoa",
+      entity: "products",
+      name: "Example Cocoa",
+      ownership: "repo_managed",
+      fields: { min_stock_amount: 2, location: "Example Shelf" },
+      aliases: [],
+      provenance: { source: "synthetic-consumer-contract", notes: [] }
+    }
+  ]
+};
+
+const liveExport: GrocyConfigExport = {
+  kind: "grocy_config_export",
+  version: 1,
+  exportedAt: "2026-04-20T09:31:00.000Z",
+  source: { toolId: "grocy", grocyVersion: "synthetic" },
+  counts: {
+    products: 0,
+    product_groups: 0,
+    locations: 0,
+    quantity_units: 0,
+    product_barcodes: 0,
+    shopping_lists: 0,
+    shopping_list: 0
+  },
+  items: []
+};
+
+const plan = createGrocyConfigSyncPlan({
+  manifest,
+  liveExport,
+  manifestPath: "config/desired-state.json",
+  exportPath: "data/grocy-config-export.json",
+  generatedAt: "2026-04-20T09:32:00.000Z",
+});
+createGrocyConfigApplyDryRunReport({
+  plan,
+  planPath: "data/grocy-config-sync-plan.json",
+  generatedAt: "2026-04-20T09:33:00.000Z",
+});
+createGrocyReviewDashboard({
+  generatedAt: "2026-04-20T09:34:00.000Z",
+  plan,
+});
+const smokeReport = await runGrocyMockSmokeTest(".", {
+  generatedAt: "2026-04-20T09:35:00.000Z",
+});
+
+console.log(smokeReport.summary.result);
+```
+
+Compile and run the consumer:
+
+```bash
+npx tsc -p tsconfig.json
+node dist/consumer-contract.js
+```
+
+Expected result: the consumer compiles against the public exports and prints `pass` without live Grocy credentials or private data. The repo's packed-install coverage exercises the same synthetic package-consumer path during `npm test`.
+
 ## Configuration Workflow
 
 Use this workflow to export Grocy configuration, review changes, and apply only explicitly approved writes.
