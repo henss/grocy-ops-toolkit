@@ -9,6 +9,7 @@ type PackageJson = {
 const repoRoot = process.cwd();
 const readmePath = path.join(repoRoot, "README.md");
 const routingReviewPath = path.join(repoRoot, "docs", "recovery-confidence-routing-review.md");
+const quickstartFixtureGalleryPath = path.join(repoRoot, "docs", "quickstart-fixture-gallery.md");
 const packageJsonPath = path.join(repoRoot, "package.json");
 
 function readText(filePath: string): string {
@@ -72,5 +73,81 @@ describe("Recovery confidence routing review doc", () => {
 
     expect(routingReview).toContain("grocy_backup_integrity_receipt");
     expect(routingReview).toContain("grocy_backup_integrity_receipt_verification");
+  });
+});
+
+describe("Quickstart fixture gallery doc", () => {
+  it("is linked from the public README and examples index", () => {
+    const readme = readText(readmePath);
+    const examplesReadme = readText(path.join(repoRoot, "examples", "README.md"));
+
+    expect(readme).toContain("[Quickstart Fixture Gallery](docs/quickstart-fixture-gallery.md)");
+    expect(examplesReadme).toContain("[Quickstart Fixture Gallery](../docs/quickstart-fixture-gallery.md)");
+  });
+
+  it("maps existing fixture families to real commands, docs, and example artifacts", () => {
+    const gallery = readText(quickstartFixtureGalleryPath);
+    const packageJson = parsePackageJson();
+    const scripts = packageJson.scripts ?? {};
+
+    expect(fs.existsSync(quickstartFixtureGalleryPath)).toBe(true);
+    expect(gallery).toContain("## Quick Verification Loop");
+    expect(gallery).toContain("### 1. Health Failure Fixtures");
+    expect(gallery).toContain("### 2. Config Review Fixtures");
+    expect(gallery).toContain("### 3. Fixture API Shapes");
+    expect(gallery).toContain("### 4. Backup And Recovery Fixtures");
+    expect(gallery).toContain("### 5. Review And Boundary Fixtures");
+    expect(gallery).toContain("[Synthetic Grocy Demo Lab](synthetic-demo-lab.md)");
+    expect(gallery).toContain("[Synthetic Examples For grocy-ops-toolkit](../examples/README.md)");
+    expect(gallery).toContain("[Synthetic Grocy Fixture Server](synthetic-fixture-server.md)");
+    expect(gallery).toContain("[Fixture-Only Restore Drill Walkthrough](fixture-only-restore-drill-walkthrough.md)");
+
+    for (const scriptName of [
+      "grocy:health:badge",
+      "grocy:health:diagnostics",
+      "grocy:desired-state:lint",
+      "grocy:diff-config",
+      "grocy:config:drift-trend",
+      "grocy:apply-config",
+      "grocy:fixtures:serve",
+      "grocy:compatibility:matrix",
+      "grocy:compatibility:deprecation-canary",
+      "grocy:coverage:playground",
+      "grocy:backup:snapshot",
+      "grocy:backup:restore-plan",
+      "grocy:backup:verify",
+      "grocy:backup:restore-drill",
+      "grocy:backup:receipt",
+      "grocy:backup:receipt:verify",
+      "grocy:smoke:mock",
+      "grocy:review:dashboard",
+      "grocy:artifacts:audit-redaction",
+      "grocy:support:bundle",
+    ]) {
+      expect(gallery).toContain(`npm run ${scriptName}`);
+      expect(scripts[scriptName]).toBeTruthy();
+    }
+
+    for (const examplePath of [
+      "examples/grocy-health-badge.example.json",
+      "examples/grocy-health-diagnostics.example.json",
+      "examples/grocy-desired-state-manifest-lint-report.example.json",
+      "examples/config-sync-plan.example.json",
+      "examples/grocy-config-drift-trend-report.example.json",
+      "examples/config-apply-dry-run-report.example.json",
+      "examples/grocy-api-compatibility-matrix.example.json",
+      "examples/grocy-api-deprecation-canary-report.example.json",
+      "examples/grocy-object-coverage-playground.example.json",
+      "examples/grocy-backup-restore-plan-dry-run-report.example.json",
+      "examples/grocy-backup-restore-drill-report.example.json",
+      "examples/grocy-backup-integrity-receipt.example.json",
+      "examples/grocy-backup-integrity-receipt-verification.example.json",
+      "examples/grocy-mock-smoke-report.example.json",
+      "examples/grocy-review-dashboard.example.md",
+      "examples/grocy-public-artifact-redaction-audit.example.json",
+      "examples/grocy-support-bundle.example.json",
+    ]) {
+      expect(gallery).toContain(examplePath);
+    }
   });
 });

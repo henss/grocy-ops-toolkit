@@ -43,6 +43,8 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-backup-integrity-receipt-verification.example.json` shows the public-safe verifier result emitted by `npm run grocy:backup:receipt:verify` when the stored receipt still matches the manifest and proof artifacts.
 
+For the quickest map from these example files to their matching commands and docs, see [Quickstart Fixture Gallery](../docs/quickstart-fixture-gallery.md).
+
 For a built-checkout preview that uses `npx --no-install grocy-ops-toolkit` to regenerate the health and backup example shapes without a global install step, see the repository-level [No-Install Example Preview](../README.md#no-install-example-preview).
 
 The repository-level [Synthetic Grocy Demo Lab](../docs/synthetic-demo-lab.md) shows how to combine these examples with generated local artifacts from a clean checkout.

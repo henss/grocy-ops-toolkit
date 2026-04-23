@@ -86,6 +86,8 @@ Expected result: the loop completes without live Grocy credentials, uses only sy
 
 For the exact commands and expected outputs, see [Synthetic Grocy Demo Lab](docs/synthetic-demo-lab.md).
 
+For a smaller entrypoint that maps the main synthetic example families to their commands, docs, and example artifacts, see [Quickstart Fixture Gallery](docs/quickstart-fixture-gallery.md).
+
 ## No-Install Example Preview
 
 When you want to preview the public health and backup example shapes from a built checkout without adding a global install step, use the package bin through `npx --no-install`.
