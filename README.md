@@ -25,6 +25,7 @@ It can:
 - Generate a synthetic Grocy API compatibility matrix for fixture-only API-shape review.
 - Generate a synthetic Grocy API deprecation canary report for upgrade-risk review.
 - Generate a synthetic Grocy object coverage playground for fixture-only endpoint coverage review.
+- Export a stable read-only inventory snapshot artifact derived only from Grocy stock and product reads.
 - Run a local synthetic Grocy API fixture server for read-only endpoint prototyping without live credentials.
 
 ## Requirements
@@ -487,7 +488,23 @@ The playground repackages the synthetic compatibility fixtures as explicit objec
 
 For the current public-safe inventory boundary, see [Read-Only Pantry Boundary Probe](docs/read-only-pantry-boundary-probe.md).
 
-That note records the bounded Wave 2 proposal for stock-and-product pantry reads, explains why shopping-list reads stay outside the pantry-safe slice for now, and keeps the boundary explicit without changing the runtime API.
+That note records the bounded Wave 2 pantry-safe boundary, including the prototype inventory snapshot seam that exports stock-plus-product state without crossing into shopping-list or policy workflows.
+
+## Inventory Snapshot
+
+Export a stable read-only inventory snapshot artifact for private consumers:
+
+```bash
+npm run grocy:inventory:snapshot
+```
+
+By default, the snapshot is written to:
+
+```text
+data/grocy-inventory-snapshot.json
+```
+
+The snapshot derives only from the Grocy `/stock` and `/objects/products` read surfaces. It intentionally excludes shopping-list state, pantry policy, recommendation logic, calendar/task integrations, and other private workflow context. See `examples/grocy-inventory-snapshot.example.json` for the public-safe example shape.
 
 ## Review Dashboard
 
@@ -688,6 +705,7 @@ npm run grocy:demo:lab
 npm run grocy:health
 npm run grocy:health:badge
 npm run grocy:health:diagnostics
+npm run grocy:inventory:snapshot
 npm run grocy:desired-state:lint
 npm run grocy:compatibility:matrix
 npm run grocy:compatibility:deprecation-canary

@@ -2,7 +2,7 @@
 
 This note records the current public-safe boundary for a Wave 2 pantry-oriented read path.
 
-It is a proposal and evidence summary, not a runtime change or a public support commitment.
+It is an evidence summary for the bounded prototype inventory snapshot seam, not a broader shopping-workflow or recommendation commitment.
 
 ## Scope
 
@@ -38,7 +38,7 @@ The fixture-only public review surfaces already show the same coupling:
 - [`docs/synthetic-object-coverage-playground.md`](/abs/path/D:/workspace/grocy-ops-toolkit/docs/synthetic-object-coverage-playground.md:1) frames coverage in terms of stock plus Grocy object endpoints.
 - [`docs/grocy-api-compatibility-matrix.md`](/abs/path/D:/workspace/grocy-ops-toolkit/docs/grocy-api-compatibility-matrix.md:1) documents `/stock` and `/objects/*` compatibility using synthetic fixtures only.
 
-This means the repo already contains the raw read ingredients for a pantry-safe slice, but the public live adapter currently couples that slice to shopping-list reads that are out of scope for this Wave 2 boundary probe.
+The repo now also contains a prototype inventory artifact seam in [`src/inventory-snapshot.ts`](/abs/path/D:/workspace/grocy-ops-toolkit/src/inventory-snapshot.ts:1). That seam consumes only stock and product reads and emits a stable `grocy_inventory_snapshot` artifact.
 
 ## Proposed Boundary
 
@@ -54,16 +54,30 @@ Do not treat the following as part of the public pantry boundary:
 - Any extraction of preferred reorder thresholds beyond directly observed Grocy fields already present in product records.
 - Any synthesis of shopping-list state into pantry recommendations or operational policy.
 
+## Implemented Prototype
+
+The current bounded prototype is:
+
+1. `npm run grocy:inventory:snapshot`
+2. A stable JSON artifact at `data/grocy-inventory-snapshot.json`
+3. A synthetic public example at [`examples/grocy-inventory-snapshot.example.json`](/abs/path/D:/workspace/grocy-ops-toolkit/examples/grocy-inventory-snapshot.example.json:1)
+
+The artifact stays inside the pantry-safe boundary by:
+
+- reading only `stock` plus `products`
+- enriching stock rows with static product metadata already exposed by Grocy
+- excluding shopping-list state, recommendation logic, and policy inference
+
 ## Recommendation
 
-The next coherent bounded step is a docs-or-fixture-level follow-up that makes the pantry-safe subset explicit without broadening the runtime API yet.
+The next coherent bounded follow-up is to let private consumers prove the snapshot contract against their own adapters without broadening the public toolkit into shopping workflows.
 
 Preferred follow-up:
 
-1. Add a synthetic pantry-read fixture or report shape that only references stock and product surfaces.
-2. Keep shopping-list coverage in the generic compatibility and object-coverage artifacts, but do not use it as a prerequisite for a pantry-safe read-only slice.
-3. If a later session proposes a reusable pantry-specific runtime helper, review that change explicitly as a public API decision instead of slipping it in through the existing live adapter.
+1. Add consumer-side contract checks that read `grocy_inventory_snapshot` without depending on Grocy shopping-list surfaces.
+2. Keep shopping-list coverage in the generic compatibility and object-coverage artifacts, but do not use it as a prerequisite for the inventory snapshot seam.
+3. Review any later pantry-specific recommendation helper as a separate public API decision.
 
 ## Why This Matters
 
-This boundary keeps the public toolkit useful for inventory-style Grocy inspection while avoiding accidental drift into shopping-policy extraction or private personal-ops behavior. It also gives future agents a concrete public-safe interpretation of OPS-1146 without requiring them to infer intent from broader Grocy read coverage.
+This boundary keeps the public toolkit useful for inventory-style Grocy inspection while avoiding accidental drift into shopping-policy extraction or private personal-ops behavior. It also gives future agents a concrete public-safe interpretation of the current pantry-safe slice without requiring them to infer intent from broader Grocy read coverage.

@@ -38,6 +38,7 @@
     "grocy:health": "tsx src/cli.ts grocy:health",
     "grocy:health:badge": "tsx src/cli.ts grocy:health:badge",
     "grocy:health:diagnostics": "tsx src/cli.ts grocy:health:diagnostics",
+    "grocy:inventory:snapshot": "tsx src/cli.ts grocy:inventory:snapshot",
     "grocy:desired-state:lint": "tsx src/cli.ts grocy:desired-state:lint",
     "grocy:compatibility:matrix": "tsx src/cli.ts grocy:compatibility:matrix",
     "grocy:compatibility:deprecation-canary": "tsx src/cli.ts grocy:compatibility:deprecation-canary",

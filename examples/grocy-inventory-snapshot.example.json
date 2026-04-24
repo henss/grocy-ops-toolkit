@@ -1,0 +1,51 @@
+{
+  "kind": "grocy_inventory_snapshot",
+  "version": 1,
+  "generatedAt": "2026-04-24T06:15:00.000Z",
+  "scope": "stock_products_read_only",
+  "source": {
+    "toolId": "grocy",
+    "surfaces": ["stock", "products"]
+  },
+  "summary": {
+    "itemCount": 2,
+    "inStockCount": 1,
+    "lowStockCount": 1,
+    "outOfStockCount": 0,
+    "unknownCount": 0,
+    "locationCount": 2,
+    "productCount": 2
+  },
+  "items": [
+    {
+      "productId": "1",
+      "productName": "Example Cocoa",
+      "stockState": "in_stock",
+      "quantity": "2",
+      "quantityNumeric": 2,
+      "location": "Example Shelf",
+      "minStockAmount": 1,
+      "quantityUnitPurchaseId": "1",
+      "quantityUnitStockId": "1",
+      "defaultBestBeforeDays": "30",
+      "dueType": "best_before",
+      "notes": ["Synthetic pantry staple."]
+    },
+    {
+      "productId": "2",
+      "productName": "Example Tea",
+      "stockState": "low",
+      "quantity": "0.5",
+      "quantityNumeric": 0.5,
+      "location": "Example Drawer",
+      "minStockAmount": 1,
+      "quantityUnitPurchaseId": "1",
+      "quantityUnitStockId": "1",
+      "notes": ["Synthetic low-stock fixture."]
+    }
+  ],
+  "reviewNotes": [
+    "Derived only from the Grocy stock and products read surfaces.",
+    "Deliberately excludes shopping-list state, pantry policy, and recommendation logic."
+  ]
+}
