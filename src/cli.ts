@@ -38,6 +38,11 @@ import {
   DEFAULT_GROCY_BACKUP_RESTORE_DRILL_DIR,
   recordGrocyBackupRestoreDrillReport,
 } from "./backup-restore-drill.js";
+import {
+  createGrocyBackupRestoreFailureDrillReport,
+  DEFAULT_GROCY_BACKUP_RESTORE_FAILURE_DRILL_DIR,
+  recordGrocyBackupRestoreFailureDrillReport,
+} from "./backup-restore-failure-drill.js";
 import { createGrocyDemoEnvironment, recordGrocyDemoEnvironmentReport } from "./demo-lab.js";
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
 import { recordGrocyHealthBadgeArtifact, runGrocyHealthBadge } from "./health-badge.js";
@@ -370,6 +375,20 @@ async function main(): Promise<void> {
       restoreDir: parseFlag("--restore-dir") ?? DEFAULT_GROCY_BACKUP_RESTORE_DRILL_DIR,
     });
     const outputPath = recordGrocyBackupRestoreDrillReport(report, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: report.summary });
+    if (report.summary.result !== "pass") {
+      process.exitCode = 1;
+    }
+    return;
+  }
+  if (command === "grocy:backup:restore-failure-drill") {
+    const report = createGrocyBackupRestoreFailureDrillReport(process.cwd(), {
+      restoreDir: parseFlag("--restore-dir") ?? DEFAULT_GROCY_BACKUP_RESTORE_FAILURE_DRILL_DIR,
+    });
+    const outputPath = recordGrocyBackupRestoreFailureDrillReport(report, {
       outputPath: parseFlag("--output"),
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });

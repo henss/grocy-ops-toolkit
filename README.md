@@ -19,6 +19,7 @@ It can:
 - Emit a compact backup integrity receipt that ties a snapshot to checksum, restore-plan, and restore-drill evidence.
 - Generate a no-write restore-plan dry-run report before a confirmed restore.
 - Run a fixture-only restore drill that records machine-checkable recovery checkpoints.
+- Run a fixture-only restore failure drill that records corruption, wrong-passphrase, and path-escape rejection evidence.
 - Run a synthetic secret-rotation smoke test for Grocy credentials and backup passphrases.
 - Render a Markdown review dashboard from generated artifacts.
 - Audit generated public artifacts for private-path, URL, credential, and boundary-term leaks.
@@ -714,6 +715,20 @@ data/grocy-backup-restore-drill-report.json
 
 The report stays inside a fixture-only boundary and records three machine-checkable checkpoints: snapshot creation, dry-run restore planning, and confirmed restore verification. The walkthrough also shows a JSON gate that checks the synthetic scope, passing checkpoint statuses, zero overwrite expectation, and the expected proof artifact paths.
 
+Run the failure-injection drill with:
+
+```bash
+npm run grocy:backup:restore-failure-drill -- --restore-dir restore/fixture-only-restore-failure-drill
+```
+
+By default, the failure drill report is written to:
+
+```text
+data/grocy-backup-restore-failure-drill-report.json
+```
+
+The report stays inside a fixture-only boundary and records three machine-checkable rejection scenarios: corruption detected as `manifest_checksum_mismatch`, wrong-passphrase rejection as `archive_decryption_failed`, and restore path escape rejection as `restore_path_escape`. Use it when you need explicit failure-class evidence instead of only happy-path restore proof. See `examples/grocy-backup-restore-failure-drill-report.example.json` for the public-safe report shape.
+
 When restore verification fails, the backup manifest records `restoreTestStatus: "failed"` and a public-safe `restoreFailureCategory` when a backup record is available. Categories intentionally describe the failure class without storing file contents, Grocy records, credentials, live URLs, or private local paths:
 
 - `archive_unreadable`: the encrypted archive file could not be read or parsed.
@@ -773,6 +788,7 @@ npm run grocy:backup:restore-plan -- --restore-dir restore/grocy-backup-check
 npm run grocy:backup:receipt
 npm run grocy:backup:receipt:verify
 npm run grocy:backup:restore-drill -- --restore-dir restore/fixture-only-restore-drill
+npm run grocy:backup:restore-failure-drill -- --restore-dir restore/fixture-only-restore-failure-drill
 npm run grocy:backup:verify
 npm run grocy:backup:verify -- --restore-dir restore/grocy-backup-check --confirm-restore-write
 npm run grocy:review:dashboard

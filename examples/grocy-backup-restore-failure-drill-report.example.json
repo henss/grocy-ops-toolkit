@@ -1,0 +1,62 @@
+{
+  "kind": "grocy_backup_restore_failure_drill_report",
+  "version": 1,
+  "generatedAt": "2026-04-25T09:15:00.000Z",
+  "scope": "synthetic_fixture_only",
+  "sourcePath": "examples/synthetic-grocy-backup-source",
+  "restoreDir": "restore/grocy-restore-failure-drill",
+  "summary": {
+    "result": "pass",
+    "scenarioCount": 3,
+    "passedCount": 3
+  },
+  "scenarios": [
+    {
+      "id": "corruption_detected",
+      "status": "pass",
+      "expectedFailureCategory": "manifest_checksum_mismatch",
+      "observedFailureCategory": "manifest_checksum_mismatch",
+      "command": "npm run grocy:backup:restore-failure-drill",
+      "artifactPath": "data/grocy-backup-manifest.json",
+      "evidence": [
+        "A synthetic archive was re-encrypted after snapshot creation so the manifest checksum no longer matched the latest archive bytes.",
+        "Verification rejected the injected corruption with manifest_checksum_mismatch.",
+        "The failure stayed inside the encrypted archive and manifest boundary without exposing bundle contents."
+      ]
+    },
+    {
+      "id": "wrong_passphrase_rejected",
+      "status": "pass",
+      "expectedFailureCategory": "archive_decryption_failed",
+      "observedFailureCategory": "archive_decryption_failed",
+      "command": "npm run grocy:backup:restore-failure-drill",
+      "artifactPath": "data/grocy-backup-manifest.json",
+      "evidence": [
+        "A synthetic archive was verified with an intentionally rotated passphrase value.",
+        "Verification rejected the mismatched passphrase with archive_decryption_failed.",
+        "The drill proves the toolkit records passphrase mismatch as a public-safe decryption failure class."
+      ]
+    },
+    {
+      "id": "path_escape_blocked",
+      "status": "pass",
+      "expectedFailureCategory": "restore_path_escape",
+      "observedFailureCategory": "restore_path_escape",
+      "command": "npm run grocy:backup:restore-failure-drill",
+      "artifactPath": "restore/grocy-restore-failure-drill",
+      "evidence": [
+        "A synthetic archive entry path was rewritten to escape the requested restore directory before verification.",
+        "Verification rejected the restore target with restore_path_escape.",
+        "No synthetic bundle file was allowed to write outside the requested restore directory."
+      ]
+    }
+  ],
+  "artifacts": {
+    "manifestPath": "data/grocy-backup-manifest.json"
+  },
+  "reviewNotes": [
+    "This failure drill is fixture-only and uses synthetic archive mutations to exercise corruption, wrong-passphrase, and path-escape restore defenses.",
+    "Treat the scenario statuses as the machine-checkable signoff surface for failure-class coverage.",
+    "Keep the backup config pointed at synthetic fixtures when running this drill from the public toolkit."
+  ]
+}

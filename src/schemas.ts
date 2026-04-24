@@ -506,7 +506,6 @@ export const GrocyBackupRestoreDrillReportSchema = z.object({
   reviewNotes: z.array(z.string().min(1)).default([]),
 });
 
-
 export type GrocyConfigEntity = z.infer<typeof GrocyConfigEntitySchema>;
 export type GrocyConfigOwnership = z.infer<typeof GrocyConfigOwnershipSchema>;
 export type GrocyConfigProvenance = z.infer<typeof GrocyConfigProvenanceSchema>;
