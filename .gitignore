@@ -3,6 +3,8 @@ dist/
 coverage/
 .runtime/
 data/
+!examples/synthetic-grocy-backup-source/data/
+!examples/synthetic-grocy-backup-source/data/**
 backups/
 restore/
 config/*.local.json
