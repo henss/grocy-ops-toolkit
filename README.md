@@ -154,7 +154,25 @@ Expected result: the restore-plan report stays no-write, records the synthetic f
 
 ## npm-First Sample Consumer Smoke Experiment
 
-When you need to prove that the public package edge works from a separate TypeScript consumer, run a local tarball smoke experiment from a clean checkout. Keep the sample synthetic and confined to conventional local paths such as `config/`, `data/`, and `restore/`.
+When you need to prove that the public package edge works from a separate TypeScript consumer, generate a disposable local tarball smoke workspace from a clean checkout. The generated sample stays synthetic and uses conventional local paths such as `config/`, `data/`, `backups/`, and `restore/`.
+
+Generate the workspace:
+
+```bash
+npm run sample-consumer:smoke:workspace
+```
+
+The command builds the toolkit, creates a packed tarball, writes a disposable consumer workspace, installs the tarball without creating a `package-lock.json`, runs the installed-bin preview commands, compiles the synthetic TypeScript consumer, and executes the smoke contract. It prints a JSON summary with the workspace path plus the generated artifact paths.
+
+To keep the workspace at a specific location instead of a temporary directory, pass `--output-dir`:
+
+```bash
+npm run sample-consumer:smoke:workspace -- --output-dir ../grocy-ops-toolkit-consumer
+```
+
+Expected result: the generated workspace contains synthetic config, data, backup, and restore inputs; the consumer compiles against the public exports; and the generated mock smoke report records `pass` without live Grocy credentials or private data.
+
+If you need to inspect or adapt the exact manual sequence, the generated workspace follows the same npm-first consumer shape described below.
 
 Build the package edge and create a tarball:
 
