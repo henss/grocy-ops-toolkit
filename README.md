@@ -19,6 +19,7 @@ It can:
 - Emit a compact backup integrity receipt that ties a snapshot to checksum, restore-plan, and restore-drill evidence.
 - Generate a no-write restore-plan dry-run report before a confirmed restore.
 - Run a fixture-only restore drill that records machine-checkable recovery checkpoints.
+- Run a synthetic secret-rotation smoke test for Grocy credentials and backup passphrases.
 - Render a Markdown review dashboard from generated artifacts.
 - Audit generated public artifacts for private-path, URL, credential, and boundary-term leaks.
 - Generate an offline sanitized support bundle manifest from local generated artifacts.
@@ -417,6 +418,24 @@ The repo's GitHub Actions CI workflow runs this command after `npm run typecheck
 ```bash
 npm run grocy:smoke:mock -- --output data/ci-mock-smoke-report.json --receipt-output data/ci-mock-smoke-receipt.json --force
 ```
+
+## Secret Rotation Smoke Test
+
+The secret-rotation smoke command exercises a synthetic Grocy API-key handoff and a synthetic backup-passphrase rotation without using live credentials, live URLs, or real backup contents.
+
+```bash
+npm run grocy:smoke:secret-rotation
+```
+
+By default, the report is written to:
+
+```text
+data/grocy-secret-rotation-smoke-report.json
+```
+
+The report records six synthetic checks: baseline and rotated Grocy credential health, stale-credential rejection, baseline and rotated backup-key verification, and stale-passphrase rejection. Use `--output <path>` to write the report somewhere else.
+
+When you need a manual rehearsal with step-by-step commands instead of a single synthetic report, see [Synthetic Backup Passphrase Rotation Rehearsal](docs/synthetic-backup-passphrase-rotation-rehearsal.md).
 
 ## Synthetic Fixture Server
 

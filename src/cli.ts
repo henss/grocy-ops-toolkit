@@ -52,6 +52,10 @@ import { createGrocyObjectCoveragePlayground, recordGrocyObjectCoveragePlaygroun
 import { auditGrocyPublicArtifacts, recordGrocyPublicArtifactRedactionAudit } from "./redaction-audit.js";
 import { createGrocyReviewDashboardFromArtifacts, recordGrocyReviewDashboard } from "./review-dashboard.js";
 import { createGrocyMockSmokeRunReceipt, recordGrocyToolkitRunReceipt } from "./run-receipt.js";
+import {
+  recordGrocySecretRotationSmokeReport,
+  runGrocySecretRotationSmokeTest,
+} from "./secret-rotation-smoke.js";
 import { createGrocySupportBundle, recordGrocySupportBundle } from "./support-bundle.js";
 
 function parseFlag(flag: string): string | undefined {
@@ -156,6 +160,15 @@ async function main(): Promise<void> {
       overwrite: process.argv.includes("--force") || !parseFlag("--receipt-output"),
     });
     printJson({ outputPath, receiptPath, summary: report.summary });
+    return;
+  }
+  if (command === "grocy:smoke:secret-rotation") {
+    const report = await runGrocySecretRotationSmokeTest(process.cwd());
+    const outputPath = recordGrocySecretRotationSmokeReport(report, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: report.summary });
     return;
   }
   if (command === "grocy:fixtures:serve") {

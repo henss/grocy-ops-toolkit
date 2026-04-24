@@ -19,5 +19,7 @@ export * from "./object-coverage-playground.js";
 export * from "./redaction-audit.js";
 export * from "./review-dashboard.js";
 export * from "./schemas.js";
+export * from "./secret-rotation-smoke-schema.js";
+export * from "./secret-rotation-smoke.js";
 export * from "./support-bundle.js";
 export * from "./synthetic-grocy-fixtures.js";
