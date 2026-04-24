@@ -35,6 +35,12 @@ It can:
 
 Live credentials are not required for the synthetic demo, mock smoke test, apply dry run from an existing plan, or backup verification against synthetic files.
 
+For a one-command synthetic evaluation environment that assembles the demo artifacts, review dashboard, and sanitized support bundle in one pass, run:
+
+```bash
+npm run grocy:demo:lab
+```
+
 ## Quick Start
 
 Install dependencies and verify the project:
@@ -87,6 +93,8 @@ When you need a clean-checkout validation path that uses synthetic data only, ru
 5. Copy `examples/grocy-backup.local.example.json` into `config/grocy-backup.local.json`, set `GROCY_BACKUP_PASSPHRASE` to a synthetic value for the current shell, and run `npm run grocy:backup:snapshot`, `npm run grocy:backup:restore-plan`, `npm run grocy:backup:verify`, and `npm run grocy:review:dashboard`.
 
 Expected result: the loop completes without live Grocy credentials, uses only synthetic fixtures, and leaves a reviewable set of JSON and Markdown artifacts under `data/`.
+
+When you want the same synthetic evidence set in one pass instead of following the loop step by step, run `npm run grocy:demo:lab`. It writes `data/grocy-demo-environment.json`, `data/demo-review-dashboard.md`, and `data/demo-support-bundle.json` as the main entry artifacts.
 
 For the exact commands and expected outputs, see [Synthetic Grocy Demo Lab](docs/synthetic-demo-lab.md).
 
@@ -662,12 +670,21 @@ The demo combines:
 - Backup verification.
 - Dashboard rendering.
 
+For the one-command variant that assembles the same synthetic evaluation surface and a sanitized support bundle in one pass, run:
+
+```bash
+npm run grocy:demo:lab
+```
+
+Expected result: the command writes `data/grocy-demo-environment.json`, `data/demo-review-dashboard.md`, and `data/demo-support-bundle.json` without live Grocy credentials or private data.
+
 For guidance on which recovery-confidence path to run for a given review question, see [Recovery Confidence Routing Review](docs/recovery-confidence-routing-review.md).
 
 ## Common Commands
 
 ```bash
 npm run grocy:config:status
+npm run grocy:demo:lab
 npm run grocy:health
 npm run grocy:health:badge
 npm run grocy:health:diagnostics

@@ -361,7 +361,16 @@ function normalizeDisplayPath(filePath: string): string {
   return filePath.replace(/\\/g, "/");
 }
 
+function toPublicSafePath(baseDir: string, targetPath: string): string {
+  const absolutePath = path.resolve(baseDir, targetPath);
+  const relativePath = path.relative(baseDir, absolutePath);
+  return relativePath.startsWith("..") || path.isAbsolute(relativePath)
+    ? "[external-path-redacted]"
+    : normalizeDisplayPath(relativePath);
+}
+
 function resolveRestorePlanItem(
+  baseDir: string,
   restoreDirPath: string,
   file: BackupBundleFile,
 ): GrocyBackupRestorePlanDryRunReportItem {
@@ -370,7 +379,7 @@ function resolveRestorePlanItem(
     return {
       action: "blocked_path_escape",
       path: file.path,
-      targetPath: normalizeDisplayPath(targetPath),
+      targetPath: toPublicSafePath(baseDir, targetPath),
       size: file.size,
       sha256: file.sha256,
       reason: "Archive entry would escape the requested restore directory.",
@@ -380,7 +389,7 @@ function resolveRestorePlanItem(
   return {
     action,
     path: file.path,
-    targetPath: normalizeDisplayPath(targetPath),
+    targetPath: toPublicSafePath(baseDir, targetPath),
     size: file.size,
     sha256: file.sha256,
     reason: action === "would_overwrite"
@@ -448,14 +457,14 @@ export function createGrocyBackupRestorePlanDryRunReport(
     throw new GrocyBackupRestoreError("manifest_checksum_mismatch", `Grocy backup checksum verification failed for ${archivePath}.`);
   }
   const restoreDirPath = path.resolve(baseDir, options.restoreDir);
-  const items = bundle.files.map((file) => resolveRestorePlanItem(restoreDirPath, file));
+  const items = bundle.files.map((file) => resolveRestorePlanItem(baseDir, restoreDirPath, file));
   return GrocyBackupRestorePlanDryRunReportSchema.parse({
     kind: "grocy_backup_restore_plan_dry_run_report",
     version: 1,
     generatedAt: options.generatedAt ?? new Date().toISOString(),
-    archivePath,
+    archivePath: toPublicSafePath(baseDir, archivePath),
     archiveRecordId: record.id,
-    restoreDir: normalizeDisplayPath(restoreDirPath),
+    restoreDir: toPublicSafePath(baseDir, restoreDirPath),
     summary: {
       ...summarizeRestorePlan(items),
       checksumVerified,

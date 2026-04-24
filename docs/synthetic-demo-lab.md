@@ -8,6 +8,7 @@ Use this lab as the canonical fresh-agent cold-start loop for the public toolkit
 - a passing mock smoke report
 - an offline lint report, sync plan, drift trend report, and apply dry-run report built from synthetic examples
 - a synthetic encrypted backup, restore-plan dry run, restore verification result, and Markdown review dashboard
+- a sanitized support bundle that stays ready to share across the generated demo artifact set
 
 The loop should finish without live Grocy credentials, household data, or private local paths in the generated artifacts.
 
@@ -19,6 +20,16 @@ The lab uses conventional local paths:
 - `restore/` for an optional local restore check.
 
 These generated paths are ignored by git.
+
+## One-Command Path
+
+When you want the fake Grocy evaluation environment and docs-capture artifacts in one pass, run:
+
+```bash
+npm run grocy:demo:lab
+```
+
+Expected result: the command writes `data/grocy-demo-environment.json`, `data/demo-review-dashboard.md`, and `data/demo-support-bundle.json`, plus the underlying synthetic diagnostics, config-review, backup-proof, and redaction-audit artifacts. The raw backup manifest stays under `backups/demo/` so the shareable `data/` artifacts remain public-safe.
 
 ## Setup
 

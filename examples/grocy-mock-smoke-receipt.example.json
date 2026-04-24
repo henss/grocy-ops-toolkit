@@ -11,7 +11,7 @@
     "scope": "synthetic_fixture_only",
     "notes": [
       "Uses only synthetic Grocy response fixtures and a temporary local config.",
-      "Does not require live Grocy credentials, household data, or private workflow state."
+      "Does not require live Grocy credentials, real inventory records, or private workflow state."
     ]
   },
   "artifacts": [

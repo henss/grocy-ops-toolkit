@@ -66,6 +66,7 @@ export type GrocySupportBundleArtifact = z.infer<typeof GrocySupportBundleArtifa
 export interface GrocySupportBundleOptions {
   baseDir?: string;
   artifactPaths?: string[];
+  auditPaths?: string[];
   generatedAt?: string;
 }
 
@@ -170,7 +171,11 @@ function collectSupportArtifacts(baseDir: string, artifactPaths: string[]): Groc
 
 export function createGrocySupportBundle(options: GrocySupportBundleOptions = {}): GrocySupportBundle {
   const baseDir = path.resolve(options.baseDir ?? process.cwd());
-  const redactionAudit = auditGrocyPublicArtifacts({ baseDir, paths: ["data", "examples"], generatedAt: options.generatedAt });
+  const redactionAudit = auditGrocyPublicArtifacts({
+    baseDir,
+    paths: options.auditPaths ?? ["data", "examples"],
+    generatedAt: options.generatedAt,
+  });
   const artifacts = collectSupportArtifacts(baseDir, options.artifactPaths ?? DEFAULT_SUPPORT_ARTIFACT_PATHS);
   const findingCodes = [...new Set(redactionAudit.findings.map((finding) => finding.code))].sort();
   return GrocySupportBundleSchema.parse({
