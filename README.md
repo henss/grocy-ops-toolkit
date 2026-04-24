@@ -8,6 +8,7 @@ TypeScript toolkit for safe Grocy GitOps, health checks, and encrypted local bac
 
 It can:
 
+- Run an install-doctor preflight that checks Node.js, conventional local directories, and first-run config gaps before operators start live or backup workflows.
 - Read Grocy stock, shopping-list, product, and master/config objects.
 - Export stable Grocy master/config records into a reviewable JSON manifest.
 - Lint desired-state manifests offline before config diff or apply review steps.
@@ -40,10 +41,13 @@ Install dependencies and verify the project:
 
 ```bash
 npm install
+npm run grocy:install:doctor -- --output data/install-doctor.json --force
 npm run typecheck
 npm run build
 npm test
 ```
+
+On a clean checkout, the install doctor reports first-run gaps such as missing `config/`, `data/`, `restore/`, and local config files. It exits non-zero only for blocking failures such as unsupported Node.js or invalid local config JSON.
 
 Create the conventional local directories used by the toolkit:
 
@@ -113,9 +117,10 @@ Preview the health example artifacts without live Grocy credentials:
 ```bash
 npx --no-install grocy-ops-toolkit grocy:health:badge --output data/preview-health-badge.json --force
 npx --no-install grocy-ops-toolkit grocy:health:diagnostics --output data/preview-health-diagnostics.json --force
+npx --no-install grocy-ops-toolkit grocy:install:doctor --output data/preview-install-doctor.json --force
 ```
 
-Expected result: both commands complete with public-safe `fail` outputs that match the same artifact families as `examples/grocy-health-badge.example.json` and `examples/grocy-health-diagnostics.example.json`.
+Expected result: the health commands complete with public-safe `fail` outputs and the install doctor records first-run directory/config guidance in `data/preview-install-doctor.json`, matching the same artifact families as `examples/grocy-health-badge.example.json`, `examples/grocy-health-diagnostics.example.json`, and `examples/grocy-install-doctor.example.json`.
 
 Preview the backup example flow with the synthetic fixture source:
 

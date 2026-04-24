@@ -110,6 +110,7 @@ describe("Quickstart fixture gallery doc", () => {
     expect(gallery).toContain("[Fixture-Only Restore Drill Walkthrough](fixture-only-restore-drill-walkthrough.md)");
 
     for (const scriptName of [
+      "grocy:install:doctor",
       "grocy:health:badge",
       "grocy:health:diagnostics",
       "grocy:desired-state:lint",
@@ -136,6 +137,7 @@ describe("Quickstart fixture gallery doc", () => {
     }
 
     for (const examplePath of [
+      "examples/grocy-install-doctor.example.json",
       "examples/grocy-health-badge.example.json",
       "examples/grocy-health-diagnostics.example.json",
       "examples/grocy-desired-state-manifest-lint-report.example.json",

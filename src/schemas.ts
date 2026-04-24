@@ -275,6 +275,55 @@ export const GrocyHealthBadgeArtifactSchema = z.object({
     .default([]),
 });
 
+export const GrocyInstallDoctorCheckSchema = z.object({
+  id: z.enum([
+    "node_version",
+    "config_dir",
+    "data_dir",
+    "restore_dir",
+    "grocy_config",
+    "backup_config",
+    "backup_source",
+  ]),
+  status: z.enum(["pass", "warn", "fail", "skipped"]),
+  code: z.enum([
+    "node_version_supported",
+    "node_version_unreadable",
+    "node_version_unsupported",
+    "directory_ready",
+    "directory_missing",
+    "directory_invalid",
+    "grocy_config_ready",
+    "grocy_config_missing",
+    "grocy_config_invalid",
+    "backup_config_ready",
+    "backup_config_missing",
+    "backup_config_invalid",
+    "backup_source_ready",
+    "backup_source_missing",
+    "backup_source_skipped",
+  ]),
+  message: z.string().min(1),
+  action: z.string().min(1),
+  evidence: z.array(z.string().min(1)).default([]),
+});
+
+export const GrocyInstallDoctorArtifactSchema = z.object({
+  kind: z.literal("grocy_install_doctor"),
+  version: z.literal(1),
+  generatedAt: z.string().min(1),
+  toolId: z.literal("grocy"),
+  summary: z.object({
+    status: z.enum(["ready", "action_required"]),
+    failureCount: z.number().int().nonnegative(),
+    warningCount: z.number().int().nonnegative(),
+    skippedCount: z.number().int().nonnegative(),
+    passCount: z.number().int().nonnegative(),
+  }),
+  checks: z.array(GrocyInstallDoctorCheckSchema).default([]),
+  nextActions: z.array(z.string().min(1)).default([]),
+});
+
 export const GrocyToolkitRunReceiptSchema = z.object({
   kind: z.literal("grocy_toolkit_run_receipt"),
   version: z.literal(1),
@@ -481,6 +530,8 @@ export type GrocyHealthDiagnosticCode = z.infer<typeof GrocyHealthDiagnosticCode
 export type GrocyHealthDiagnostic = z.infer<typeof GrocyHealthDiagnosticSchema>;
 export type GrocyHealthDiagnosticsArtifact = z.infer<typeof GrocyHealthDiagnosticsArtifactSchema>;
 export type GrocyHealthBadgeArtifact = z.infer<typeof GrocyHealthBadgeArtifactSchema>;
+export type GrocyInstallDoctorCheck = z.infer<typeof GrocyInstallDoctorCheckSchema>;
+export type GrocyInstallDoctorArtifact = z.infer<typeof GrocyInstallDoctorArtifactSchema>;
 export type GrocyToolkitRunReceipt = z.infer<typeof GrocyToolkitRunReceiptSchema>;
 export type GrocyObjectCoveragePlaygroundScenario = z.infer<typeof GrocyObjectCoveragePlaygroundScenarioSchema>;
 export type GrocyObjectCoveragePlaygroundEntry = z.infer<typeof GrocyObjectCoveragePlaygroundEntrySchema>;

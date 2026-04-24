@@ -19,6 +19,8 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-health-badge.example.json` shows the compact badge-style JSON emitted by `npm run grocy:health:badge` for CI, docs, and agent receipts.
 
+`grocy-install-doctor.example.json` shows the first-run preflight artifact emitted by `npm run grocy:install:doctor`.
+
 `grocy-mock-smoke-report.example.json` shows the public-safe report shape emitted by `npm run grocy:smoke:mock`.
 
 `grocy-mock-smoke-receipt.example.json` shows the compact run receipt emitted alongside the synthetic mock smoke report.

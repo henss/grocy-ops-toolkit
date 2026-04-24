@@ -15,6 +15,7 @@ Start with the standard repo checks:
 
 ```bash
 npm install
+npm run grocy:install:doctor -- --output data/gallery-install-doctor.json --force
 npm run typecheck
 npm run build
 npm test
@@ -34,18 +35,22 @@ New-Item -ItemType Directory -Force config, data, restore | Out-Null
 
 Use this section when you need to confirm a clean checkout before reviewing any individual fixture family.
 
+Expected result: the install doctor records any missing first-run directories or local config files before the deeper fixture loops begin.
+
 ## Gallery Map
 
 ### 1. Health Failure Fixtures
 
 Use these when you want the smallest no-credential proof that the toolkit emits public-safe health artifacts.
 
+- Command: `npm run grocy:install:doctor -- --output data/gallery-install-doctor.json --force`
 - Command: `npm run grocy:health:badge -- --output data/preview-health-badge.json --force`
 - Command: `npm run grocy:health:diagnostics -- --output data/preview-health-diagnostics.json --force`
+- Example artifact: `examples/grocy-install-doctor.example.json`
 - Example artifact: `examples/grocy-health-badge.example.json`
 - Example artifact: `examples/grocy-health-diagnostics.example.json`
 
-Expected result: both artifacts report a synthetic config gap without live Grocy URLs, record contents, or private local paths.
+Expected result: the install-doctor and health artifacts report synthetic first-run gaps without live Grocy URLs, record contents, or private local paths.
 
 ### 2. Config Review Fixtures
 

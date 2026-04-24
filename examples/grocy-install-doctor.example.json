@@ -1,0 +1,79 @@
+{
+  "kind": "grocy_install_doctor",
+  "version": 1,
+  "generatedAt": "2026-04-24T06:00:00.000Z",
+  "toolId": "grocy",
+  "summary": {
+    "status": "action_required",
+    "failureCount": 0,
+    "warningCount": 5,
+    "skippedCount": 1,
+    "passCount": 1
+  },
+  "checks": [
+    {
+      "id": "node_version",
+      "status": "pass",
+      "code": "node_version_supported",
+      "message": "Node.js v20.12.0 satisfies the toolkit requirement.",
+      "action": "No action required.",
+      "evidence": []
+    },
+    {
+      "id": "config_dir",
+      "status": "warn",
+      "code": "directory_missing",
+      "message": "Conventional local directory config is missing.",
+      "action": "Create config before running workflows that write local artifacts there.",
+      "evidence": []
+    },
+    {
+      "id": "data_dir",
+      "status": "warn",
+      "code": "directory_missing",
+      "message": "Conventional local directory data is missing.",
+      "action": "Create data before running workflows that write local artifacts there.",
+      "evidence": []
+    },
+    {
+      "id": "restore_dir",
+      "status": "warn",
+      "code": "directory_missing",
+      "message": "Conventional local directory restore is missing.",
+      "action": "Create restore before running workflows that write local artifacts there.",
+      "evidence": []
+    },
+    {
+      "id": "grocy_config",
+      "status": "warn",
+      "code": "grocy_config_missing",
+      "message": "Local Grocy config is missing at config/grocy.local.json.",
+      "action": "Create config/grocy.local.json with baseUrl, apiKey, and timeoutMs before running live Grocy commands.",
+      "evidence": []
+    },
+    {
+      "id": "backup_config",
+      "status": "warn",
+      "code": "backup_config_missing",
+      "message": "Local backup config is missing at config/grocy-backup.local.json.",
+      "action": "Create config/grocy-backup.local.json with sourcePath, backupDir, and passphraseEnv before running backup workflows.",
+      "evidence": []
+    },
+    {
+      "id": "backup_source",
+      "status": "skipped",
+      "code": "backup_source_skipped",
+      "message": "Backup source path check was skipped because local backup config is missing.",
+      "action": "Create config/grocy-backup.local.json before running backup workflows.",
+      "evidence": []
+    }
+  ],
+  "nextActions": [
+    "Create config before running workflows that write local artifacts there.",
+    "Create data before running workflows that write local artifacts there.",
+    "Create restore before running workflows that write local artifacts there.",
+    "Create config/grocy.local.json with baseUrl, apiKey, and timeoutMs before running live Grocy commands.",
+    "Create config/grocy-backup.local.json with sourcePath, backupDir, and passphraseEnv before running backup workflows.",
+    "Create config/grocy-backup.local.json before running backup workflows."
+  ]
+}

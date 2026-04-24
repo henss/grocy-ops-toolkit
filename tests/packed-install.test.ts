@@ -119,6 +119,12 @@ function runInstalledPreviewScenario(params: {
   const backupEnv = { ...npmEnv, [backupPassphraseEnv]: "synthetic-package-preview-passphrase" };
 
   return {
+    installDoctorOutput: run(
+      installedBinCommand,
+      ["grocy:install:doctor", "--output", "data/install-doctor.json", "--force"],
+      consumerDir,
+      npmEnv,
+    ),
     exportOutput: run(
       "node",
       [
@@ -188,6 +194,10 @@ function assertInstalledPreviewScenario(params: {
   const { consumerDir, outputs } = params;
 
   expect(String(outputs.exportOutput).trim()).toBe("pass");
+  expect(JSON.parse(String(outputs.installDoctorOutput))).toMatchObject({
+    outputPath: expect.stringContaining(path.join("data", "install-doctor.json")),
+    summary: { status: "action_required", failureCount: 0, warningCount: 3, skippedCount: 0, passCount: 4 },
+  });
   expect(JSON.parse(String(outputs.smokeOutput))).toMatchObject({ summary: { result: "pass" } });
   expect(JSON.parse(String(outputs.smokeOutput))).toMatchObject({
     receiptPath: expect.stringContaining(path.join("data", "grocy-mock-smoke-receipt.json")),
@@ -220,6 +230,10 @@ function assertInstalledPreviewScenario(params: {
   expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "data", "grocy-mock-smoke-receipt.json"), "utf8"))).toMatchObject({
     kind: "grocy_toolkit_run_receipt",
     verification: { command: "npm run grocy:smoke:mock", status: "pass" },
+  });
+  expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "data", "install-doctor.json"), "utf8"))).toMatchObject({
+    kind: "grocy_install_doctor",
+    summary: { status: "action_required", failureCount: 0, warningCount: 3, skippedCount: 0, passCount: 4 },
   });
   expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "data", "health-badge.json"), "utf8"))).toMatchObject({
     kind: "grocy_health_badge",

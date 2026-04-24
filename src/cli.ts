@@ -39,6 +39,7 @@ import {
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
 import { recordGrocyHealthBadgeArtifact, runGrocyHealthBadge } from "./health-badge.js";
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
+import { recordGrocyInstallDoctorArtifact, runGrocyInstallDoctor } from "./install-doctor.js";
 import { createGrocyApiCompatibilityMatrix, recordGrocyApiCompatibilityMatrix } from "./compatibility-matrix.js";
 import { createGrocyApiDeprecationCanaryReport, recordGrocyApiDeprecationCanaryReport } from "./deprecation-canary.js";
 import { startGrocyFixtureServer } from "./fixture-server.js";
@@ -100,6 +101,18 @@ async function main(): Promise<void> {
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
     printJson({ outputPath, summary: artifact.summary });
+    return;
+  }
+  if (command === "grocy:install:doctor") {
+    const artifact = runGrocyInstallDoctor(process.cwd());
+    const outputPath = recordGrocyInstallDoctorArtifact(artifact, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: artifact.summary, nextActions: artifact.nextActions });
+    if (artifact.summary.failureCount > 0) {
+      process.exitCode = 1;
+    }
     return;
   }
   if (command === "grocy:smoke:mock") {

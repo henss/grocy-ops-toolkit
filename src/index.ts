@@ -10,6 +10,7 @@ export * from "./fixture-server.js";
 export * from "./grocy-live.js";
 export * from "./health-badge.js";
 export * from "./health-diagnostics.js";
+export * from "./install-doctor.js";
 export * from "./mock-smoke.js";
 export * from "./object-coverage-playground.js";
 export * from "./redaction-audit.js";

@@ -32,6 +32,7 @@
     "LICENSE"
   ],
   "scripts": {
+    "grocy:install:doctor": "tsx src/cli.ts grocy:install:doctor",
     "grocy:config:status": "tsx src/cli.ts grocy:config:status",
     "grocy:health": "tsx src/cli.ts grocy:health",
     "grocy:health:badge": "tsx src/cli.ts grocy:health:badge",
