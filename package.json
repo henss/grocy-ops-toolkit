@@ -34,6 +34,7 @@
   "scripts": {
     "sample-consumer:smoke:workspace": "tsx scripts/generate-sample-consumer-smoke-workspace.ts",
     "grocy:demo:lab": "tsx src/cli.ts grocy:demo:lab",
+    "grocy:quickstart:proof": "tsx src/cli.ts grocy:quickstart:proof",
     "grocy:install:doctor": "tsx src/cli.ts grocy:install:doctor",
     "grocy:config:status": "tsx src/cli.ts grocy:config:status",
     "grocy:health": "tsx src/cli.ts grocy:health",

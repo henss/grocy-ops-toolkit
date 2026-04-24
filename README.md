@@ -99,6 +99,8 @@ Expected result: the loop completes without live Grocy credentials, uses only sy
 
 When you want the same synthetic evidence set in one pass instead of following the loop step by step, run `npm run grocy:demo:lab`. It writes `data/grocy-demo-environment.json`, `data/demo-review-dashboard.md`, and `data/demo-support-bundle.json` as the main entry artifacts.
 
+When you want a compact machine-readable proof that the README quickstart recipes still work end to end, run `npm run grocy:quickstart:proof`. It writes `data/grocy-quickstart-proof-receipt.json` plus the matching quickstart artifacts and demo-lab proof files under conventional `data/`, `config/`, and `backups/` paths.
+
 For the exact commands and expected outputs, see [Synthetic Grocy Demo Lab](docs/synthetic-demo-lab.md).
 
 For a smaller entrypoint that maps the main synthetic example families to their commands, docs, and example artifacts, see [Quickstart Fixture Gallery](docs/quickstart-fixture-gallery.md).
@@ -768,6 +770,7 @@ For guidance on which recovery-confidence path to run for a given review questio
 ```bash
 npm run grocy:config:status
 npm run grocy:demo:lab
+npm run grocy:quickstart:proof
 npm run grocy:health
 npm run grocy:health:badge
 npm run grocy:health:diagnostics

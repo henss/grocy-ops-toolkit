@@ -44,6 +44,10 @@ import {
   recordGrocyBackupRestoreFailureDrillReport,
 } from "./backup-restore-failure-drill.js";
 import { createGrocyDemoEnvironment, recordGrocyDemoEnvironmentReport } from "./demo-lab.js";
+import {
+  createGrocyReadmeQuickstartProofReceipt,
+  recordGrocyReadmeQuickstartProofReceipt,
+} from "./quickstart-proof.js";
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
 import { recordGrocyHealthBadgeArtifact, runGrocyHealthBadge } from "./health-badge.js";
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
@@ -145,6 +149,18 @@ async function main(): Promise<void> {
     });
     printJson({ outputPath, summary: report.summary, artifacts: report.artifacts });
     if (report.summary.result !== "pass") {
+      process.exitCode = 1;
+    }
+    return;
+  }
+  if (command === "grocy:quickstart:proof") {
+    const receipt = await createGrocyReadmeQuickstartProofReceipt(process.cwd());
+    const outputPath = recordGrocyReadmeQuickstartProofReceipt(receipt, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: receipt.summary, recipes: receipt.recipes });
+    if (receipt.summary.status !== "pass") {
       process.exitCode = 1;
     }
     return;

@@ -15,6 +15,7 @@ Start with the standard repo checks:
 
 ```bash
 npm install
+npm run grocy:quickstart:proof
 npm run grocy:install:doctor -- --output data/gallery-install-doctor.json --force
 npm run typecheck
 npm run build
@@ -36,6 +37,10 @@ New-Item -ItemType Directory -Force config, data, restore | Out-Null
 Use this section when you need to confirm a clean checkout before reviewing any individual fixture family.
 
 Expected result: the install doctor records any missing first-run directories or local config files before the deeper fixture loops begin.
+
+When you need a compact receipt that proves the README quickstart recipes still regenerate their public-safe artifacts, use `npm run grocy:quickstart:proof`. It writes `data/grocy-quickstart-proof-receipt.json` and stages the matching quickstart evidence files under conventional repo paths.
+
+- Example artifact: `examples/grocy-quickstart-proof-receipt.example.json`
 
 ## Gallery Map
 
@@ -127,6 +132,7 @@ Pick the smallest slice that answers the current question:
 - For HTTP prototyping or API-shape checks, use the fixture API shapes.
 - For recovery confidence, use the backup and recovery fixtures.
 - For one command sequence that combines multiple fixture families, use [Synthetic Grocy Demo Lab](synthetic-demo-lab.md).
+- For a compact machine-readable proof that the README quickstart recipes still work, use `npm run grocy:quickstart:proof`.
 - For the full example file inventory, use [Synthetic Examples For grocy-ops-toolkit](../examples/README.md).
 
 ## Public Boundary Reminder

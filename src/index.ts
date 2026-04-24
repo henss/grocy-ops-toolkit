@@ -18,6 +18,8 @@ export * from "./inventory-snapshot.js";
 export * from "./install-doctor.js";
 export * from "./mock-smoke.js";
 export * from "./object-coverage-playground.js";
+export * from "./quickstart-proof-schema.js";
+export * from "./quickstart-proof.js";
 export * from "./redaction-audit.js";
 export * from "./review-dashboard.js";
 export * from "./schemas.js";

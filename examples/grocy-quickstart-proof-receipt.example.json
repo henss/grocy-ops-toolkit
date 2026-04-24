@@ -1,0 +1,169 @@
+{
+  "kind": "grocy_readme_quickstart_proof_receipt",
+  "version": 1,
+  "generatedAt": "2026-04-24T23:38:21.869Z",
+  "scope": "synthetic_fixture_only",
+  "command": {
+    "id": "grocy:quickstart:proof",
+    "cli": "npm run grocy:quickstart:proof"
+  },
+  "summary": {
+    "status": "pass",
+    "recipeCount": 3,
+    "artifactCount": 13
+  },
+  "recipes": [
+    {
+      "id": "quick_start_preflight",
+      "title": "Quick Start Preflight",
+      "status": "pass",
+      "summary": "Proved the README quick-start preflight on a clean synthetic checkout and captured the first-run guidance artifact.",
+      "checks": [
+        {
+          "id": "install_doctor_action_required",
+          "status": "pass",
+          "message": "Install doctor reported action_required on a clean synthetic checkout."
+        },
+        {
+          "id": "install_doctor_missing_dirs",
+          "status": "pass",
+          "message": "Install doctor surfaced the expected first-run directory gaps."
+        }
+      ],
+      "artifactPaths": [
+        "data/quickstart-install-doctor.json"
+      ]
+    },
+    {
+      "id": "fresh_agent_cold_start_loop",
+      "title": "Fresh-Agent Cold-Start Loop",
+      "status": "pass",
+      "summary": "Proved the README cold-start loop with public-safe diagnostics, mock smoke evidence, and offline config review artifacts.",
+      "checks": [
+        {
+          "id": "diagnostics_config_gap_only",
+          "status": "pass",
+          "message": "Diagnostics stayed public-safe and only reported the missing local config boundary."
+        },
+        {
+          "id": "mock_smoke_passed",
+          "status": "pass",
+          "message": "Mock smoke passed and emitted the matching run receipt."
+        },
+        {
+          "id": "lint_ready",
+          "status": "pass",
+          "message": "Desired-state lint stayed ready on the synthetic manifest."
+        },
+        {
+          "id": "diff_preview_generated",
+          "status": "pass",
+          "message": "Config diff and preview artifacts captured the expected reviewed update."
+        },
+        {
+          "id": "drift_trend_generated",
+          "status": "pass",
+          "message": "Config drift trend proved the expected synthetic change set."
+        },
+        {
+          "id": "apply_dry_run_generated",
+          "status": "pass",
+          "message": "Apply dry run stayed no-write and preserved the reviewed update count."
+        }
+      ],
+      "artifactPaths": [
+        "data/quickstart-health-diagnostics.json",
+        "data/quickstart-mock-smoke-report.json",
+        "data/quickstart-mock-smoke-receipt.json",
+        "data/quickstart-desired-state-lint-report.json",
+        "data/quickstart-config-sync-plan.json",
+        "data/quickstart-config-diff-preview-report.json",
+        "data/quickstart-config-drift-trend-report.json",
+        "data/quickstart-apply-dry-run-report.json"
+      ]
+    },
+    {
+      "id": "demo_lab_one_command",
+      "title": "Synthetic Demo Lab",
+      "status": "pass",
+      "summary": "Proved the one-command README recipe that bundles diagnostics, review artifacts, backup proof, dashboard output, and support-bundle evidence.",
+      "checks": [
+        {
+          "id": "demo_environment_passed",
+          "status": "pass",
+          "message": "The one-command demo lab finished successfully."
+        },
+        {
+          "id": "demo_shareability_ready",
+          "status": "pass",
+          "message": "The demo lab remained ready to share after the redaction audit."
+        }
+      ],
+      "artifactPaths": [
+        "data/grocy-demo-environment.json",
+        "data/demo-public-artifact-redaction-audit.json",
+        "data/demo-review-dashboard.md",
+        "data/demo-support-bundle.json"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "grocy_install_doctor",
+      "path": "data/quickstart-install-doctor.json"
+    },
+    {
+      "kind": "grocy_health_diagnostics",
+      "path": "data/quickstart-health-diagnostics.json"
+    },
+    {
+      "kind": "grocy_mock_smoke_report",
+      "path": "data/quickstart-mock-smoke-report.json"
+    },
+    {
+      "kind": "grocy_toolkit_run_receipt",
+      "path": "data/quickstart-mock-smoke-receipt.json"
+    },
+    {
+      "kind": "grocy_desired_state_manifest_lint_report",
+      "path": "data/quickstart-desired-state-lint-report.json"
+    },
+    {
+      "kind": "grocy_config_sync_plan",
+      "path": "data/quickstart-config-sync-plan.json"
+    },
+    {
+      "kind": "grocy_config_diff_preview_report",
+      "path": "data/quickstart-config-diff-preview-report.json"
+    },
+    {
+      "kind": "grocy_config_drift_trend_report",
+      "path": "data/quickstart-config-drift-trend-report.json"
+    },
+    {
+      "kind": "grocy_config_apply_dry_run_report",
+      "path": "data/quickstart-apply-dry-run-report.json"
+    },
+    {
+      "kind": "grocy_demo_environment",
+      "path": "data/grocy-demo-environment.json"
+    },
+    {
+      "kind": "grocy_public_artifact_redaction_audit",
+      "path": "data/demo-public-artifact-redaction-audit.json"
+    },
+    {
+      "kind": "grocy_review_dashboard",
+      "path": "data/demo-review-dashboard.md"
+    },
+    {
+      "kind": "grocy_support_bundle",
+      "path": "data/demo-support-bundle.json"
+    }
+  ],
+  "reviewNotes": [
+    "This receipt proves the README quickstart recipes with synthetic fixtures only and does not require live Grocy credentials.",
+    "The proof run copies public-safe artifacts back into conventional repo paths so the README and docs can reference stable evidence files.",
+    "A failed install doctor or diagnostics artifact can still count as expected proof when the recipe is validating the clean-checkout boundary instead of live readiness."
+  ]
+}
