@@ -12,7 +12,7 @@ It can:
 - Read Grocy stock, shopping-list, product, and master/config objects.
 - Export stable Grocy master/config records into a reviewable JSON manifest.
 - Lint desired-state manifests offline before config diff or apply review steps.
-- Diff a reviewed desired-state manifest against a live export.
+- Diff a reviewed desired-state manifest against a live export and emit a no-write diff preview.
 - Report config drift trends between two offline exports.
 - Apply only reviewed `repo_managed` creates and updates when explicitly confirmed.
 - Create and verify encrypted local backup bundles.
@@ -300,9 +300,23 @@ Then diff the desired state against the live export:
 npm run grocy:diff-config
 ```
 
+By default, the diff command writes the sync plan to:
+
+```text
+data/grocy-config-sync-plan.json
+```
+
+It also writes a preview-first diff report to:
+
+```text
+data/grocy-config-diff-preview-report.json
+```
+
+Use `--output <path>` to override the sync plan path and `--preview-output <path>` to override the preview report path.
+
 ### 3. Review The Apply Plan
 
-Run a dry run first. This reads an existing sync plan and writes a review report without sending live write requests.
+Start with the diff preview report for desired-state review. Then run a dry run when you want the later apply-focused report from an existing sync plan without sending live write requests.
 
 ```bash
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --dry-run

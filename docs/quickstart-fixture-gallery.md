@@ -57,15 +57,16 @@ Expected result: the install-doctor and health artifacts report synthetic first-
 Use these when you need an offline desired-state and drift-review path built from synthetic config records.
 
 - Command: `npm run grocy:desired-state:lint -- --manifest examples/desired-state.example.json --output data/gallery-desired-state-lint.json --force`
-- Command: `npm run grocy:diff-config -- --manifest examples/desired-state.example.json --export examples/config-export.example.json --output data/gallery-config-sync-plan.json --force`
+- Command: `npm run grocy:diff-config -- --manifest examples/desired-state.example.json --export examples/config-export.example.json --output data/gallery-config-sync-plan.json --preview-output data/gallery-config-diff-preview.json --force`
 - Command: `npm run grocy:config:drift-trend -- --previous examples/config-export.previous.example.json --current examples/config-export.example.json --output data/gallery-config-drift-trend.json --force`
 - Command: `npm run grocy:apply-config -- --plan data/gallery-config-sync-plan.json --dry-run --output data/gallery-apply-dry-run.json --force`
 - Example artifact: `examples/grocy-desired-state-manifest-lint-report.example.json`
 - Example artifact: `examples/config-sync-plan.example.json`
+- Example artifact: `examples/grocy-config-diff-preview-report.example.json`
 - Example artifact: `examples/grocy-config-drift-trend-report.example.json`
 - Example artifact: `examples/config-apply-dry-run-report.example.json`
 
-Expected result: the gallery remains review-only and shows invented product/config changes such as `Example Coffee` without widening into live apply writes.
+Expected result: the gallery remains review-only and shows invented product/config changes such as `Example Coffee` first in the diff preview, then in the later apply dry-run artifact, without widening into live apply writes.
 
 ### 3. Fixture API Shapes
 

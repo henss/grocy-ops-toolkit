@@ -1,0 +1,38 @@
+{
+  "kind": "grocy_config_diff_preview_report",
+  "version": 1,
+  "generatedAt": "2026-04-19T10:05:00.000Z",
+  "manifestPath": "examples/desired-state.example.json",
+  "exportPath": "examples/config-export.example.json",
+  "summary": {
+    "create": 0,
+    "update": 1,
+    "noop": 0,
+    "manualReview": 0,
+    "reviewedChangeCount": 1
+  },
+  "items": [
+    {
+      "action": "update",
+      "key": "products.example-coffee",
+      "entity": "products",
+      "name": "Example Coffee",
+      "ownership": "repo_managed",
+      "liveId": "10",
+      "reason": "Repo-managed item differs from live Grocy on non-destructive fields.",
+      "changeCount": 1,
+      "changes": [
+        {
+          "field": "min_stock_amount",
+          "desired": 1,
+          "live": 0
+        }
+      ]
+    }
+  ],
+  "reviewNotes": [
+    "This diff preview is generated from desired-state and export artifacts only. It does not send live Grocy write requests.",
+    "Review examples/desired-state.example.json against examples/config-export.example.json before confirming any apply step.",
+    "Use grocy:apply-config -- --plan <path> --dry-run when you want the later apply-focused no-write report."
+  ]
+}

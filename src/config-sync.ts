@@ -21,6 +21,11 @@ import {
   type GrocyJsonValue,
 } from "./schemas.js";
 export {
+  createGrocyConfigDiffPreviewReport,
+  GROCY_CONFIG_DIFF_PREVIEW_REPORT_PATH,
+  recordGrocyConfigDiffPreviewReport,
+} from "./config-diff-preview.js";
+export {
   createGrocyConfigApplyDryRunReport,
   createGrocyConfigDriftTrendReport,
   GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH,

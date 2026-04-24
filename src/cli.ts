@@ -2,6 +2,7 @@
 
 import {
   applyGrocyConfigSyncPlan,
+  createGrocyConfigDiffPreviewReport,
   createGrocyConfigDriftTrendReport,
   createGrocyConfigApplyDryRunReport,
   createGrocyConfigSyncPlan,
@@ -10,6 +11,7 @@ import {
   GROCY_CONFIG_PREVIOUS_EXPORT_PATH,
   loadGrocyConfigExport,
   loadGrocyConfigSyncPlan,
+  recordGrocyConfigDiffPreviewReport,
   recordGrocyConfigDriftTrendReport,
   recordGrocyConfigApplyDryRunReport,
   recordGrocyConfigExport,
@@ -239,11 +241,16 @@ async function main(): Promise<void> {
       manifestPath: manifestPath ?? "registry/grocy/desired-state.json",
       exportPath,
     });
+    const previewReport = createGrocyConfigDiffPreviewReport({ plan });
     const outputPath = recordGrocyConfigSyncPlan(plan, {
       outputPath: parseFlag("--output"),
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
-    printJson({ outputPath, summary: plan.summary });
+    const previewOutputPath = recordGrocyConfigDiffPreviewReport(previewReport, {
+      outputPath: parseFlag("--preview-output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--preview-output"),
+    });
+    printJson({ outputPath, previewOutputPath, summary: plan.summary });
     return;
   }
   if (command === "grocy:config:drift-trend") {

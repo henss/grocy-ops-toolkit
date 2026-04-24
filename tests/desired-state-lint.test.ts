@@ -34,6 +34,35 @@ function createManifest(items: GrocyConfigManifest["items"]): GrocyConfigManifes
   };
 }
 
+function readJson<T>(filePath: string): T {
+  return JSON.parse(fs.readFileSync(filePath, "utf8")) as T;
+}
+
+function writeManifestFixture(baseDir: string, items: GrocyConfigManifest["items"]): void {
+  fs.mkdirSync(path.join(baseDir, "config"), { recursive: true });
+  fs.writeFileSync(
+    path.join(baseDir, "config", "desired-state.json"),
+    JSON.stringify(createManifest(items), null, 2),
+    "utf8",
+  );
+}
+
+function runSyntheticDiffPreview(baseDir: string, planPath: string, previewPath: string): ReturnType<typeof spawnSync> {
+  return runCliFrom(baseDir, [
+    path.join(repoRoot, "src", "cli.ts"),
+    "grocy:diff-config",
+    "--manifest",
+    path.join(repoRoot, "examples", "desired-state.example.json"),
+    "--export",
+    path.join(repoRoot, "examples", "config-export.example.json"),
+    "--output",
+    planPath,
+    "--preview-output",
+    previewPath,
+    "--force",
+  ]);
+}
+
 describe("Desired-state manifest lint", () => {
   it("accepts the public desired-state example", () => {
     const manifest = JSON.parse(
@@ -114,22 +143,17 @@ describe("Desired-state manifest lint", () => {
 
   it("fails diff before the live config path when lint errors exist", () => {
     const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-diff-lint-gate-"));
-    fs.mkdirSync(path.join(baseDir, "config"), { recursive: true });
-    fs.writeFileSync(
-      path.join(baseDir, "config", "desired-state.json"),
-      JSON.stringify(createManifest([
-        {
-          key: "products.example-coffee",
-          entity: "products",
-          name: "Example Coffee",
-          ownership: "repo_managed",
-          fields: { last_price: 5.25 },
-          aliases: [],
-          provenance: { source: "synthetic", notes: [] },
-        },
-      ]), null, 2),
-      "utf8",
-    );
+    writeManifestFixture(baseDir, [
+      {
+        key: "products.example-coffee",
+        entity: "products",
+        name: "Example Coffee",
+        ownership: "repo_managed",
+        fields: { last_price: 5.25 },
+        aliases: [],
+        provenance: { source: "synthetic", notes: [] },
+      },
+    ]);
 
     const result = runCliFrom(baseDir, [path.join(repoRoot, "src", "cli.ts"), "grocy:diff-config"]);
 
@@ -137,5 +161,33 @@ describe("Desired-state manifest lint", () => {
     expect(result.stderr).toContain("Desired-state manifest lint failed");
     expect(result.stderr).toContain("volatile");
     expect(result.stderr).not.toContain("Grocy live config is missing");
+  });
+
+  it("writes a diff preview report alongside the sync plan for synthetic exports", () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-diff-preview-"));
+    const planPath = path.join("data", "custom-sync-plan.json");
+    const previewPath = path.join("data", "custom-diff-preview.json");
+
+    const result = runSyntheticDiffPreview(baseDir, planPath, previewPath);
+
+    expect(result.status).toBe(0);
+
+    const plan = readJson<{ kind: string; summary: { update: number } }>(path.join(baseDir, planPath));
+    const preview = readJson<{
+      kind: string;
+      summary: { update: number; reviewedChangeCount: number };
+      items: Array<{ action: string; key: string }>;
+    }>(path.join(baseDir, previewPath));
+
+    expect(plan.kind).toBe("grocy_config_sync_plan");
+    expect(plan.summary.update).toBe(1);
+    expect(preview).toMatchObject({
+      kind: "grocy_config_diff_preview_report",
+      summary: {
+        update: 1,
+        reviewedChangeCount: 1,
+      },
+      items: [{ action: "update", key: "products.example-coffee" }],
+    });
   });
 });

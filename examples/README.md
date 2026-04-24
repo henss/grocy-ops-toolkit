@@ -11,6 +11,8 @@ Rules:
 
 Config sync examples use synthetic product names and IDs. `config-apply-dry-run-report.example.json` shows the report shape produced before any reviewed apply write.
 
+`grocy-config-diff-preview-report.example.json` shows the preview-first desired-state diff artifact emitted alongside the sync plan before any apply-focused dry run.
+
 `grocy-desired-state-manifest-lint-report.example.json` shows the offline lint-gate report shape for a public-safe desired-state manifest.
 
 `config-export.previous.example.json` and `grocy-config-drift-trend-report.example.json` show the public-safe offline trend report shape for comparing two config exports.

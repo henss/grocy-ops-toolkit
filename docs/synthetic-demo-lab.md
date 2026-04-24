@@ -6,7 +6,7 @@ Use this lab as the canonical fresh-agent cold-start loop for the public toolkit
 
 - a `fail` diagnostics artifact that only reports the missing local live config
 - a passing mock smoke report
-- an offline lint report, sync plan, drift trend report, and apply dry-run report built from synthetic examples
+- an offline lint report, sync plan, diff preview report, drift trend report, and apply dry-run report built from synthetic examples
 - a synthetic encrypted backup, restore-plan dry run, restore verification result, and Markdown review dashboard
 - a sanitized support bundle that stays ready to share across the generated demo artifact set
 
@@ -87,10 +87,10 @@ Expected result: the generated lint report is `ready: true` with zero findings.
 Create a synthetic sync plan from the public desired-state and export examples.
 
 ```bash
-npm run grocy:diff-config -- --manifest examples/desired-state.example.json --export examples/config-export.example.json --output data/demo-config-sync-plan.json --force
+npm run grocy:diff-config -- --manifest examples/desired-state.example.json --export examples/config-export.example.json --output data/demo-config-sync-plan.json --preview-output data/demo-config-diff-preview-report.json --force
 ```
 
-Expected result: the generated plan contains one reviewed update for `Example Coffee`.
+Expected result: the generated plan contains one reviewed update for `Example Coffee`, and the diff preview report records that same update without requiring an apply dry-run step first.
 
 ## Config Drift Trend
 
