@@ -78,7 +78,7 @@ function listChangedFiles(args: ParsedArgs): string[] {
 
 function walk(directory: string, output: string[]): void {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
-    if (entry.name === "node_modules" || entry.name === ".git" || entry.name === ".runtime" || entry.name === "dist") {
+    if (entry.name === "node_modules" || entry.name === ".git" || entry.name === ".runtime" || entry.name === "dist" || entry.name === "generated") {
       continue;
     }
     const absolutePath = path.join(directory, entry.name);
@@ -135,14 +135,14 @@ function buildReport(absolutePath: string, args: ParsedArgs): FileReport {
 
 function collectReports(args: ParsedArgs): FileReport[] {
   const changedFiles = listChangedFiles(args);
-  const changedOnly = args.staged || Boolean(args.changedAgainst) || args.files.length > 0;
-  const absoluteFiles = changedOnly
-    ? changedFiles.map(toAbsolutePath).filter((candidate) => fs.existsSync(candidate))
-    : (() => {
-        const discovered: string[] = [];
-        walk(repoRoot, discovered);
-        return discovered;
-      })();
+  const absoluteFiles =
+    changedFiles.length > 0
+      ? changedFiles.map(toAbsolutePath).filter((candidate) => fs.existsSync(candidate))
+      : (() => {
+          const discovered: string[] = [];
+          walk(repoRoot, discovered);
+          return discovered;
+        })();
   return absoluteFiles
     .map((absolutePath) => buildReport(absolutePath, args))
     .filter((report) => isTrackedSurface(report.filePath))
