@@ -63,6 +63,7 @@
     "grocy:backup:restore-plan": "tsx src/cli.ts grocy:backup:restore-plan",
     "grocy:backup:restore-drill": "tsx src/cli.ts grocy:backup:restore-drill",
     "grocy:backup:restore-failure-drill": "tsx src/cli.ts grocy:backup:restore-failure-drill",
+    "grocy:backup:retention-simulate": "tsx src/cli.ts grocy:backup:retention-simulate",
     "grocy:review:dashboard": "tsx src/cli.ts grocy:review:dashboard",
     "grocy:artifacts:audit-redaction": "tsx src/cli.ts grocy:artifacts:audit-redaction",
     "grocy:support:bundle": "tsx src/cli.ts grocy:support:bundle",
@@ -78,7 +79,9 @@
     "lint:fix": "eslint . --fix",
     "lint:typechecked": "eslint . --config eslint.typechecked.config.mjs",
     "verify:session": "npm run lint && npm run typecheck && npm run test && npm run check:agent-surface",
-    "grocy:backup:retention-simulate": "tsx src/cli.ts grocy:backup:retention-simulate"
+    "arch": "depcruise . --exclude \"(^|/)(dist|build|coverage|.runtime|.sandbox-tmp)/\" --config .dependency-cruiser.cjs --ignore-known .dependency-cruiser-known-violations.json --output-type err",
+    "arch:baseline": "depcruise . --exclude \"(^|/)(dist|build|coverage|.runtime|.sandbox-tmp)/\" --config .dependency-cruiser.cjs --output-type baseline --output-to .dependency-cruiser-known-violations.json",
+    "arch:graph": "depcruise . --exclude \"(^|/)(dist|build|coverage|.runtime|.sandbox-tmp)/\" --config .dependency-cruiser.cjs --ignore-known .dependency-cruiser-known-violations.json --output-type mermaid"
   },
   "dependencies": {
     "zod": "^4.3.6"
@@ -92,6 +95,7 @@
     "eslint": "^10.2.0",
     "globals": "^16.5.0",
     "ts-morph": "^27.0.2",
-    "typescript-eslint": "^8.50.0"
+    "typescript-eslint": "^8.50.0",
+    "dependency-cruiser": "^17.3.10"
   }
 }
