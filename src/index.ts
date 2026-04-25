@@ -47,6 +47,16 @@ export * from "./inventory-snapshot.js";
 export * from "./init-workspace.js";
 export * from "./install-doctor.js";
 export * from "./mock-smoke.js";
+export {
+  createGrocyMultiInstanceNamespacePrototype,
+  GROCY_MULTI_INSTANCE_NAMESPACE_PROTOTYPE_PATH,
+  recordGrocyMultiInstanceNamespacePrototype,
+} from "./multi-instance-namespace-prototype.js";
+export type {
+  GrocyMultiInstanceNamespacePrototypeArtifact,
+  GrocyMultiInstanceNamespacePrototypeNamespace,
+  GrocyMultiInstanceNamespacePrototypeValidation,
+} from "./multi-instance-namespace-prototype.js";
 export * from "./object-coverage-playground.js";
 export * from "./quickstart-proof-schema.js";
 export * from "./quickstart-proof.js";

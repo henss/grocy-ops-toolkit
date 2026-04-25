@@ -356,6 +356,43 @@ export const GrocyObjectCoveragePlaygroundSchema = z.object({
   reviewNotes: z.array(z.string().min(1)).default([]),
 });
 
+export const GrocyMultiInstanceNamespacePrototypeNamespaceSchema = z.object({
+  namespaceId: z.string().min(1),
+  rootDir: z.string().min(1),
+  configDir: z.string().min(1),
+  dataDir: z.string().min(1),
+  backupsDir: z.string().min(1),
+  restoreDir: z.string().min(1),
+  grocyConfigPath: z.string().min(1),
+  backupConfigPath: z.string().min(1),
+  notes: z.array(z.string().min(1)).default([]),
+});
+
+export const GrocyMultiInstanceNamespacePrototypeValidationSchema = z.object({
+  id: z.enum(["namespace_roots_unique", "conventional_local_paths", "namespace_paths_non_overlapping"]),
+  status: z.enum(["pass", "fail"]),
+  message: z.string().min(1),
+  evidence: z.array(z.string().min(1)).default([]),
+});
+
+export const GrocyMultiInstanceNamespacePrototypeSchema = z.object({
+  kind: z.literal("grocy_multi_instance_namespace_prototype"),
+  version: z.literal(1),
+  generatedAt: z.string().min(1),
+  scope: z.literal("synthetic_namespace_example"),
+  summary: z.object({
+    namespaceCount: z.number().int().nonnegative(),
+    validationStatus: z.enum(["pass", "fail"]),
+    validationCount: z.number().int().nonnegative(),
+    passCount: z.number().int().nonnegative(),
+    failCount: z.number().int().nonnegative(),
+    overlappingPathCount: z.number().int().nonnegative(),
+  }),
+  namespaces: z.array(GrocyMultiInstanceNamespacePrototypeNamespaceSchema).default([]),
+  validations: z.array(GrocyMultiInstanceNamespacePrototypeValidationSchema).default([]),
+  reviewNotes: z.array(z.string().min(1)).default([]),
+});
+
 export const GrocyBackupRestoreFailureCategorySchema = z.enum([
   "archive_unreadable",
   "archive_format_unsupported",
@@ -487,6 +524,9 @@ export type GrocyToolkitRunReceipt = z.infer<typeof GrocyToolkitRunReceiptSchema
 export type GrocyObjectCoveragePlaygroundScenario = z.infer<typeof GrocyObjectCoveragePlaygroundScenarioSchema>;
 export type GrocyObjectCoveragePlaygroundEntry = z.infer<typeof GrocyObjectCoveragePlaygroundEntrySchema>;
 export type GrocyObjectCoveragePlayground = z.infer<typeof GrocyObjectCoveragePlaygroundSchema>;
+export type GrocyMultiInstanceNamespacePrototypeNamespace = z.infer<typeof GrocyMultiInstanceNamespacePrototypeNamespaceSchema>;
+export type GrocyMultiInstanceNamespacePrototypeValidation = z.infer<typeof GrocyMultiInstanceNamespacePrototypeValidationSchema>;
+export type GrocyMultiInstanceNamespacePrototype = z.infer<typeof GrocyMultiInstanceNamespacePrototypeSchema>;
 export type GrocyBackupRestoreFailureCategory = z.infer<typeof GrocyBackupRestoreFailureCategorySchema>;
 export type GrocyBackupRecord = z.infer<typeof GrocyBackupRecordSchema>;
 export type GrocyBackupManifest = z.infer<typeof GrocyBackupManifestSchema>;

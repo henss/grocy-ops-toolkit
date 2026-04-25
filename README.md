@@ -128,6 +128,8 @@ For the shortest evaluator walkthrough, see [Synthetic Evaluator Starter Pack](d
 
 For a smaller entrypoint that maps the main synthetic example families to their commands, docs, and example artifacts, see [Quickstart Fixture Gallery](docs/quickstart-fixture-gallery.md).
 
+For a fixture-only proof that two Grocy instance namespaces can keep conventional local paths without overlapping each other, see [Multi-Instance Namespace Prototype](docs/multi-instance-namespace-prototype.md).
+
 For a reusable GitHub Actions path that turns the synthetic desired-state review flow into uploaded CI artifacts, see [Synthetic GitOps Drift CI Template](docs/synthetic-gitops-drift-ci-template.md).
 
 ## No-Install Example Preview
@@ -613,6 +615,22 @@ data/grocy-object-coverage-playground.json
 
 The playground repackages the synthetic compatibility fixtures as explicit object-coverage scenarios so you can inspect which surfaces are currently `covered`, `degraded`, or `missing` without implying live Grocy certification. For details, see [Synthetic Object Coverage Playground](docs/synthetic-object-coverage-playground.md).
 
+## Multi-Instance Namespace Prototype
+
+Generate a fixture-only namespace proof that shows how two Grocy instance roots can keep conventional local directories without colliding:
+
+```bash
+npm run grocy:namespace:prototype
+```
+
+By default, the prototype is written to:
+
+```text
+data/grocy-multi-instance-namespace-prototype.json
+```
+
+The artifact models namespace roots such as `instances/demo-alpha` and `instances/demo-beta`, then validates that each one keeps its own `config/`, `data/`, `backups/`, and `restore/` subtree plus conventional local config filenames. It is a synthetic layout proof only and does not widen the toolkit's public command surface into a broader multi-tenant contract. For details, see [Multi-Instance Namespace Prototype](docs/multi-instance-namespace-prototype.md).
+
 ## Read-Only Pantry Boundary Probe
 
 For the current public-safe inventory boundary, see [Read-Only Pantry Boundary Probe](docs/read-only-pantry-boundary-probe.md).
@@ -900,6 +918,7 @@ npm run grocy:compatibility:schema-capture
 npm run grocy:bug-report:trace
 npm run grocy:compatibility:deprecation-canary
 npm run grocy:coverage:playground
+npm run grocy:namespace:prototype
 npm run grocy:smoke:mock
 npm run grocy:fixtures:serve
 npm run grocy:export-config

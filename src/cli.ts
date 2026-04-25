@@ -51,6 +51,10 @@ import { createGrocyApiCompatibilityMatrix, recordGrocyApiCompatibilityMatrix } 
 import { createGrocyApiDeprecationCanaryReport, recordGrocyApiDeprecationCanaryReport } from "./deprecation-canary.js";
 import { startGrocyFixtureServer } from "./fixture-server.js";
 import { recordGrocyMockSmokeReport, runGrocyMockSmokeTest } from "./mock-smoke.js";
+import {
+  createGrocyMultiInstanceNamespacePrototype,
+  recordGrocyMultiInstanceNamespacePrototype,
+} from "./multi-instance-namespace-prototype.js";
 import { createGrocyObjectCoveragePlayground, recordGrocyObjectCoveragePlayground } from "./object-coverage-playground.js";
 import {
   createGrocySchemaFixtureCaptureFromLiveConfig,
@@ -294,6 +298,18 @@ async function main(): Promise<void> {
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
     printJson({ outputPath, summary: playground.summary });
+    return;
+  }
+  if (command === "grocy:namespace:prototype") {
+    const prototype = createGrocyMultiInstanceNamespacePrototype();
+    const outputPath = recordGrocyMultiInstanceNamespacePrototype(prototype, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: prototype.summary });
+    if (prototype.summary.validationStatus !== "pass") {
+      process.exitCode = 1;
+    }
     return;
   }
   if (command === "grocy:export-config") {

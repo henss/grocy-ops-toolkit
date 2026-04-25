@@ -43,6 +43,8 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-object-coverage-playground.example.json` shows the fixture-only object coverage playground emitted by `npm run grocy:coverage:playground`.
 
+`grocy-multi-instance-namespace-prototype.example.json` shows the fixture-only namespace layout proof emitted by `npm run grocy:namespace:prototype`.
+
 `grocy-inventory-snapshot.example.json` shows the prototype read-only inventory snapshot emitted by `npm run grocy:inventory:snapshot` from the `stock` and `products` read surfaces only.
 
 `grocy-shopping-state-export.example.json` shows the read-only shopping-state export emitted by `npm run grocy:shopping-state:export` from the `shopping_lists` and `shopping_list` read surfaces only.
@@ -68,6 +70,8 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 `grocy-backup-integrity-receipt-verification.example.json` shows the public-safe verifier result emitted by `npm run grocy:backup:receipt:verify` when the stored receipt still matches the manifest and proof artifacts.
 
 For the quickest map from these example files to their matching commands and docs, see [Quickstart Fixture Gallery](../docs/quickstart-fixture-gallery.md).
+
+For the namespace layout proof that validates synthetic instance roots such as `instances/demo-alpha`, see [Multi-Instance Namespace Prototype](../docs/multi-instance-namespace-prototype.md).
 
 For a built-checkout preview that uses `npx --no-install grocy-ops-toolkit` to regenerate the health and backup example shapes without a global install step, see the repository-level [No-Install Example Preview](../README.md#no-install-example-preview).
 

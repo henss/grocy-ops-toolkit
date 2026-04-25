@@ -58,6 +58,7 @@
     "grocy:bug-report:trace": "tsx src/cli.ts grocy:bug-report:trace",
     "grocy:compatibility:deprecation-canary": "tsx src/cli.ts grocy:compatibility:deprecation-canary",
     "grocy:coverage:playground": "tsx src/cli.ts grocy:coverage:playground",
+    "grocy:namespace:prototype": "tsx src/cli.ts grocy:namespace:prototype",
     "grocy:smoke:mock": "tsx src/cli.ts grocy:smoke:mock",
     "grocy:smoke:secret-rotation": "tsx src/cli.ts grocy:smoke:secret-rotation",
     "grocy:fixtures:serve": "tsx src/cli.ts grocy:fixtures:serve",

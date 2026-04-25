@@ -1,0 +1,69 @@
+{
+  "kind": "grocy_multi_instance_namespace_prototype",
+  "version": 1,
+  "generatedAt": "2026-04-25T12:32:20.883Z",
+  "scope": "synthetic_namespace_example",
+  "summary": {
+    "namespaceCount": 2,
+    "validationStatus": "pass",
+    "validationCount": 3,
+    "passCount": 3,
+    "failCount": 0,
+    "overlappingPathCount": 0
+  },
+  "namespaces": [
+    {
+      "namespaceId": "demo-alpha",
+      "rootDir": "instances/demo-alpha",
+      "configDir": "instances/demo-alpha/config",
+      "dataDir": "instances/demo-alpha/data",
+      "backupsDir": "instances/demo-alpha/backups",
+      "restoreDir": "instances/demo-alpha/restore",
+      "grocyConfigPath": "instances/demo-alpha/config/grocy.local.json",
+      "backupConfigPath": "instances/demo-alpha/config/grocy-backup.local.json",
+      "notes": [
+        "Each namespace keeps the toolkit's conventional config, data, backups, and restore directories under its own root.",
+        "This prototype proves layout separation only; it does not widen the public command surface into a broader multi-tenant contract."
+      ]
+    },
+    {
+      "namespaceId": "demo-beta",
+      "rootDir": "instances/demo-beta",
+      "configDir": "instances/demo-beta/config",
+      "dataDir": "instances/demo-beta/data",
+      "backupsDir": "instances/demo-beta/backups",
+      "restoreDir": "instances/demo-beta/restore",
+      "grocyConfigPath": "instances/demo-beta/config/grocy.local.json",
+      "backupConfigPath": "instances/demo-beta/config/grocy-backup.local.json",
+      "notes": [
+        "Each namespace keeps the toolkit's conventional config, data, backups, and restore directories under its own root.",
+        "This prototype proves layout separation only; it does not widen the public command surface into a broader multi-tenant contract."
+      ]
+    }
+  ],
+  "validations": [
+    {
+      "id": "namespace_roots_unique",
+      "status": "pass",
+      "message": "Each synthetic namespace example resolves to a unique workspace root.",
+      "evidence": []
+    },
+    {
+      "id": "conventional_local_paths",
+      "status": "pass",
+      "message": "Every namespace example keeps the toolkit's conventional local directory and config filenames.",
+      "evidence": []
+    },
+    {
+      "id": "namespace_paths_non_overlapping",
+      "status": "pass",
+      "message": "Each namespace keeps distinct config, data, backup, restore, and local config file paths.",
+      "evidence": []
+    }
+  ],
+  "reviewNotes": [
+    "This artifact is a synthetic layout proof for multiple Grocy instance namespaces and contains no live Grocy data, credentials, or private domestic details.",
+    "The prototype keeps conventional local paths inside each namespace root instead of redefining the toolkit's public defaults.",
+    "Treat this as support-infrastructure validation, not as a broader package publication or multi-tenant API commitment."
+  ]
+}
