@@ -1,3 +1,13 @@
+export {
+  createGrocyApiTraceHarnessFromLiveConfig,
+  createGrocyApiTraceHarnessFromSyntheticFixture,
+  createGrocyReplayFetch,
+  GROCY_API_TRACE_HARNESS_PATH,
+  GrocyApiTraceEntrySchema,
+  GrocyApiTraceHarnessSchema,
+  recordGrocyApiTraceHarness,
+} from "./api-trace-harness.js";
+export type { GrocyApiTraceEntry, GrocyApiTraceHarness } from "./api-trace-harness.js";
 export * from "./backup-integrity-receipt.js";
 export * from "./backup-integrity-receipt-schema.js";
 export * from "./backup-verification-report.js";

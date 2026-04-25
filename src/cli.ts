@@ -1,6 +1,11 @@
 #!/usr/bin/env node
 
 import {
+  createGrocyApiTraceHarnessFromLiveConfig,
+  createGrocyApiTraceHarnessFromSyntheticFixture,
+  recordGrocyApiTraceHarness,
+} from "./api-trace-harness.js";
+import {
   applyGrocyConfigSyncPlan,
   createGrocyConfigDiffPreviewReport,
   createGrocyConfigDriftTrendReport,
@@ -253,6 +258,20 @@ async function main(): Promise<void> {
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
     printJson({ outputPath, summary: capture.summary, source: capture.source });
+    return;
+  }
+  if (command === "grocy:bug-report:trace") {
+    if (parseFlag("--fixture") && parseFlag("--config")) {
+      throw new Error("Use either --fixture <id> or --config <path>, not both.");
+    }
+    const trace = parseFlag("--config")
+      ? await createGrocyApiTraceHarnessFromLiveConfig(process.cwd(), { configPath: parseFlag("--config") })
+      : createGrocyApiTraceHarnessFromSyntheticFixture(parseFlag("--fixture"));
+    const outputPath = recordGrocyApiTraceHarness(trace, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: trace.summary, source: trace.source });
     return;
   }
   if (command === "grocy:compatibility:deprecation-canary") {

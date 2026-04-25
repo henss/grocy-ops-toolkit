@@ -27,6 +27,7 @@ It can:
 - Generate an offline sanitized support bundle manifest from local generated artifacts.
 - Generate a synthetic Grocy API compatibility matrix for fixture-only API-shape review.
 - Capture schema-only Grocy endpoint shapes for upgrade tests without storing payload values.
+- Record a redacted Grocy API trace artifact and replay it through a fetch-compatible harness for bug-report reproduction.
 - Generate a synthetic Grocy API deprecation canary report for upgrade-risk review.
 - Generate a synthetic Grocy object coverage playground for fixture-only endpoint coverage review.
 - Export a stable read-only inventory snapshot artifact derived only from Grocy stock and product reads.
@@ -543,6 +544,22 @@ data/grocy-schema-fixture-capture.json
 
 Use `--fixture <id>` to inspect a different synthetic API shape, or `--config <path>` to read a live Grocy instance through the local config while still emitting only schema metadata. The artifact stores field paths, type unions, and field presence, but it does not serialize Grocy payload values, base URLs, API keys, or private workflow context. For details, see [Grocy Schema Fixture Capture](docs/grocy-schema-fixture-capture.md).
 
+## Redacted API Trace Harness
+
+Record a public-safe trace artifact for Grocy bug-report reproduction:
+
+```bash
+npm run grocy:bug-report:trace
+```
+
+By default, the trace is written to:
+
+```text
+data/grocy-api-trace-harness.json
+```
+
+The default mode records the repo's synthetic fixture surfaces so the artifact can be shared and replayed safely. Use `--fixture <id>` to select a different synthetic API shape, or `--config <path>` to read a live Grocy instance while redacting all response values into shape-preserving placeholders before writing the artifact. The replay harness reuses the recorded status codes, paths, and JSON shapes through a fetch-compatible adapter instead of proxying live traffic. For details, see [Grocy API Trace Harness](docs/grocy-api-trace-harness.md).
+
 ## API Deprecation Canary Report
 
 Generate a synthetic canary report that interprets compatibility gaps as upgrade-risk signals:
@@ -859,6 +876,7 @@ npm run grocy:shopping-state:export
 npm run grocy:desired-state:lint
 npm run grocy:compatibility:matrix
 npm run grocy:compatibility:schema-capture
+npm run grocy:bug-report:trace
 npm run grocy:compatibility:deprecation-canary
 npm run grocy:coverage:playground
 npm run grocy:smoke:mock

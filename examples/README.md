@@ -35,6 +35,8 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-api-compatibility-matrix.example.json` shows the fixture-only matrix shape emitted by `npm run grocy:compatibility:matrix`.
 
+`grocy-api-trace-harness.example.json` shows the prototype redacted trace artifact emitted by `npm run grocy:bug-report:trace`.
+
 `grocy-api-deprecation-canary-report.example.json` shows the synthetic upgrade-risk report emitted by `npm run grocy:compatibility:deprecation-canary`.
 
 `grocy-object-coverage-playground.example.json` shows the fixture-only object coverage playground emitted by `npm run grocy:coverage:playground`.

@@ -1,0 +1,278 @@
+{
+  "kind": "grocy_api_trace_harness",
+  "version": 1,
+  "generatedAt": "2026-04-25T09:00:29.080Z",
+  "source": {
+    "mode": "synthetic_fixture",
+    "fixtureId": "fixture-current-object-api",
+    "fixtureLabel": "Current object API shape"
+  },
+  "summary": {
+    "entryCount": 9,
+    "successCount": 9,
+    "missingCount": 0,
+    "redactedValueCount": 0
+  },
+  "replay": {
+    "baseUrl": "https://replay.grocy-ops.invalid/api",
+    "supportedPaths": [
+      "/api/system/info",
+      "/api/stock",
+      "/api/objects/products",
+      "/api/objects/product_groups",
+      "/api/objects/locations",
+      "/api/objects/quantity_units",
+      "/api/objects/product_barcodes",
+      "/api/objects/shopping_lists",
+      "/api/objects/shopping_list"
+    ]
+  },
+  "entries": [
+    {
+      "surface": "system_info",
+      "request": {
+        "method": "GET",
+        "path": "/system/info",
+        "headers": {
+          "accept": "application/json"
+        }
+      },
+      "response": {
+        "statusCode": 200,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "grocy_version": "synthetic-current"
+        }
+      },
+      "reviewNotes": [
+        "Synthetic trace bodies use the repo's public-safe fixture values."
+      ]
+    },
+    {
+      "surface": "stock",
+      "request": {
+        "method": "GET",
+        "path": "/stock",
+        "headers": {
+          "accept": "application/json"
+        }
+      },
+      "response": {
+        "statusCode": 200,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": [
+          {
+            "product_id": "1",
+            "product_name": "Example Coffee",
+            "amount_aggregated": 2,
+            "product": {
+              "min_stock_amount": 1,
+              "qu_id_stock": "1",
+              "qu_id_purchase": "1"
+            }
+          }
+        ]
+      },
+      "reviewNotes": [
+        "Synthetic trace bodies use the repo's public-safe fixture values."
+      ]
+    },
+    {
+      "surface": "products",
+      "request": {
+        "method": "GET",
+        "path": "/objects/products",
+        "headers": {
+          "accept": "application/json"
+        }
+      },
+      "response": {
+        "statusCode": 200,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": [
+          {
+            "id": "1",
+            "name": "Example Coffee",
+            "min_stock_amount": 1,
+            "last_price": 12.34
+          },
+          {
+            "id": "2",
+            "name": "Example Tea",
+            "min_stock_amount": 1,
+            "last_price": 4.56
+          }
+        ]
+      },
+      "reviewNotes": [
+        "Synthetic trace bodies use the repo's public-safe fixture values."
+      ]
+    },
+    {
+      "surface": "product_groups",
+      "request": {
+        "method": "GET",
+        "path": "/objects/product_groups",
+        "headers": {
+          "accept": "application/json"
+        }
+      },
+      "response": {
+        "statusCode": 200,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": [
+          {
+            "id": "1",
+            "name": "Example Staples"
+          }
+        ]
+      },
+      "reviewNotes": [
+        "Synthetic trace bodies use the repo's public-safe fixture values."
+      ]
+    },
+    {
+      "surface": "locations",
+      "request": {
+        "method": "GET",
+        "path": "/objects/locations",
+        "headers": {
+          "accept": "application/json"
+        }
+      },
+      "response": {
+        "statusCode": 200,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": [
+          {
+            "id": "1",
+            "name": "Example Shelf"
+          }
+        ]
+      },
+      "reviewNotes": [
+        "Synthetic trace bodies use the repo's public-safe fixture values."
+      ]
+    },
+    {
+      "surface": "quantity_units",
+      "request": {
+        "method": "GET",
+        "path": "/objects/quantity_units",
+        "headers": {
+          "accept": "application/json"
+        }
+      },
+      "response": {
+        "statusCode": 200,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": [
+          {
+            "id": "1",
+            "name": "Example Unit",
+            "name_plural": "Example Units"
+          }
+        ]
+      },
+      "reviewNotes": [
+        "Synthetic trace bodies use the repo's public-safe fixture values."
+      ]
+    },
+    {
+      "surface": "product_barcodes",
+      "request": {
+        "method": "GET",
+        "path": "/objects/product_barcodes",
+        "headers": {
+          "accept": "application/json"
+        }
+      },
+      "response": {
+        "statusCode": 200,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": [
+          {
+            "id": "1",
+            "product_id": "1",
+            "barcode": "0000000000000"
+          }
+        ]
+      },
+      "reviewNotes": [
+        "Synthetic trace bodies use the repo's public-safe fixture values."
+      ]
+    },
+    {
+      "surface": "shopping_lists",
+      "request": {
+        "method": "GET",
+        "path": "/objects/shopping_lists",
+        "headers": {
+          "accept": "application/json"
+        }
+      },
+      "response": {
+        "statusCode": 200,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": [
+          {
+            "id": "1",
+            "name": "Example List"
+          }
+        ]
+      },
+      "reviewNotes": [
+        "Synthetic trace bodies use the repo's public-safe fixture values."
+      ]
+    },
+    {
+      "surface": "shopping_list",
+      "request": {
+        "method": "GET",
+        "path": "/objects/shopping_list",
+        "headers": {
+          "accept": "application/json"
+        }
+      },
+      "response": {
+        "statusCode": 200,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": [
+          {
+            "id": "1",
+            "product_id": "2",
+            "product_name": "Example Tea",
+            "amount": 1,
+            "note": "Synthetic pending item",
+            "done": 0
+          }
+        ]
+      },
+      "reviewNotes": [
+        "Synthetic trace bodies use the repo's public-safe fixture values."
+      ]
+    }
+  ],
+  "reviewNotes": [
+    "Synthetic traces are the safest bug-report artifact because they replay from public-safe fixture values.",
+    "When a live Grocy instance is needed, use the live capture mode and review the redacted placeholders before sharing."
+  ]
+}
