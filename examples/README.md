@@ -41,6 +41,8 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-inventory-snapshot.example.json` shows the prototype read-only inventory snapshot emitted by `npm run grocy:inventory:snapshot` from the `stock` and `products` read surfaces only.
 
+`grocy-shopping-state-export.example.json` shows the read-only shopping-state export emitted by `npm run grocy:shopping-state:export` from the `shopping_lists` and `shopping_list` read surfaces only.
+
 `grocy-review-dashboard.example.md` shows the public-safe Markdown dashboard shape rendered from existing synthetic JSON artifacts.
 
 `grocy-public-artifact-redaction-audit.example.json` shows a passing public-boundary audit report for generated JSON and Markdown artifacts.

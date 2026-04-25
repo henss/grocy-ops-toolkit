@@ -75,6 +75,7 @@ import {
   recordGrocySecretRotationSmokeReport,
   runGrocySecretRotationSmokeTest,
 } from "./secret-rotation-smoke.js";
+import { recordGrocyShoppingStateExport, runGrocyShoppingStateExport } from "./shopping-state-export.js";
 import { createGrocySupportBundle, recordGrocySupportBundle } from "./support-bundle.js";
 
 function parseFlag(flag: string): string | undefined {
@@ -143,6 +144,15 @@ async function main(): Promise<void> {
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
     printJson({ outputPath, summary: snapshot.summary });
+    return;
+  }
+  if (command === "grocy:shopping-state:export") {
+    const shoppingState = await runGrocyShoppingStateExport(process.cwd());
+    const outputPath = recordGrocyShoppingStateExport(shoppingState, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: shoppingState.summary });
     return;
   }
   if (command === "grocy:install:doctor") {

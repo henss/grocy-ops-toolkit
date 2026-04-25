@@ -1,0 +1,65 @@
+{
+  "kind": "grocy_shopping_state_export",
+  "version": 1,
+  "generatedAt": "2026-04-25T08:15:00.000Z",
+  "scope": "shopping_lists_read_only",
+  "source": {
+    "toolId": "grocy",
+    "surfaces": ["shopping_lists", "shopping_list"]
+  },
+  "summary": {
+    "listCount": 2,
+    "itemCount": 3,
+    "openItemCount": 2,
+    "completedItemCount": 1,
+    "productCount": 3,
+    "itemWithListAssignmentCount": 2
+  },
+  "lists": [
+    {
+      "listId": "1",
+      "listName": "Main pantry run"
+    },
+    {
+      "listId": "2",
+      "listName": "Weekend shop"
+    }
+  ],
+  "items": [
+    {
+      "itemId": "1",
+      "listId": "1",
+      "listName": "Main pantry run",
+      "productId": "11",
+      "productName": "Example Coffee",
+      "quantity": "2",
+      "quantityNumeric": 2,
+      "quantityUnitId": "1",
+      "note": "Synthetic staple restock.",
+      "done": false
+    },
+    {
+      "itemId": "3",
+      "productId": "15",
+      "productName": "Example Filters",
+      "quantity": "1",
+      "quantityNumeric": 1,
+      "done": false
+    },
+    {
+      "itemId": "2",
+      "listId": "2",
+      "listName": "Weekend shop",
+      "productId": "12",
+      "productName": "Example Tea",
+      "quantity": "1",
+      "quantityNumeric": 1,
+      "note": "Synthetic completed item.",
+      "done": true
+    }
+  ],
+  "reviewNotes": [
+    "Derived only from the Grocy shopping_lists and shopping_list read surfaces.",
+    "Represents current shopping state only; excludes pantry policy, recommendation logic, calendar/task integrations, and private workflow context."
+  ]
+}

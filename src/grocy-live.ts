@@ -47,6 +47,7 @@ export interface GrocyStockRecord {
 
 export interface GrocyShoppingListRecord {
   itemId: string;
+  listId?: string;
   productId?: string;
   productName: string;
   quantity?: string;
@@ -54,6 +55,11 @@ export interface GrocyShoppingListRecord {
   quantityUnitId?: string;
   note?: string;
   done: boolean;
+}
+
+export interface GrocyShoppingListDefinitionRecord {
+  listId: string;
+  listName: string;
 }
 
 export interface GrocyProductRecord {
@@ -251,6 +257,7 @@ function mapGrocyShoppingListRecord(raw: unknown): GrocyShoppingListRecord {
   const doneValue = record.done ?? record.completed ?? record.bought;
   return {
     itemId: asString(record.id) ?? "unknown-item",
+    listId: asString(record.shopping_list_id) ?? asString(record.list_id),
     productId: asString(record.product_id) ?? asString(product.id),
     productName: asString(record.product_name) ?? asString(product.name) ?? asString(record.note) ?? "Unknown item",
     quantity: asString(record.amount),
@@ -258,6 +265,14 @@ function mapGrocyShoppingListRecord(raw: unknown): GrocyShoppingListRecord {
     quantityUnitId: asString(record.qu_id),
     note: asString(record.note),
     done: doneValue === true || doneValue === 1 || doneValue === "1",
+  };
+}
+
+function mapGrocyShoppingListDefinitionRecord(raw: unknown): GrocyShoppingListDefinitionRecord {
+  const record = (raw ?? {}) as Record<string, unknown>;
+  return {
+    listId: asString(record.id) ?? "unknown-list",
+    listName: asString(record.name) ?? "Unknown list",
   };
 }
 
@@ -279,6 +294,9 @@ export function createGrocyLiveReadSurface(config: GrocyLiveConfig, fetchImpl: t
   return {
     async listStock(): Promise<GrocyStockRecord[]> {
       return (await fetchGrocyJson<unknown[]>(config, "/stock", fetchImpl)).map(mapGrocyStockRecord);
+    },
+    async listShoppingLists(): Promise<GrocyShoppingListDefinitionRecord[]> {
+      return (await fetchGrocyJson<unknown[]>(config, "/objects/shopping_lists", fetchImpl)).map(mapGrocyShoppingListDefinitionRecord);
     },
     async listShoppingList(input?: { includeCompleted?: boolean }): Promise<GrocyShoppingListRecord[]> {
       const records = (await fetchGrocyJson<unknown[]>(config, "/objects/shopping_list", fetchImpl)).map(mapGrocyShoppingListRecord);

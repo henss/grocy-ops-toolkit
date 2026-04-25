@@ -29,5 +29,7 @@ export * from "./schema-fixture-capture.js";
 export * from "./schemas.js";
 export * from "./secret-rotation-smoke-schema.js";
 export * from "./secret-rotation-smoke.js";
+export * from "./shopping-state-export-schema.js";
+export * from "./shopping-state-export.js";
 export * from "./support-bundle.js";
 export * from "./synthetic-grocy-fixtures.js";

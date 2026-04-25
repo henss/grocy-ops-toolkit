@@ -43,6 +43,7 @@
     "grocy:health:badge": "tsx src/cli.ts grocy:health:badge",
     "grocy:health:diagnostics": "tsx src/cli.ts grocy:health:diagnostics",
     "grocy:inventory:snapshot": "tsx src/cli.ts grocy:inventory:snapshot",
+    "grocy:shopping-state:export": "tsx src/cli.ts grocy:shopping-state:export",
     "grocy:desired-state:lint": "tsx src/cli.ts grocy:desired-state:lint",
     "grocy:compatibility:matrix": "tsx src/cli.ts grocy:compatibility:matrix",
     "grocy:compatibility:schema-capture": "tsx src/cli.ts grocy:compatibility:schema-capture",

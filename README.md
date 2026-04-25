@@ -29,6 +29,7 @@ It can:
 - Generate a synthetic Grocy API deprecation canary report for upgrade-risk review.
 - Generate a synthetic Grocy object coverage playground for fixture-only endpoint coverage review.
 - Export a stable read-only inventory snapshot artifact derived only from Grocy stock and product reads.
+- Export a stable read-only shopping-state artifact derived only from Grocy shopping-list reads.
 - Run a local synthetic Grocy API fixture server for read-only endpoint prototyping without live credentials.
 
 ## Requirements
@@ -595,6 +596,22 @@ data/grocy-inventory-snapshot.json
 
 The snapshot derives only from the Grocy `/stock` and `/objects/products` read surfaces. It intentionally excludes shopping-list state, pantry policy, recommendation logic, calendar/task integrations, and other private workflow context. See `examples/grocy-inventory-snapshot.example.json` for the public-safe example shape.
 
+## Shopping-State Export
+
+Export a stable read-only shopping-state artifact for private consumers:
+
+```bash
+npm run grocy:shopping-state:export
+```
+
+By default, the export is written to:
+
+```text
+data/grocy-shopping-state-export.json
+```
+
+The export derives only from the Grocy `/objects/shopping_lists` and `/objects/shopping_list` read surfaces. It records current list and item state without adding pantry policy, replenishment recommendations, calendar/task integrations, or other private workflow context. See `examples/grocy-shopping-state-export.example.json` for the public-safe example shape and [Read-Only Shopping-State Export](docs/read-only-shopping-state-export.md) for the bounded scope note.
+
 ## Review Dashboard
 
 Render a Markdown dashboard from existing JSON artifacts:
@@ -812,6 +829,7 @@ npm run grocy:health
 npm run grocy:health:badge
 npm run grocy:health:diagnostics
 npm run grocy:inventory:snapshot
+npm run grocy:shopping-state:export
 npm run grocy:desired-state:lint
 npm run grocy:compatibility:matrix
 npm run grocy:compatibility:schema-capture
