@@ -73,6 +73,12 @@ describe("Grocy health badge", () => {
             evidence: [],
           },
         ],
+        triage: {
+          classification: "healthy",
+          severity: "info",
+          summary: "Grocy health checks passed, so no immediate operator follow-up is required.",
+        },
+        nextActions: [],
       },
     });
 

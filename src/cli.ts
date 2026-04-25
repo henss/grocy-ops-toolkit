@@ -123,7 +123,7 @@ async function main(): Promise<void> {
       outputPath: parseFlag("--output"),
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
-    printJson({ outputPath, summary: artifact.summary });
+    printJson({ outputPath, summary: artifact.summary, triage: artifact.triage, nextActions: artifact.nextActions });
     return;
   }
   if (command === "grocy:inventory:snapshot") {

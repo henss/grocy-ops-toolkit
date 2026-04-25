@@ -451,6 +451,8 @@ data/grocy-health-diagnostics.json
 
 The diagnostics artifact records reachability checks and next actions. It does not store Grocy record contents, API keys, absolute local paths, or live URL values.
 
+It now also records a bounded triage classification plus a short `nextActions` list so operators and automation can distinguish setup gaps, config repair work, and live API investigation without parsing free-form evidence.
+
 Use `--output <path>` to write the artifact somewhere else.
 
 ## Mock Smoke Test

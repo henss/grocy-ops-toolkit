@@ -216,64 +216,13 @@ export const GrocyConfigDriftTrendReportSchema = z.object({
   items: z.array(GrocyConfigDriftTrendItemSchema).default([]),
 });
 
-export const GrocyHealthDiagnosticCodeSchema = z.enum([
-  "config_missing",
-  "config_invalid",
-  "grocy_unreachable",
-  "grocy_reachable",
-]);
-
-export const GrocyHealthDiagnosticSchema = z.object({
-  severity: z.enum(["info", "warning", "error"]),
-  code: GrocyHealthDiagnosticCodeSchema,
-  message: z.string().min(1),
-  agentAction: z.string().min(1),
-  evidence: z.array(z.string().min(1)).default([]),
-});
-
-export const GrocyHealthDiagnosticsArtifactSchema = z.object({
-  kind: z.literal("grocy_health_diagnostics"),
-  version: z.literal(1),
-  generatedAt: z.string().min(1),
-  toolId: z.literal("grocy"),
-  summary: z.object({
-    result: z.enum(["pass", "fail"]),
-    failureCount: z.number().int().nonnegative(),
-    warningCount: z.number().int().nonnegative(),
-  }),
-  checks: z.array(z.object({
-    id: z.enum(["config", "live_api"]),
-    status: z.enum(["pass", "fail", "skipped"]),
-    message: z.string().min(1),
-  })).default([]),
-  diagnostics: z.array(GrocyHealthDiagnosticSchema).default([]),
-});
-
-export const GrocyHealthBadgeArtifactSchema = z.object({
-  kind: z.literal("grocy_health_badge"),
-  version: z.literal(1),
-  generatedAt: z.string().min(1),
-  toolId: z.literal("grocy"),
-  badge: z.object({
-    label: z.literal("grocy health"),
-    message: z.string().min(1),
-    color: z.enum(["green", "red"]),
-  }),
-  summary: z.object({
-    status: z.enum(["pass", "fail"]),
-    failureCodes: z.array(GrocyHealthDiagnosticCodeSchema).default([]),
-    componentCount: z.number().int().nonnegative(),
-  }),
-  components: z
-    .array(
-      z.object({
-        id: z.enum(["config", "live_api"]),
-        status: z.enum(["pass", "fail", "skipped"]),
-        code: GrocyHealthDiagnosticCodeSchema.optional(),
-      }),
-    )
-    .default([]),
-});
+export {
+  GrocyHealthBadgeArtifactSchema,
+  GrocyHealthDiagnosticCodeSchema,
+  GrocyHealthDiagnosticSchema,
+  GrocyHealthDiagnosticsArtifactSchema,
+  GrocyHealthTriageClassificationSchema,
+} from "./health-schemas.js";
 
 export const GrocyInstallDoctorCheckSchema = z.object({
   id: z.enum([
@@ -525,10 +474,13 @@ export type GrocyConfigDriftTrendStatus = z.infer<typeof GrocyConfigDriftTrendSt
 export type GrocyConfigDriftTrendChange = z.infer<typeof GrocyConfigDriftTrendChangeSchema>;
 export type GrocyConfigDriftTrendItem = z.infer<typeof GrocyConfigDriftTrendItemSchema>;
 export type GrocyConfigDriftTrendReport = z.infer<typeof GrocyConfigDriftTrendReportSchema>;
-export type GrocyHealthDiagnosticCode = z.infer<typeof GrocyHealthDiagnosticCodeSchema>;
-export type GrocyHealthDiagnostic = z.infer<typeof GrocyHealthDiagnosticSchema>;
-export type GrocyHealthDiagnosticsArtifact = z.infer<typeof GrocyHealthDiagnosticsArtifactSchema>;
-export type GrocyHealthBadgeArtifact = z.infer<typeof GrocyHealthBadgeArtifactSchema>;
+export type {
+  GrocyHealthBadgeArtifact,
+  GrocyHealthDiagnostic,
+  GrocyHealthDiagnosticCode,
+  GrocyHealthDiagnosticsArtifact,
+  GrocyHealthTriageClassification,
+} from "./health-schemas.js";
 export type GrocyInstallDoctorCheck = z.infer<typeof GrocyInstallDoctorCheckSchema>;
 export type GrocyInstallDoctorArtifact = z.infer<typeof GrocyInstallDoctorArtifactSchema>;
 export type GrocyToolkitRunReceipt = z.infer<typeof GrocyToolkitRunReceiptSchema>;

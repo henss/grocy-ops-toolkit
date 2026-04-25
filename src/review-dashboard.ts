@@ -204,6 +204,10 @@ function renderDiagnostics(diagnostics: GrocyHealthDiagnosticsArtifact | undefin
   }
   return [
     `Result: ${diagnostics.summary.result}; failures: ${diagnostics.summary.failureCount}; warnings: ${diagnostics.summary.warningCount}.`,
+    `Triage: ${diagnostics.triage.classification}; severity: ${diagnostics.triage.severity}. ${diagnostics.triage.summary}`,
+    ...(diagnostics.nextActions.length > 0
+      ? ["", "Next actions:", ...diagnostics.nextActions.map((item) => `- ${item}`)]
+      : []),
     "",
     "| Severity | Code | Action |",
     "| --- | --- | --- |",

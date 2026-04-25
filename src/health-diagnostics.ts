@@ -6,6 +6,7 @@ import {
   runGrocyHealthCheck,
   type GrocyHealthCheckResult,
 } from "./grocy-live.js";
+import { classifyGrocyHealthTriage } from "./health-triage.js";
 import {
   GrocyHealthDiagnosticsArtifactSchema,
   type GrocyHealthDiagnostic,
@@ -97,6 +98,7 @@ export function createGrocyHealthDiagnosticsArtifact(input: {
 }): GrocyHealthDiagnosticsArtifact {
   const configPath = input.configPath ?? DEFAULT_GROCY_CONFIG_PATH;
   const diagnostics = createDiagnostics({ health: input.health, configPath });
+  const triage = classifyGrocyHealthTriage(diagnostics);
   const failureCount = diagnostics.filter((item) => item.severity === "error").length;
   const warningCount = diagnostics.filter((item) => item.severity === "warning").length;
   const missingConfig = diagnostics.some((item) => item.code === "config_missing");
@@ -133,6 +135,8 @@ export function createGrocyHealthDiagnosticsArtifact(input: {
       },
     ],
     diagnostics,
+    triage,
+    nextActions: triage.nextActions,
   });
 }
 

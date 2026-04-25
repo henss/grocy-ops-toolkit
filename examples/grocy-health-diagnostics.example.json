@@ -30,5 +30,15 @@
         "Grocy request failed: 503 Service Unavailable for /stock"
       ]
     }
+  ],
+  "triage": {
+    "classification": "investigate_live_api",
+    "severity": "error",
+    "summary": "Local config is present, but the Grocy live read probes did not complete successfully."
+  },
+  "nextActions": [
+    "Confirm the configured baseUrl points at the intended Grocy instance and is reachable from this machine.",
+    "Confirm the configured API key still has read access for the current health probes.",
+    "Rerun npm run grocy:health:diagnostics after the connectivity or permission issue is resolved."
   ]
 }

@@ -7,6 +7,7 @@ import {
   recordGrocyHealthDiagnosticsArtifact,
   runGrocyHealthDiagnostics,
 } from "../src/health-diagnostics.js";
+import { GrocyHealthDiagnosticsArtifactSchema } from "../src/schemas.js";
 
 function writeConfig(baseDir: string): void {
   fs.mkdirSync(path.join(baseDir, "config"), { recursive: true });
@@ -30,6 +31,16 @@ describe("Grocy health diagnostics", () => {
     });
 
     expect(artifact.summary).toEqual({ result: "fail", failureCount: 1, warningCount: 0 });
+    expect(artifact.triage).toEqual({
+      classification: "setup_required",
+      severity: "error",
+      summary: "Local Grocy config is missing, so live health checks cannot run yet.",
+    });
+    expect(artifact.nextActions).toEqual([
+      "Run npm run grocy:init:workspace if the conventional local directories or starter config files are missing.",
+      "Copy examples/grocy.local.example.json to config/grocy.local.json and set baseUrl plus apiKey for the local Grocy instance.",
+      "Rerun npm run grocy:health:diagnostics after the local config is in place.",
+    ]);
     expect(artifact.diagnostics[0]).toMatchObject({
       severity: "error",
       code: "config_missing",
@@ -48,6 +59,8 @@ describe("Grocy health diagnostics", () => {
     });
 
     expect(artifact.summary.result).toBe("fail");
+    expect(artifact.triage.classification).toBe("investigate_live_api");
+    expect(artifact.nextActions).toHaveLength(3);
     expect(artifact.diagnostics[0]).toMatchObject({
       code: "grocy_unreachable",
       evidence: ["Grocy request failed: 503 Service Unavailable for /stock"],
@@ -65,6 +78,7 @@ describe("Grocy health diagnostics", () => {
     });
 
     expect(artifact.summary.result).toBe("fail");
+    expect(artifact.triage.classification).toBe("repair_required");
     expect(artifact.checks).toContainEqual({
       id: "live_api",
       status: "skipped",
@@ -93,6 +107,12 @@ describe("Grocy health diagnostics", () => {
     });
 
     expect(artifact.summary.result).toBe("pass");
+    expect(artifact.triage).toEqual({
+      classification: "healthy",
+      severity: "info",
+      summary: "Grocy health checks passed, so no immediate operator follow-up is required.",
+    });
+    expect(artifact.nextActions).toEqual([]);
     expect(JSON.stringify(artifact)).not.toContain("stockCount");
     expect(JSON.stringify(artifact)).not.toContain("shoppingListCount");
     expect(JSON.stringify(artifact)).not.toContain("productCount");
@@ -119,6 +139,14 @@ describe("Grocy health diagnostics", () => {
     expect(JSON.parse(fs.readFileSync(outputPath, "utf8"))).toMatchObject({
       kind: "grocy_health_diagnostics",
       summary: { result: "fail" },
+      triage: { classification: "investigate_live_api" },
+      nextActions: expect.any(Array),
     });
+  });
+
+  it("keeps the public example fixture schema-valid", () => {
+    const example = JSON.parse(fs.readFileSync(path.join(process.cwd(), "examples", "grocy-health-diagnostics.example.json"), "utf8")) as unknown;
+
+    expect(() => GrocyHealthDiagnosticsArtifactSchema.parse(example)).not.toThrow();
   });
 });

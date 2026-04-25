@@ -124,6 +124,16 @@ const diagnostics: GrocyHealthDiagnosticsArtifact = {
       evidence: [],
     },
   ],
+  triage: {
+    classification: "investigate_live_api",
+    severity: "error",
+    summary: "Local config is present, but the Grocy live read probes did not complete successfully.",
+  },
+  nextActions: [
+    "Confirm the configured baseUrl points at the intended Grocy instance and is reachable from this machine.",
+    "Confirm the configured API key still has read access for the current health probes.",
+    "Rerun npm run grocy:health:diagnostics after the connectivity or permission issue is resolved.",
+  ],
 };
 
 const backupManifest: GrocyBackupManifest = {
@@ -177,6 +187,8 @@ describe("Grocy review dashboard", () => {
     expect(dashboard).toContain("Period: 2026-04-19T10:00:00.000Z to 2026-04-20T10:00:00.000Z. Changed records: 2; unchanged: 3.");
     expect(dashboard).toContain("| changed | products.example-coffee | products | min_stock_amount |");
     expect(dashboard).toContain("| products.example-duplicate | products | Multiple live Grocy records match this manifest item. |");
+    expect(dashboard).toContain("Triage: investigate_live_api; severity: error. Local config is present, but the Grocy live read probes did not complete successfully.");
+    expect(dashboard).toContain("- Confirm the configured baseUrl points at the intended Grocy instance and is reachable from this machine.");
     expect(dashboard).toContain("Latest record: grocy-backup-20260419102000; files: 2; bytes: 123; restore test: verified.");
   });
 
