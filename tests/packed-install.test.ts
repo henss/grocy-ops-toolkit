@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import type { GrocyBackupRetentionHistory } from "../src/backup-retention-simulation-schema.js";
 
 const repoRoot = process.cwd();
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
@@ -254,6 +255,47 @@ function assertInstalledPreviewScenario(params: {
   });
 }
 
+const retentionHistory: GrocyBackupRetentionHistory = {
+  kind: "grocy_backup_retention_history",
+  version: 1,
+  generatedAt: "2026-04-20T09:31:30.000Z",
+  scope: "synthetic_fixture_only",
+  policy: {
+    hourly: 2,
+    daily: 2,
+    weekly: 1,
+    monthly: 1,
+  },
+  pricing: {
+    currencyCode: "USD",
+    storagePricePerGiBMonth: 0.25,
+  },
+  snapshots: [
+    {
+      id: "snap-2026-04-19-0800",
+      createdAt: "2026-04-19T08:00:00.000Z",
+      logicalBytes: 2147483648,
+      storedBytes: 157286400,
+      notes: ["Synthetic baseline."],
+    },
+    {
+      id: "snap-2026-04-20-0800",
+      createdAt: "2026-04-20T08:00:00.000Z",
+      logicalBytes: 2202009600,
+      storedBytes: 94371840,
+      notes: ["Synthetic daily point."],
+    },
+    {
+      id: "snap-2026-04-20-1200",
+      createdAt: "2026-04-20T12:00:00.000Z",
+      logicalBytes: 2218786816,
+      storedBytes: 83886080,
+      notes: ["Synthetic latest point."],
+    },
+  ],
+  reviewNotes: ["Synthetic package-consumer retention history."],
+};
+
 describe("packed npm install smoke test", () => {
   it(
     "initializes a clean consumer workspace through the installed bin without bundled examples",
@@ -361,6 +403,10 @@ import {
   type GrocyConfigExport,
   type GrocyConfigManifest,
 } from "grocy-ops-toolkit";
+import {
+  GROCY_BACKUP_RETENTION_SIMULATION_REPORT_PATH,
+  createGrocyBackupRetentionSimulationReport,
+} from "grocy-ops-toolkit/backup-retention-simulation";
 
 function assertEqual<T>(actual: T, expected: T): void {
   if (actual !== expected) {
@@ -416,9 +462,15 @@ const liveExport: GrocyConfigExport = {
 };
 
 assertEqual(DEFAULT_GROCY_CONFIG_PATH, ${JSON.stringify(path.join("config", "grocy.local.json"))});
+assertEqual(
+  GROCY_BACKUP_RETENTION_SIMULATION_REPORT_PATH,
+  ${JSON.stringify(path.join("data", "grocy-backup-retention-simulation-report.json"))},
+);
 assertEqual(GROCY_CONFIG_MANIFEST_PATH, ${JSON.stringify(path.join("config", "desired-state.json"))});
 assertEqual(GROCY_CONFIG_EXPORT_PATH, ${JSON.stringify(path.join("data", "grocy-config-export.json"))});
 assertEqual(GROCY_CONFIG_PLAN_PATH, ${JSON.stringify(path.join("data", "grocy-config-sync-plan.json"))});
+
+const retentionHistory = ${JSON.stringify(retentionHistory, null, 2)};
 
 const plan = createGrocyConfigSyncPlan({
   manifest,
@@ -445,12 +497,25 @@ const dashboard = createGrocyReviewDashboard({
 assertIncludes(dashboard, "products.example-cocoa");
 assertExcludesPattern(dashboard, /api-key|token|secret/i);
 
+const retentionReport = createGrocyBackupRetentionSimulationReport(".", {
+  historyPath: "data/retention-history.json",
+  generatedAt: "2026-04-20T09:34:30.000Z",
+});
+assertEqual(retentionReport.summary.retainedSnapshotCount, 3);
+assertEqual(retentionReport.summary.expiredSnapshotCount, 0);
+assertEqual(retentionReport.historyPath, "data/retention-history.json");
+
 const smokeReport = await runGrocyMockSmokeTest(".", {
   generatedAt: "2026-04-20T09:35:00.000Z",
 });
 assertEqual(smokeReport.summary.result, "pass");
 console.log("contract-ok");
 `.trimStart(),
+      );
+      fs.mkdirSync(path.join(consumerDir, "data"), { recursive: true });
+      fs.writeFileSync(
+        path.join(consumerDir, "data", "retention-history.json"),
+        JSON.stringify(retentionHistory, null, 2),
       );
 
       run(npmCommand, ["run", "build"], repoRoot, npmEnv);

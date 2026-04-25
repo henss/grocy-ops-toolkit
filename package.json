@@ -21,6 +21,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./backup-retention-simulation": {
+      "types": "./dist/backup-retention-simulation.d.ts",
+      "import": "./dist/backup-retention-simulation.js"
+    },
+    "./backup-retention-simulation-schema": {
+      "types": "./dist/backup-retention-simulation-schema.d.ts",
+      "import": "./dist/backup-retention-simulation-schema.js"
     }
   },
   "bin": {

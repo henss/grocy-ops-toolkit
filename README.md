@@ -869,6 +869,7 @@ npm run grocy:config:drift-trend -- --previous data/grocy-config-export.previous
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --dry-run
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
 npm run grocy:backup:snapshot
+npm run grocy:backup:retention-simulate -- --history examples/grocy-backup-retention-history.example.json
 npm run grocy:backup:restore-plan -- --restore-dir restore/grocy-backup-check
 npm run grocy:backup:receipt
 npm run grocy:backup:receipt:verify
