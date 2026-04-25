@@ -51,9 +51,11 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-backup-restore-plan-dry-run-report.example.json` shows the no-write restore planning report emitted by `npm run grocy:backup:restore-plan`.
 
+`grocy-backup-verification-report.example.json` shows the public-safe encrypted backup verification artifact emitted by `npm run grocy:backup:verify -- --output ...`.
+
 `grocy-backup-restore-drill-report.example.json` shows the fixture-only checkpoint artifact emitted by `npm run grocy:backup:restore-drill`.
 
-`grocy-backup-integrity-receipt.example.json` shows the compact backup evidence receipt emitted by `npm run grocy:backup:receipt` after snapshot verification and optional restore-plan or restore-drill evidence are available.
+`grocy-backup-integrity-receipt.example.json` shows the signed backup evidence receipt emitted by `npm run grocy:backup:receipt` after snapshot verification and optional restore-plan or restore-drill evidence are available.
 
 `grocy-backup-integrity-receipt-verification.example.json` shows the public-safe verifier result emitted by `npm run grocy:backup:receipt:verify` when the stored receipt still matches the manifest and proof artifacts.
 

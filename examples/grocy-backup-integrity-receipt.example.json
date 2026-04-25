@@ -1,15 +1,22 @@
 {
   "kind": "grocy_backup_integrity_receipt",
   "version": 1,
-  "generatedAt": "2026-04-22T17:11:00.000Z",
+  "generatedAt": "2026-04-25T04:12:36.129Z",
   "scope": "public_safe_metadata",
+  "signature": {
+    "algorithm": "hmac-sha256",
+    "keySource": "backup_passphrase_env",
+    "keyName": "GROCY_BACKUP_PASSPHRASE",
+    "signedAt": "2026-04-25T04:12:36.129Z",
+    "value": "5a642f070f84046393ba3269b0ee32bc8fc09f4eae37065010de750520a42bd0"
+  },
   "archive": {
-    "recordId": "grocy-backup-20260422171000",
-    "createdAt": "2026-04-22T17:10:00.000Z",
-    "sourcePath": "examples/synthetic-grocy-backup-source",
-    "archivePath": "backups/grocy-backup-20260422171000.grocy-backup.enc",
+    "recordId": "grocy-backup-20260425041233",
+    "createdAt": "2026-04-25T04:12:33.877Z",
+    "sourcePath": "source",
+    "archivePath": "backups/grocy-backup-20260425041233.grocy-backup.enc",
     "locationLabel": "synthetic-local-encrypted",
-    "checksumSha256": "7c66a8f4658d4977898ee66332144028aee89a368ac27fb3e83b3f58f8f63187",
+    "checksumSha256": "523796c6db218bd668e8a744ed9fbf9c2f726ff2e1c7ce437e110ae5053bb346",
     "fileCount": 3,
     "totalBytes": 476,
     "restoreTestStatus": "verified"
@@ -37,9 +44,9 @@
       "status": "pass",
       "artifactPath": "data/grocy-backup-manifest.json",
       "evidence": [
-        "Manifest record grocy-backup-20260422171000 points to 3 files and 476 total bytes.",
+        "Manifest record grocy-backup-20260425041233 points to 3 files and 476 total bytes.",
         "Location label is synthetic-local-encrypted.",
-        "Archive checksum fingerprint is 7c66a8f4658d4977898ee66332144028aee89a368ac27fb3e83b3f58f8f63187."
+        "Archive checksum fingerprint is 523796c6db218bd668e8a744ed9fbf9c2f726ff2e1c7ce437e110ae5053bb346."
       ]
     },
     {
@@ -58,7 +65,7 @@
       "evidence": [
         "Restore plan result=ready with checksumVerified=true.",
         "Dry-run wouldCreate=3, wouldOverwrite=0, blocked=0.",
-        "Restore plan archive record id=grocy-backup-20260422171000 was checked against manifest record grocy-backup-20260422171000."
+        "Restore plan archive record id=grocy-backup-20260425041233 was checked against manifest record grocy-backup-20260425041233."
       ]
     },
     {
@@ -74,6 +81,7 @@
   ],
   "reviewNotes": [
     "This receipt keeps only public-safe metadata and redacts archive or source paths that fall outside the current repo root.",
+    "The receipt body is signed with an HMAC derived from GROCY_BACKUP_PASSPHRASE so verification can detect tampering.",
     "Treat the receipt as bounded backup evidence tied to the referenced manifest and optional restore-plan or restore-drill artifacts.",
     "Regenerate the receipt after new snapshots or restore drills so the recorded checksum, counts, and proof paths stay current."
   ]

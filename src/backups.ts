@@ -284,7 +284,14 @@ export function createGrocyBackupSnapshot(
 export function verifyGrocyBackupSnapshot(
   baseDir: string = process.cwd(),
   options: { archivePath?: string; restoreDir?: string; confirmRestoreWrite?: boolean; configPath?: string; manifestPath?: string } = {},
-): { archivePath: string; fileCount: number; totalBytes: number; checksumVerified: boolean; restoredTo?: string } {
+): {
+  recordId: string;
+  archivePath: string;
+  fileCount: number;
+  totalBytes: number;
+  checksumVerified: boolean;
+  restoredTo?: string;
+} {
   const config = loadBackupConfig(baseDir, options.configPath);
   const passphrase = requirePassphrase(config);
   const manifest = loadBackupManifest(baseDir, options.manifestPath);
@@ -340,7 +347,14 @@ export function verifyGrocyBackupSnapshot(
         restoreFailureCategory: undefined,
       }, options.manifestPath);
     }
-    return { archivePath, fileCount: bundle.files.length, totalBytes: bundle.files.reduce((sum, file) => sum + file.size, 0), checksumVerified, restoredTo };
+    return {
+      recordId: latest.id,
+      archivePath,
+      fileCount: bundle.files.length,
+      totalBytes: bundle.files.reduce((sum, file) => sum + file.size, 0),
+      checksumVerified,
+      restoredTo,
+    };
   } catch (error) {
     if (error instanceof GrocyBackupRestoreError) {
       markRestoreFailure(baseDir, latest.id, error.category, options.manifestPath);

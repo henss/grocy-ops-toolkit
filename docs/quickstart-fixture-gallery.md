@@ -101,10 +101,11 @@ Use these when you need synthetic encrypted backup evidence, restore planning, o
 
 - Command: `npm run grocy:backup:snapshot`
 - Command: `npm run grocy:backup:restore-plan -- --restore-dir restore/gallery-backup-check --output data/gallery-backup-restore-plan.json --force`
-- Command: `npm run grocy:backup:verify`
+- Command: `npm run grocy:backup:verify -- --output data/gallery-backup-verification.json --force`
 - Command: `npm run grocy:backup:restore-drill -- --restore-dir restore/gallery-restore-drill --output data/gallery-restore-drill.json --force`
 - Command: `npm run grocy:backup:receipt -- --output data/gallery-backup-receipt.json --force`
 - Command: `npm run grocy:backup:receipt:verify -- --receipt data/gallery-backup-receipt.json --output data/gallery-backup-receipt-verification.json --force`
+- Example artifact: `examples/grocy-backup-verification-report.example.json`
 - Example artifact: `examples/grocy-backup-restore-plan-dry-run-report.example.json`
 - Example artifact: `examples/grocy-backup-restore-drill-report.example.json`
 - Example artifact: `examples/grocy-backup-integrity-receipt.example.json`
@@ -113,7 +114,7 @@ Use these when you need synthetic encrypted backup evidence, restore planning, o
 
 Before running the backup commands, copy `examples/grocy-backup.local.example.json` to `config/grocy-backup.local.json` and set `GROCY_BACKUP_PASSPHRASE` to a synthetic value for the current shell.
 
-Expected result: the toolkit generates machine-checkable synthetic recovery evidence without private source files or live Grocy credentials.
+Expected result: the toolkit generates machine-checkable synthetic recovery evidence, including a persisted encrypted-backup verification report and a signed receipt, without private source files or live Grocy credentials.
 
 ### 5. Review And Boundary Fixtures
 

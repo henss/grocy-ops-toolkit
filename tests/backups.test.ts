@@ -1,7 +1,14 @@
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
+import { GrocyBackupVerificationReportSchema } from "../src/backup-verification-schema.js";
+import {
+  createGrocyBackupVerificationReport,
+  GROCY_BACKUP_VERIFICATION_REPORT_PATH,
+  recordGrocyBackupVerificationReport,
+} from "../src/backup-verification-report.js";
 import {
   createGrocyBackupRestorePlanDryRunReport,
   createGrocyBackupSnapshot,
@@ -155,6 +162,62 @@ function expectRestorePlanReport(params: {
   expectRecordedRestorePlanReport(baseDir, sourceFileCount);
 }
 
+function expectVerificationReport(baseDir: string, sourceFileCount: number): void {
+  const report = createGrocyBackupVerificationReport(baseDir, {
+    generatedAt: "2026-04-19T10:17:00.000Z",
+  });
+  const outputPath = recordGrocyBackupVerificationReport(report, { baseDir });
+
+  expect(path.relative(baseDir, outputPath)).toBe(GROCY_BACKUP_VERIFICATION_REPORT_PATH);
+  expect(report).toMatchObject({
+    kind: "grocy_backup_verification_report",
+    verification: {
+      command: "npm run grocy:backup:verify",
+      status: "pass",
+      checksumVerified: true,
+      fileCount: sourceFileCount,
+    },
+  });
+  expect(GrocyBackupVerificationReportSchema.parse(JSON.parse(fs.readFileSync(outputPath, "utf8")))).toMatchObject({
+    kind: "grocy_backup_verification_report",
+    verification: { status: "pass", fileCount: sourceFileCount },
+  });
+}
+
+function expectBackupVerifyCliOutputFile(baseDir: string, sourceFileCount: number): void {
+  const nodeCommand = process.execPath;
+  const cliEntrypoint = path.join(process.cwd(), "src", "cli.ts");
+  const stdout = execFileSync(nodeCommand, [
+    path.join(process.cwd(), "node_modules", "tsx", "dist", "cli.mjs"),
+    cliEntrypoint,
+    "grocy:backup:verify",
+    "--output",
+    GROCY_BACKUP_VERIFICATION_REPORT_PATH,
+    "--force",
+  ], {
+    cwd: baseDir,
+    encoding: "utf8",
+    env: { ...process.env, [envName]: "synthetic-passphrase" },
+  });
+
+  expect(JSON.parse(stdout)).toMatchObject({
+    outputPath: path.join(baseDir, GROCY_BACKUP_VERIFICATION_REPORT_PATH),
+    verification: {
+      status: "pass",
+      checksumVerified: true,
+      fileCount: sourceFileCount,
+    },
+  });
+  expect(JSON.parse(fs.readFileSync(path.join(baseDir, GROCY_BACKUP_VERIFICATION_REPORT_PATH), "utf8"))).toMatchObject({
+    kind: "grocy_backup_verification_report",
+    verification: {
+      status: "pass",
+      checksumVerified: true,
+      fileCount: sourceFileCount,
+    },
+  });
+}
+
 function expectWrongPassphraseFailure(baseDir: string): void {
   setBackupPassphrase("synthetic-passphrase-rotated");
   expect(() => verifyGrocyBackupSnapshot(baseDir)).toThrow("could not be decrypted");
@@ -211,6 +274,35 @@ describe("Grocy backups", () => {
     });
     recordGrocyBackupRestorePlanDryRunReport(report, { baseDir });
     expectRestorePlanReport({ baseDir, sourceFileCount, report, existingRestorePath });
+  });
+
+  it("records a public-safe encrypted backup verification report", () => {
+    const { baseDir, sourceFileCount } = setupFixtureBackupBase("grocy-backup-verify-report-");
+    createGrocyBackupSnapshot(baseDir, {
+      createdAt: "2026-04-19T10:16:00.000Z",
+    });
+
+    expectVerificationReport(baseDir, sourceFileCount);
+  });
+
+  it("writes the encrypted backup verifier CLI result to an output artifact when requested", () => {
+    const { baseDir, sourceFileCount } = setupFixtureBackupBase("grocy-backup-verify-cli-");
+    createGrocyBackupSnapshot(baseDir, {
+      createdAt: "2026-04-19T10:17:00.000Z",
+    });
+
+    expectBackupVerifyCliOutputFile(baseDir, sourceFileCount);
+  });
+
+  it("keeps the public backup verification example fixture schema-valid", () => {
+    const verificationExample = JSON.parse(
+      fs.readFileSync(path.join(process.cwd(), "examples", "grocy-backup-verification-report.example.json"), "utf8"),
+    ) as unknown;
+
+    expect(GrocyBackupVerificationReportSchema.parse(verificationExample)).toMatchObject({
+      kind: "grocy_backup_verification_report",
+      verification: { status: "pass", checksumVerified: true, fileCount: 3 },
+    });
   });
 });
 

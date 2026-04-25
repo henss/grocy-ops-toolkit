@@ -1,0 +1,19 @@
+{
+  "kind": "grocy_backup_verification_report",
+  "version": 1,
+  "generatedAt": "2026-04-25T04:12:35.040Z",
+  "archiveRecordId": "grocy-backup-20260425041233",
+  "archivePath": "backups/grocy-backup-20260425041233.grocy-backup.enc",
+  "manifestPath": "data/grocy-backup-manifest.json",
+  "verification": {
+    "command": "npm run grocy:backup:verify",
+    "status": "pass",
+    "checksumVerified": true,
+    "fileCount": 3,
+    "totalBytes": 476
+  },
+  "reviewNotes": [
+    "This report keeps verification output public-safe by redacting paths outside the current repo root.",
+    "Use --confirm-restore-write only when you intentionally want restore proof written into the requested restore directory."
+  ]
+}

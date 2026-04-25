@@ -149,6 +149,7 @@ describe("Quickstart fixture gallery doc", () => {
       "examples/grocy-api-compatibility-matrix.example.json",
       "examples/grocy-api-deprecation-canary-report.example.json",
       "examples/grocy-object-coverage-playground.example.json",
+      "examples/grocy-backup-verification-report.example.json",
       "examples/grocy-backup-restore-plan-dry-run-report.example.json",
       "examples/grocy-backup-restore-drill-report.example.json",
       "examples/grocy-backup-integrity-receipt.example.json",

@@ -1,12 +1,12 @@
 {
   "kind": "grocy_backup_integrity_receipt_verification",
   "version": 1,
-  "verifiedAt": "2026-04-22T17:45:00.000Z",
+  "verifiedAt": "2026-04-25T04:12:37.301Z",
   "receiptPath": "data/grocy-backup-integrity-receipt.json",
   "summary": {
     "status": "pass",
-    "checkCount": 5,
-    "passedCount": 5
+    "checkCount": 6,
+    "passedCount": 6
   },
   "checks": [
     {
@@ -15,9 +15,14 @@
       "message": "Receipt parsed successfully against the published schema."
     },
     {
+      "id": "receipt_signature_valid",
+      "status": "pass",
+      "message": "Receipt signature still matches GROCY_BACKUP_PASSPHRASE."
+    },
+    {
       "id": "archive_record_present",
       "status": "pass",
-      "message": "Manifest record grocy-backup-20260422171000 still matches the receipt metadata."
+      "message": "Manifest record grocy-backup-20260425041233 still matches the receipt metadata."
     },
     {
       "id": "archive_verification_passed",

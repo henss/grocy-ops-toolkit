@@ -1,6 +1,8 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import {
+  GROCY_BACKUP_CONFIG_PATH,
   GROCY_BACKUP_MANIFEST_PATH,
   GROCY_BACKUP_RESTORE_PLAN_DRY_RUN_REPORT_PATH,
   verifyGrocyBackupSnapshot,
@@ -22,6 +24,10 @@ import {
 } from "./backup-integrity-receipt-schema.js";
 
 export const GROCY_BACKUP_INTEGRITY_RECEIPT_PATH = path.join("data", "grocy-backup-integrity-receipt.json");
+export const GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH = path.join(
+  "data",
+  "grocy-backup-integrity-receipt-verification.json",
+);
 
 function readJsonFile(filePath: string): unknown {
   return JSON.parse(fs.readFileSync(filePath, "utf8")) as unknown;
@@ -34,6 +40,31 @@ function writeJsonFile(filePath: string, value: unknown, overwrite: boolean): st
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
   fs.writeFileSync(filePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
   return filePath;
+}
+
+function parseBackupPassphraseEnvName(baseDir: string, configPath: string): string {
+  const absoluteConfigPath = path.resolve(baseDir, configPath);
+  if (!fs.existsSync(absoluteConfigPath)) {
+    throw new Error(`Grocy backup config is missing at ${absoluteConfigPath}.`);
+  }
+  const raw = readJsonFile(absoluteConfigPath);
+  if (!raw || typeof raw !== "object") {
+    throw new Error("Grocy backup config must be an object.");
+  }
+  const record = raw as Record<string, unknown>;
+  const passphraseEnv = typeof record.passphraseEnv === "string" && record.passphraseEnv.trim()
+    ? record.passphraseEnv
+    : "GROCY_BACKUP_PASSPHRASE";
+  return passphraseEnv;
+}
+
+function requireBackupPassphrase(baseDir: string, configPath: string): { keyName: string; passphrase: string } {
+  const keyName = parseBackupPassphraseEnvName(baseDir, configPath);
+  const passphrase = process.env[keyName];
+  if (!passphrase) {
+    throw new Error(`Grocy backup passphrase env var ${keyName} is not set.`);
+  }
+  return { keyName, passphrase };
 }
 
 function normalizeDisplayPath(filePath: string): string {
@@ -105,6 +136,28 @@ function findBackupRecordById(manifest: GrocyBackupManifest, recordId: string): 
   return record;
 }
 
+function sortJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) => sortJsonValue(item));
+  }
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, item]) => [key, sortJsonValue(item)]),
+    );
+  }
+  return value;
+}
+
+function serializeReceiptPayload(value: Omit<GrocyBackupIntegrityReceipt, "signature">): string {
+  return JSON.stringify(sortJsonValue(value));
+}
+
+function signReceiptPayload(payload: Omit<GrocyBackupIntegrityReceipt, "signature">, passphrase: string): string {
+  return crypto.createHmac("sha256", passphrase).update(serializeReceiptPayload(payload)).digest("hex");
+}
+
 function buildCheck(
   id: GrocyBackupIntegrityReceiptCheckId,
   status: GrocyBackupIntegrityReceiptCheck["status"],
@@ -123,27 +176,68 @@ function summarizeChecks(checks: GrocyBackupIntegrityReceipt["checks"]): GrocyBa
   };
 }
 
-export function createGrocyBackupIntegrityReceipt(
-  baseDir: string = process.cwd(),
-  options: {
-    archivePath?: string;
-    generatedAt?: string;
-    manifestPath?: string;
-    restorePlanReportPath?: string;
-    restoreDrillReportPath?: string;
-    configPath?: string;
-  } = {},
-): GrocyBackupIntegrityReceipt {
-  const manifestPath = options.manifestPath ?? GROCY_BACKUP_MANIFEST_PATH;
-  const manifest = loadBackupManifest(baseDir, manifestPath);
-  const record = findBackupRecord(manifest, options.archivePath);
-  const verification = verifyGrocyBackupSnapshot(baseDir, {
-    archivePath: record.archivePath,
-    configPath: options.configPath,
-    manifestPath,
-  });
-  const restorePlanAbsolutePath = resolveExistingPath(baseDir, options.restorePlanReportPath ?? GROCY_BACKUP_RESTORE_PLAN_DRY_RUN_REPORT_PATH);
-  const restoreDrillAbsolutePath = resolveExistingPath(baseDir, options.restoreDrillReportPath ?? GROCY_BACKUP_RESTORE_DRILL_REPORT_PATH);
+function appendRestorePlanCheck(
+  checks: GrocyBackupIntegrityReceipt["checks"],
+  baseDir: string,
+  restorePlanAbsolutePath: string | undefined,
+  record: GrocyBackupManifest["records"][number],
+): void {
+  if (!restorePlanAbsolutePath) {
+    return;
+  }
+  const restorePlan = GrocyBackupRestorePlanDryRunReportSchema.parse(readJsonFile(restorePlanAbsolutePath));
+  const restorePlanPassed = restorePlan.summary.result === "ready"
+    && restorePlan.summary.checksumVerified
+    && restorePlan.archiveRecordId === record.id
+    && restorePlan.summary.fileCount === record.fileCount
+    && restorePlan.summary.totalBytes === record.totalBytes;
+  checks.push(buildCheck(
+    "restore_plan_reviewed",
+    restorePlanPassed ? "pass" : "fail",
+    [
+      `Restore plan result=${restorePlan.summary.result} with checksumVerified=${String(restorePlan.summary.checksumVerified)}.`,
+      `Dry-run wouldCreate=${restorePlan.summary.wouldCreate}, wouldOverwrite=${restorePlan.summary.wouldOverwrite}, blocked=${restorePlan.summary.blocked}.`,
+      `Restore plan archive record id=${restorePlan.archiveRecordId ?? "missing"} was checked against manifest record ${record.id}.`,
+    ],
+    toPublicSafePath(baseDir, restorePlanAbsolutePath),
+  ));
+}
+
+function appendRestoreDrillCheck(
+  checks: GrocyBackupIntegrityReceipt["checks"],
+  baseDir: string,
+  restoreDrillAbsolutePath: string | undefined,
+  record: GrocyBackupManifest["records"][number],
+): void {
+  if (!restoreDrillAbsolutePath) {
+    return;
+  }
+  const restoreDrill = GrocyBackupRestoreDrillReportSchema.parse(readJsonFile(restoreDrillAbsolutePath));
+  const restoreDrillPassed = restoreDrill.summary.result === "pass"
+    && restoreDrill.summary.fileCount === record.fileCount
+    && restoreDrill.summary.totalBytes === record.totalBytes
+    && restoreDrill.checkpoints.every((checkpoint) => checkpoint.status === "pass");
+  checks.push(buildCheck(
+    "restore_drill_verified",
+    restoreDrillPassed ? "pass" : "fail",
+    [
+      `Restore drill result=${restoreDrill.summary.result} with ${restoreDrill.summary.passedCount}/${restoreDrill.summary.checkpointCount} checkpoints passing.`,
+      `Confirmed restore proof covers ${restoreDrill.summary.fileCount} files and ${restoreDrill.summary.totalBytes} total bytes.`,
+      `Checkpoint ids recorded: ${restoreDrill.checkpoints.map((checkpoint) => checkpoint.id).join(", ")}.`,
+    ],
+    toPublicSafePath(baseDir, restoreDrillAbsolutePath),
+  ));
+}
+
+function buildIntegrityChecks(params: {
+  baseDir: string;
+  manifestPath: string;
+  record: GrocyBackupManifest["records"][number];
+  verification: ReturnType<typeof verifyGrocyBackupSnapshot>;
+  restorePlanAbsolutePath: string | undefined;
+  restoreDrillAbsolutePath: string | undefined;
+}): GrocyBackupIntegrityReceipt["checks"] {
+  const { baseDir, manifestPath, record, verification, restorePlanAbsolutePath, restoreDrillAbsolutePath } = params;
   const checks: GrocyBackupIntegrityReceipt["checks"] = [
     buildCheck(
       "archive_record_present",
@@ -159,54 +253,43 @@ export function createGrocyBackupIntegrityReceipt(
       "archive_verification_passed",
       verification.checksumVerified ? "pass" : "fail",
       [
-        `Archive verification used npm run grocy:backup:verify without restore writes.`,
+        "Archive verification used npm run grocy:backup:verify without restore writes.",
         `Checksum verified=${String(verification.checksumVerified)}.`,
         `Archive decrypt and embedded file checks covered ${verification.fileCount} files and ${verification.totalBytes} total bytes.`,
       ],
     ),
   ];
+  appendRestorePlanCheck(checks, baseDir, restorePlanAbsolutePath, record);
+  appendRestoreDrillCheck(checks, baseDir, restoreDrillAbsolutePath, record);
+  return checks;
+}
 
-  if (restorePlanAbsolutePath) {
-    const restorePlan = GrocyBackupRestorePlanDryRunReportSchema.parse(readJsonFile(restorePlanAbsolutePath));
-    const restorePlanPassed = restorePlan.summary.result === "ready"
-      && restorePlan.summary.checksumVerified
-      && restorePlan.archiveRecordId === record.id
-      && restorePlan.summary.fileCount === record.fileCount
-      && restorePlan.summary.totalBytes === record.totalBytes;
-    checks.push(buildCheck(
-      "restore_plan_reviewed",
-      restorePlanPassed ? "pass" : "fail",
-      [
-        `Restore plan result=${restorePlan.summary.result} with checksumVerified=${String(restorePlan.summary.checksumVerified)}.`,
-        `Dry-run wouldCreate=${restorePlan.summary.wouldCreate}, wouldOverwrite=${restorePlan.summary.wouldOverwrite}, blocked=${restorePlan.summary.blocked}.`,
-        `Restore plan archive record id=${restorePlan.archiveRecordId ?? "missing"} was checked against manifest record ${record.id}.`,
-      ],
-      toPublicSafePath(baseDir, restorePlanAbsolutePath),
-    ));
-  }
-
-  if (restoreDrillAbsolutePath) {
-    const restoreDrill = GrocyBackupRestoreDrillReportSchema.parse(readJsonFile(restoreDrillAbsolutePath));
-    const restoreDrillPassed = restoreDrill.summary.result === "pass"
-      && restoreDrill.summary.fileCount === record.fileCount
-      && restoreDrill.summary.totalBytes === record.totalBytes
-      && restoreDrill.checkpoints.every((checkpoint) => checkpoint.status === "pass");
-    checks.push(buildCheck(
-      "restore_drill_verified",
-      restoreDrillPassed ? "pass" : "fail",
-      [
-        `Restore drill result=${restoreDrill.summary.result} with ${restoreDrill.summary.passedCount}/${restoreDrill.summary.checkpointCount} checkpoints passing.`,
-        `Confirmed restore proof covers ${restoreDrill.summary.fileCount} files and ${restoreDrill.summary.totalBytes} total bytes.`,
-        `Checkpoint ids recorded: ${restoreDrill.checkpoints.map((checkpoint) => checkpoint.id).join(", ")}.`,
-      ],
-      toPublicSafePath(baseDir, restoreDrillAbsolutePath),
-    ));
-  }
-
-  return GrocyBackupIntegrityReceiptSchema.parse({
+function buildUnsignedReceipt(params: {
+  baseDir: string;
+  generatedAt: string;
+  manifestPath: string;
+  record: GrocyBackupManifest["records"][number];
+  verification: ReturnType<typeof verifyGrocyBackupSnapshot>;
+  checks: GrocyBackupIntegrityReceipt["checks"];
+  restorePlanAbsolutePath: string | undefined;
+  restoreDrillAbsolutePath: string | undefined;
+  keyName: string;
+}): Omit<GrocyBackupIntegrityReceipt, "signature"> {
+  const {
+    baseDir,
+    generatedAt,
+    manifestPath,
+    record,
+    verification,
+    checks,
+    restorePlanAbsolutePath,
+    restoreDrillAbsolutePath,
+    keyName,
+  } = params;
+  return {
     kind: "grocy_backup_integrity_receipt",
     version: 1,
-    generatedAt: options.generatedAt ?? new Date().toISOString(),
+    generatedAt,
     scope: "public_safe_metadata",
     archive: {
       recordId: record.id,
@@ -236,9 +319,66 @@ export function createGrocyBackupIntegrityReceipt(
     checks,
     reviewNotes: [
       "This receipt keeps only public-safe metadata and redacts archive or source paths that fall outside the current repo root.",
+      `The receipt body is signed with an HMAC derived from ${keyName} so verification can detect tampering.`,
       "Treat the receipt as bounded backup evidence tied to the referenced manifest and optional restore-plan or restore-drill artifacts.",
       "Regenerate the receipt after new snapshots or restore drills so the recorded checksum, counts, and proof paths stay current.",
     ],
+  };
+}
+
+export function createGrocyBackupIntegrityReceipt(
+  baseDir: string = process.cwd(),
+  options: {
+    archivePath?: string;
+    generatedAt?: string;
+    manifestPath?: string;
+    restorePlanReportPath?: string;
+    restoreDrillReportPath?: string;
+    configPath?: string;
+  } = {},
+): GrocyBackupIntegrityReceipt {
+  const manifestPath = options.manifestPath ?? GROCY_BACKUP_MANIFEST_PATH;
+  const configPath = options.configPath ?? GROCY_BACKUP_CONFIG_PATH;
+  const manifest = loadBackupManifest(baseDir, manifestPath);
+  const record = findBackupRecord(manifest, options.archivePath);
+  const signingContext = requireBackupPassphrase(baseDir, configPath);
+  const verification = verifyGrocyBackupSnapshot(baseDir, {
+    archivePath: record.archivePath,
+    configPath,
+    manifestPath,
+  });
+  const restorePlanAbsolutePath = resolveExistingPath(baseDir, options.restorePlanReportPath ?? GROCY_BACKUP_RESTORE_PLAN_DRY_RUN_REPORT_PATH);
+  const restoreDrillAbsolutePath = resolveExistingPath(baseDir, options.restoreDrillReportPath ?? GROCY_BACKUP_RESTORE_DRILL_REPORT_PATH);
+  const signedAt = options.generatedAt ?? new Date().toISOString();
+  const checks = buildIntegrityChecks({
+    baseDir,
+    manifestPath,
+    record,
+    verification,
+    restorePlanAbsolutePath,
+    restoreDrillAbsolutePath,
+  });
+  const unsignedReceipt = buildUnsignedReceipt({
+    baseDir,
+    generatedAt: signedAt,
+    manifestPath,
+    record,
+    verification,
+    checks,
+    restorePlanAbsolutePath,
+    restoreDrillAbsolutePath,
+    keyName: signingContext.keyName,
+  });
+
+  return GrocyBackupIntegrityReceiptSchema.parse({
+    ...unsignedReceipt,
+    signature: {
+      algorithm: "hmac-sha256",
+      keySource: "backup_passphrase_env",
+      keyName: signingContext.keyName,
+      signedAt,
+      value: signReceiptPayload(unsignedReceipt, signingContext.passphrase),
+    },
   });
 }
 
@@ -263,9 +403,21 @@ export function verifyGrocyBackupIntegrityReceipt(
   const receiptPath = options.receiptPath ?? GROCY_BACKUP_INTEGRITY_RECEIPT_PATH;
   const absoluteReceiptPath = path.resolve(baseDir, receiptPath);
   const receipt = GrocyBackupIntegrityReceiptSchema.parse(readJsonFile(absoluteReceiptPath));
+  const configPath = options.configPath ?? GROCY_BACKUP_CONFIG_PATH;
   const checks: GrocyBackupIntegrityReceiptVerification["checks"] = [
     buildVerificationCheck("receipt_schema_valid", "pass", "Receipt parsed successfully against the published schema."),
   ];
+  const signingContext = requireBackupPassphrase(baseDir, configPath);
+  const { signature, ...unsignedReceipt } = receipt;
+  const signatureMatches = signature.keyName === signingContext.keyName
+    && signReceiptPayload(unsignedReceipt, signingContext.passphrase) === signature.value;
+  checks.push(buildVerificationCheck(
+    "receipt_signature_valid",
+    signatureMatches ? "pass" : "fail",
+    signatureMatches
+      ? `Receipt signature still matches ${signature.keyName}.`
+      : `Receipt signature no longer matches ${signature.keyName}.`,
+  ));
 
   const manifestPath = options.manifestPath ?? receipt.artifacts.manifestPath;
   const manifest = loadBackupManifest(baseDir, manifestPath);
@@ -366,6 +518,17 @@ export function recordGrocyBackupIntegrityReceipt(
   return writeJsonFile(
     path.resolve(options.baseDir ?? process.cwd(), options.outputPath ?? GROCY_BACKUP_INTEGRITY_RECEIPT_PATH),
     receipt,
+    options.overwrite ?? true,
+  );
+}
+
+export function recordGrocyBackupIntegrityReceiptVerification(
+  verification: GrocyBackupIntegrityReceiptVerification,
+  options: { baseDir?: string; outputPath?: string; overwrite?: boolean } = {},
+): string {
+  return writeJsonFile(
+    path.resolve(options.baseDir ?? process.cwd(), options.outputPath ?? GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH),
+    verification,
     options.overwrite ?? true,
   );
 }

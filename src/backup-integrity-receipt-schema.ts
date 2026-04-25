@@ -20,6 +20,13 @@ export const GrocyBackupIntegrityReceiptSchema = z.object({
   version: z.literal(1),
   generatedAt: z.string().min(1),
   scope: z.literal("public_safe_metadata"),
+  signature: z.object({
+    algorithm: z.literal("hmac-sha256"),
+    keySource: z.literal("backup_passphrase_env"),
+    keyName: z.string().min(1),
+    signedAt: z.string().min(1),
+    value: z.string().regex(/^[a-f0-9]{64}$/),
+  }),
   archive: z.object({
     recordId: z.string().min(1),
     createdAt: z.string().min(1),
@@ -64,7 +71,7 @@ export const GrocyBackupIntegrityReceiptVerificationSchema = z.object({
     passedCount: z.number().int().nonnegative(),
   }),
   checks: z.array(z.object({
-    id: z.union([GrocyBackupIntegrityReceiptCheckIdSchema, z.literal("receipt_schema_valid")]),
+    id: z.union([GrocyBackupIntegrityReceiptCheckIdSchema, z.literal("receipt_schema_valid"), z.literal("receipt_signature_valid")]),
     status: z.enum(["pass", "fail"]),
     message: z.string().min(1),
   })).default([]),

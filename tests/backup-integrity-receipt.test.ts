@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   createGrocyBackupIntegrityReceipt,
   GROCY_BACKUP_INTEGRITY_RECEIPT_PATH,
+  GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH,
   recordGrocyBackupIntegrityReceipt,
   verifyGrocyBackupIntegrityReceipt,
 } from "../src/backup-integrity-receipt.js";
@@ -94,7 +95,37 @@ function expectReceiptVerifierCliOutput(): void {
 
   expect(JSON.parse(stdout)).toMatchObject({
     kind: "grocy_backup_integrity_receipt_verification",
-    summary: { status: "pass", checkCount: 4, passedCount: 4 },
+    summary: { status: "pass", checkCount: 5, passedCount: 5 },
+  });
+}
+
+function expectReceiptVerifierCliOutputFile(): void {
+  const baseDir = setupFixtureBackupBase("grocy-backup-receipt-cli-output-");
+  createRestorePlanFixture(baseDir, "2026-04-22T17:42:00.000Z", "2026-04-22T17:43:00.000Z", path.join("restore", "cli-output-check"));
+  recordGrocyBackupIntegrityReceipt(createGrocyBackupIntegrityReceipt(baseDir), { baseDir });
+
+  const nodeCommand = process.execPath;
+  const cliEntrypoint = path.join(process.cwd(), "src", "cli.ts");
+  const stdout = execFileSync(nodeCommand, [
+    path.join(process.cwd(), "node_modules", "tsx", "dist", "cli.mjs"),
+    cliEntrypoint,
+    "grocy:backup:receipt:verify",
+    "--output",
+    GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH,
+    "--force",
+  ], {
+    cwd: baseDir,
+    encoding: "utf8",
+    env: { ...process.env, [envName]: "synthetic-passphrase" },
+  });
+
+  expect(JSON.parse(stdout)).toMatchObject({
+    outputPath: path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH),
+    summary: { status: "pass", checkCount: 5, passedCount: 5 },
+  });
+  expect(JSON.parse(fs.readFileSync(path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH), "utf8"))).toMatchObject({
+    kind: "grocy_backup_integrity_receipt_verification",
+    summary: { status: "pass", checkCount: 5, passedCount: 5 },
   });
 }
 
@@ -117,6 +148,11 @@ describe("Grocy backup integrity receipt", () => {
       status: "pass",
       checkCount: 4,
       passedCount: 4,
+    });
+    expect(receipt.signature).toMatchObject({
+      algorithm: "hmac-sha256",
+      keySource: "backup_passphrase_env",
+      keyName: envName,
     });
     expect(receipt.archive).toMatchObject({
       sourcePath: "source",
@@ -150,11 +186,12 @@ describe("Grocy backup integrity receipt", () => {
 
     expect(verification.summary).toEqual({
       status: "pass",
-      checkCount: 5,
-      passedCount: 5,
+      checkCount: 6,
+      passedCount: 6,
     });
     expect(verification.checks.map((check) => check.id)).toEqual([
       "receipt_schema_valid",
+      "receipt_signature_valid",
       "archive_record_present",
       "archive_verification_passed",
       "restore_plan_reviewed",
@@ -195,6 +232,10 @@ describe("Grocy backup integrity receipt", () => {
     expectReceiptVerifierCliOutput();
   });
 
+  it("writes the receipt verifier result to an output artifact when requested", () => {
+    expectReceiptVerifierCliOutputFile();
+  });
+
   it("keeps the public example receipt fixtures schema-valid", () => {
     const receiptExample = JSON.parse(fs.readFileSync(path.join(process.cwd(), "examples", "grocy-backup-integrity-receipt.example.json"), "utf8")) as unknown;
     const verificationExample = JSON.parse(
@@ -203,11 +244,12 @@ describe("Grocy backup integrity receipt", () => {
 
     expect(GrocyBackupIntegrityReceiptSchema.parse(receiptExample)).toMatchObject({
       kind: "grocy_backup_integrity_receipt",
+      signature: { algorithm: "hmac-sha256", keySource: "backup_passphrase_env" },
       summary: { status: "pass", checkCount: 4, passedCount: 4 },
     });
     expect(GrocyBackupIntegrityReceiptVerificationSchema.parse(verificationExample)).toMatchObject({
       kind: "grocy_backup_integrity_receipt_verification",
-      summary: { status: "pass", checkCount: 5, passedCount: 5 },
+      summary: { status: "pass", checkCount: 6, passedCount: 6 },
     });
   });
 });

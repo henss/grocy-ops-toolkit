@@ -16,7 +16,7 @@ It can:
 - Report config drift trends between two offline exports.
 - Apply only reviewed `repo_managed` creates and updates when explicitly confirmed.
 - Create and verify encrypted local backup bundles.
-- Emit a compact backup integrity receipt that ties a snapshot to checksum, restore-plan, and restore-drill evidence.
+- Emit a signed backup integrity receipt that ties a snapshot to checksum, restore-plan, and restore-drill evidence.
 - Generate a no-write restore-plan dry-run report before a confirmed restore.
 - Run a fixture-only restore drill that records machine-checkable recovery checkpoints.
 - Run a fixture-only restore failure drill that records corruption, wrong-passphrase, and path-escape rejection evidence.
@@ -717,7 +717,7 @@ data/grocy-backup-restore-plan-dry-run-report.json
 
 The report inspects the latest encrypted archive, verifies the manifest checksum, and records which files would be created or overwritten in the requested restore directory. It does not write restore files. Use `--archive <path>` to point at a different archive record and `--output <path>` to write the report somewhere else.
 
-Generate a compact integrity receipt after snapshot verification and any available restore evidence:
+Generate a signed integrity receipt after snapshot verification and any available restore evidence:
 
 ```bash
 npm run grocy:backup:receipt
@@ -729,7 +729,7 @@ By default, the receipt is written to:
 data/grocy-backup-integrity-receipt.json
 ```
 
-The receipt records public-safe metadata about the latest backup record, reruns archive verification without restore writes, and links any conventional restore-plan or restore-drill artifacts that are already present. Use `--output <path>` to write the receipt somewhere else, `--archive <path>` to target a specific manifest record, and `--restore-plan-report` or `--restore-drill-report` to point at non-default evidence files.
+The receipt records public-safe metadata about the latest backup record, reruns archive verification without restore writes, signs the receipt body with an HMAC derived from the configured backup passphrase environment variable, and links any conventional restore-plan or restore-drill artifacts that are already present. Use `--output <path>` to write the receipt somewhere else, `--archive <path>` to target a specific manifest record, and `--restore-plan-report` or `--restore-drill-report` to point at non-default evidence files.
 
 Verify an existing receipt against the current manifest and proof artifacts:
 
@@ -737,7 +737,17 @@ Verify an existing receipt against the current manifest and proof artifacts:
 npm run grocy:backup:receipt:verify
 ```
 
-The verifier reruns schema validation, checks the manifest record, reruns `grocy:backup:verify` without restore writes, and compares any referenced restore-plan or restore-drill artifacts. It exits non-zero when the receipt no longer matches current evidence.
+Use `--output <path>` to persist the verification result as a public-safe JSON artifact.
+
+The verifier reruns schema validation, validates the receipt signature against the configured backup passphrase environment variable, checks the manifest record, reruns `grocy:backup:verify` without restore writes, and compares any referenced restore-plan or restore-drill artifacts. It exits non-zero when the receipt no longer matches current evidence.
+
+When you want a machine-checkable verification artifact for the encrypted archive itself, write the backup verifier output directly:
+
+```bash
+npm run grocy:backup:verify -- --output data/grocy-backup-verification-report.json --force
+```
+
+The verification report records the selected archive record id, public-safe paths, checksum result, and optional restore target without embedding decrypted file contents.
 
 See `examples/grocy-backup-integrity-receipt.example.json` for the receipt shape and `examples/grocy-backup-integrity-receipt-verification.example.json` for the matching verifier result shape.
 
@@ -849,6 +859,7 @@ npm run grocy:backup:receipt:verify
 npm run grocy:backup:restore-drill -- --restore-dir restore/fixture-only-restore-drill
 npm run grocy:backup:restore-failure-drill -- --restore-dir restore/fixture-only-restore-failure-drill
 npm run grocy:backup:verify
+npm run grocy:backup:verify -- --output data/grocy-backup-verification-report.json --force
 npm run grocy:backup:verify -- --restore-dir restore/grocy-backup-check --confirm-restore-write
 npm run grocy:review:dashboard
 npm run grocy:artifacts:audit-redaction
