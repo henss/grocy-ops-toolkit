@@ -16,6 +16,7 @@ It can:
 - Report config drift trends between two offline exports.
 - Apply only reviewed `repo_managed` creates and updates when explicitly confirmed.
 - Create and verify encrypted local backup bundles.
+- Simulate retention-policy storage footprint and storage cost from synthetic snapshot histories.
 - Emit a signed backup integrity receipt that ties a snapshot to checksum, restore-plan, and restore-drill evidence.
 - Generate a no-write restore-plan dry-run report before a confirmed restore.
 - Run a fixture-only restore drill that records machine-checkable recovery checkpoints.
@@ -717,6 +718,20 @@ data/grocy-backup-restore-plan-dry-run-report.json
 
 The report inspects the latest encrypted archive, verifies the manifest checksum, and records which files would be created or overwritten in the requested restore directory. It does not write restore files. Use `--archive <path>` to point at a different archive record and `--output <path>` to write the report somewhere else.
 
+Model how a synthetic snapshot history would age under an hourly/daily/weekly/monthly retention policy:
+
+```bash
+npm run grocy:backup:retention-simulate -- --history examples/grocy-backup-retention-history.example.json
+```
+
+By default, the retention simulation report is written to:
+
+```text
+data/grocy-backup-retention-simulation-report.json
+```
+
+The simulator is synthetic-only. It reads an invented snapshot history, applies the history's retention policy, and reports the retained snapshot set, deduplicated `storedBytes` footprint, retained logical bytes, and estimated monthly and annual storage cost. Use `--output <path>` to write the report somewhere else.
+
 Generate a signed integrity receipt after snapshot verification and any available restore evidence:
 
 ```bash
@@ -750,6 +765,7 @@ npm run grocy:backup:verify -- --output data/grocy-backup-verification-report.js
 The verification report records the selected archive record id, public-safe paths, checksum result, and optional restore target without embedding decrypted file contents.
 
 See `examples/grocy-backup-integrity-receipt.example.json` for the receipt shape and `examples/grocy-backup-integrity-receipt-verification.example.json` for the matching verifier result shape.
+See `examples/grocy-backup-retention-history.example.json` for the synthetic history input shape and `examples/grocy-backup-retention-simulation-report.example.json` for the matching simulation report shape.
 
 To verify by restoring into a local restore directory, explicitly confirm the restore write:
 

@@ -1,0 +1,111 @@
+{
+  "kind": "grocy_backup_retention_history",
+  "version": 1,
+  "generatedAt": "2026-04-25T07:45:00.000Z",
+  "scope": "synthetic_fixture_only",
+  "policy": {
+    "hourly": 2,
+    "daily": 2,
+    "weekly": 3,
+    "monthly": 2
+  },
+  "pricing": {
+    "currencyCode": "USD",
+    "storagePricePerGiBMonth": 0.25
+  },
+  "snapshots": [
+    {
+      "id": "snap-2026-02-01-0800",
+      "createdAt": "2026-02-01T08:00:00.000Z",
+      "logicalBytes": 1006632960,
+      "storedBytes": 125829120,
+      "notes": [
+        "Synthetic monthly baseline."
+      ]
+    },
+    {
+      "id": "snap-2026-03-01-0800",
+      "createdAt": "2026-03-01T08:00:00.000Z",
+      "logicalBytes": 1048576000,
+      "storedBytes": 136314880,
+      "notes": [
+        "Synthetic monthly baseline."
+      ]
+    },
+    {
+      "id": "snap-2026-03-28-0800",
+      "createdAt": "2026-03-28T08:00:00.000Z",
+      "logicalBytes": 1065353216,
+      "storedBytes": 146800640,
+      "notes": [
+        "Synthetic weekly change set."
+      ]
+    },
+    {
+      "id": "snap-2026-04-04-0800",
+      "createdAt": "2026-04-04T08:00:00.000Z",
+      "logicalBytes": 1073741824,
+      "storedBytes": 125829120,
+      "notes": [
+        "Synthetic weekly change set."
+      ]
+    },
+    {
+      "id": "snap-2026-04-11-0800",
+      "createdAt": "2026-04-11T08:00:00.000Z",
+      "logicalBytes": 1082130432,
+      "storedBytes": 146800640,
+      "notes": [
+        "Synthetic weekly change set."
+      ]
+    },
+    {
+      "id": "snap-2026-04-18-0800",
+      "createdAt": "2026-04-18T08:00:00.000Z",
+      "logicalBytes": 1090519040,
+      "storedBytes": 157286400,
+      "notes": [
+        "Synthetic weekly change set."
+      ]
+    },
+    {
+      "id": "snap-2026-04-23-0800",
+      "createdAt": "2026-04-23T08:00:00.000Z",
+      "logicalBytes": 1098907648,
+      "storedBytes": 104857600,
+      "notes": [
+        "Synthetic daily restore point."
+      ]
+    },
+    {
+      "id": "snap-2026-04-24-0800",
+      "createdAt": "2026-04-24T08:00:00.000Z",
+      "logicalBytes": 1099431936,
+      "storedBytes": 94371840,
+      "notes": [
+        "Synthetic daily restore point."
+      ]
+    },
+    {
+      "id": "snap-2026-04-25-0200",
+      "createdAt": "2026-04-25T02:00:00.000Z",
+      "logicalBytes": 1100480512,
+      "storedBytes": 89128960,
+      "notes": [
+        "Synthetic hourly restore point."
+      ]
+    },
+    {
+      "id": "snap-2026-04-25-0800",
+      "createdAt": "2026-04-25T08:00:00.000Z",
+      "logicalBytes": 1101004800,
+      "storedBytes": 83886080,
+      "notes": [
+        "Synthetic latest restore point."
+      ]
+    }
+  ],
+  "reviewNotes": [
+    "This history is synthetic and models deduplicated stored bytes rather than live archive contents."
+  ]
+}

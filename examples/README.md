@@ -53,6 +53,10 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-backup-verification-report.example.json` shows the public-safe encrypted backup verification artifact emitted by `npm run grocy:backup:verify -- --output ...`.
 
+`grocy-backup-retention-history.example.json` shows the synthetic-only history input used to simulate retention-policy footprint and storage cost.
+
+`grocy-backup-retention-simulation-report.example.json` shows the synthetic retention simulation report emitted by `npm run grocy:backup:retention-simulate`.
+
 `grocy-backup-restore-drill-report.example.json` shows the fixture-only checkpoint artifact emitted by `npm run grocy:backup:restore-drill`.
 
 `grocy-backup-integrity-receipt.example.json` shows the signed backup evidence receipt emitted by `npm run grocy:backup:receipt` after snapshot verification and optional restore-plan or restore-drill evidence are available.

@@ -1,4 +1,8 @@
 import {
+  createGrocyBackupRetentionSimulationReport,
+  recordGrocyBackupRetentionSimulationReport,
+} from "./backup-retention-simulation.js";
+import {
   recordGrocyBackupIntegrityReceiptVerification,
   createGrocyBackupIntegrityReceipt,
   recordGrocyBackupIntegrityReceipt,
@@ -36,41 +40,64 @@ function hasForceOutput(argv: string[], outputPath: string | undefined): boolean
   return argv.includes("--force") || !outputPath;
 }
 
-export function handleGrocyBackupCommand(command: string | undefined, context: GrocyBackupCliContext): boolean {
+function handleGrocyBackupRetentionSimulationCommand(context: GrocyBackupCliContext): void {
   const { argv, baseDir, parseFlag, printJson } = context;
-
-  if (command === "grocy:backup:snapshot") {
-    printJson(createGrocyBackupSnapshot(baseDir));
-    return true;
+  const historyPath = parseFlag("--history");
+  if (!historyPath) {
+    throw new Error("Usage: grocy:backup:retention-simulate -- --history <path>");
   }
+  const report = createGrocyBackupRetentionSimulationReport(baseDir, {
+    historyPath,
+  });
+  const outputPath = recordGrocyBackupRetentionSimulationReport(report, {
+    outputPath: parseFlag("--output"),
+    overwrite: hasForceOutput(argv, parseFlag("--output")),
+  });
+  printJson({ outputPath, summary: report.summary });
+}
 
-  if (command === "grocy:backup:verify") {
-    const outputPath = parseFlag("--output");
-    if (outputPath) {
-      const report = createGrocyBackupVerificationReport(baseDir, {
-        archivePath: parseFlag("--archive"),
-        restoreDir: parseFlag("--restore-dir"),
-        confirmRestoreWrite: argv.includes("--confirm-restore-write"),
-      });
-      const recordedPath = recordGrocyBackupVerificationReport(report, {
-        outputPath,
-        overwrite: argv.includes("--force"),
-      });
-      printJson({ outputPath: recordedPath, verification: report.verification });
-      if (report.verification.status !== "pass") {
-        process.exitCode = 1;
-      }
-      return true;
-    }
+function handleGrocyBackupSnapshotCommand(command: string | undefined, context: GrocyBackupCliContext): boolean {
+  const { baseDir, printJson } = context;
+  if (command !== "grocy:backup:snapshot") {
+    return false;
+  }
+  printJson(createGrocyBackupSnapshot(baseDir));
+  return true;
+}
 
-    printJson(verifyGrocyBackupSnapshot(baseDir, {
+function handleGrocyBackupVerifyCommand(command: string | undefined, context: GrocyBackupCliContext): boolean {
+  const { argv, baseDir, parseFlag, printJson } = context;
+  if (command !== "grocy:backup:verify") {
+    return false;
+  }
+  const outputPath = parseFlag("--output");
+  if (outputPath) {
+    const report = createGrocyBackupVerificationReport(baseDir, {
       archivePath: parseFlag("--archive"),
       restoreDir: parseFlag("--restore-dir"),
       confirmRestoreWrite: argv.includes("--confirm-restore-write"),
-    }));
+    });
+    const recordedPath = recordGrocyBackupVerificationReport(report, {
+      outputPath,
+      overwrite: argv.includes("--force"),
+    });
+    printJson({ outputPath: recordedPath, verification: report.verification });
+    if (report.verification.status !== "pass") {
+      process.exitCode = 1;
+    }
     return true;
   }
 
+  printJson(verifyGrocyBackupSnapshot(baseDir, {
+    archivePath: parseFlag("--archive"),
+    restoreDir: parseFlag("--restore-dir"),
+    confirmRestoreWrite: argv.includes("--confirm-restore-write"),
+  }));
+  return true;
+}
+
+function handleGrocyBackupReceiptCommands(command: string | undefined, context: GrocyBackupCliContext): boolean {
+  const { argv, baseDir, parseFlag, printJson } = context;
   if (command === "grocy:backup:receipt") {
     const receipt = createGrocyBackupIntegrityReceipt(baseDir, {
       archivePath: parseFlag("--archive"),
@@ -111,7 +138,11 @@ export function handleGrocyBackupCommand(command: string | undefined, context: G
     }
     return true;
   }
+  return false;
+}
 
+function handleGrocyBackupRestoreCommands(command: string | undefined, context: GrocyBackupCliContext): boolean {
+  const { argv, baseDir, parseFlag, printJson } = context;
   if (command === "grocy:backup:restore-plan") {
     const restoreDir = parseFlag("--restore-dir");
     if (!restoreDir) {
@@ -159,6 +190,33 @@ export function handleGrocyBackupCommand(command: string | undefined, context: G
     if (report.summary.result !== "pass") {
       process.exitCode = 1;
     }
+    return true;
+  }
+  return false;
+}
+
+function handleGrocyBackupSimulationCommands(command: string | undefined, context: GrocyBackupCliContext): boolean {
+  if (command === "grocy:backup:retention-simulate") {
+    handleGrocyBackupRetentionSimulationCommand(context);
+    return true;
+  }
+  return false;
+}
+
+export function handleGrocyBackupCommand(command: string | undefined, context: GrocyBackupCliContext): boolean {
+  if (handleGrocyBackupSnapshotCommand(command, context)) {
+    return true;
+  }
+  if (handleGrocyBackupVerifyCommand(command, context)) {
+    return true;
+  }
+  if (handleGrocyBackupReceiptCommands(command, context)) {
+    return true;
+  }
+  if (handleGrocyBackupRestoreCommands(command, context)) {
+    return true;
+  }
+  if (handleGrocyBackupSimulationCommands(command, context)) {
     return true;
   }
 

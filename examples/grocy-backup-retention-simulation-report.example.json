@@ -1,0 +1,244 @@
+{
+  "kind": "grocy_backup_retention_simulation_report",
+  "version": 1,
+  "generatedAt": "2026-04-25T08:00:00.000Z",
+  "scope": "synthetic_fixture_only",
+  "historyPath": "examples/grocy-backup-retention-history.example.json",
+  "policy": {
+    "hourly": 2,
+    "daily": 2,
+    "weekly": 3,
+    "monthly": 2
+  },
+  "pricing": {
+    "currencyCode": "USD",
+    "storagePricePerGiBMonth": 0.25
+  },
+  "summary": {
+    "snapshotCount": 10,
+    "retainedSnapshotCount": 6,
+    "expiredSnapshotCount": 4,
+    "retainedStoredBytes": 718274560,
+    "retainedLogicalBytes": 6538919936,
+    "peakRetainedStoredBytes": 718274560,
+    "estimatedMonthlyCost": 0.1672,
+    "estimatedAnnualCost": 2.0064
+  },
+  "retainedSnapshots": [
+    {
+      "id": "snap-2026-04-25-0800",
+      "createdAt": "2026-04-25T08:00:00.000Z",
+      "logicalBytes": 1101004800,
+      "storedBytes": 83886080,
+      "retained": true,
+      "retainedBy": [
+        "daily",
+        "hourly",
+        "latest",
+        "monthly",
+        "weekly"
+      ],
+      "notes": [
+        "Synthetic latest restore point."
+      ]
+    },
+    {
+      "id": "snap-2026-04-25-0200",
+      "createdAt": "2026-04-25T02:00:00.000Z",
+      "logicalBytes": 1100480512,
+      "storedBytes": 89128960,
+      "retained": true,
+      "retainedBy": [
+        "hourly"
+      ],
+      "notes": [
+        "Synthetic hourly restore point."
+      ]
+    },
+    {
+      "id": "snap-2026-04-24-0800",
+      "createdAt": "2026-04-24T08:00:00.000Z",
+      "logicalBytes": 1099431936,
+      "storedBytes": 94371840,
+      "retained": true,
+      "retainedBy": [
+        "daily"
+      ],
+      "notes": [
+        "Synthetic daily restore point."
+      ]
+    },
+    {
+      "id": "snap-2026-04-18-0800",
+      "createdAt": "2026-04-18T08:00:00.000Z",
+      "logicalBytes": 1090519040,
+      "storedBytes": 157286400,
+      "retained": true,
+      "retainedBy": [
+        "weekly"
+      ],
+      "notes": [
+        "Synthetic weekly change set."
+      ]
+    },
+    {
+      "id": "snap-2026-04-11-0800",
+      "createdAt": "2026-04-11T08:00:00.000Z",
+      "logicalBytes": 1082130432,
+      "storedBytes": 146800640,
+      "retained": true,
+      "retainedBy": [
+        "weekly"
+      ],
+      "notes": [
+        "Synthetic weekly change set."
+      ]
+    },
+    {
+      "id": "snap-2026-03-28-0800",
+      "createdAt": "2026-03-28T08:00:00.000Z",
+      "logicalBytes": 1065353216,
+      "storedBytes": 146800640,
+      "retained": true,
+      "retainedBy": [
+        "monthly"
+      ],
+      "notes": [
+        "Synthetic weekly change set."
+      ]
+    }
+  ],
+  "expiredSnapshots": [
+    {
+      "id": "snap-2026-04-23-0800",
+      "createdAt": "2026-04-23T08:00:00.000Z",
+      "logicalBytes": 1098907648,
+      "storedBytes": 104857600,
+      "retained": false,
+      "retainedBy": [],
+      "notes": [
+        "Synthetic daily restore point."
+      ]
+    },
+    {
+      "id": "snap-2026-04-04-0800",
+      "createdAt": "2026-04-04T08:00:00.000Z",
+      "logicalBytes": 1073741824,
+      "storedBytes": 125829120,
+      "retained": false,
+      "retainedBy": [],
+      "notes": [
+        "Synthetic weekly change set."
+      ]
+    },
+    {
+      "id": "snap-2026-03-01-0800",
+      "createdAt": "2026-03-01T08:00:00.000Z",
+      "logicalBytes": 1048576000,
+      "storedBytes": 136314880,
+      "retained": false,
+      "retainedBy": [],
+      "notes": [
+        "Synthetic monthly baseline."
+      ]
+    },
+    {
+      "id": "snap-2026-02-01-0800",
+      "createdAt": "2026-02-01T08:00:00.000Z",
+      "logicalBytes": 1006632960,
+      "storedBytes": 125829120,
+      "retained": false,
+      "retainedBy": [],
+      "notes": [
+        "Synthetic monthly baseline."
+      ]
+    }
+  ],
+  "timeline": [
+    {
+      "evaluatedAt": "2026-02-01T08:00:00.000Z",
+      "snapshotId": "snap-2026-02-01-0800",
+      "retainedSnapshotCount": 1,
+      "retainedStoredBytes": 125829120,
+      "retainedLogicalBytes": 1006632960,
+      "estimatedMonthlyCost": 0.0293
+    },
+    {
+      "evaluatedAt": "2026-03-01T08:00:00.000Z",
+      "snapshotId": "snap-2026-03-01-0800",
+      "retainedSnapshotCount": 2,
+      "retainedStoredBytes": 262144000,
+      "retainedLogicalBytes": 2055208960,
+      "estimatedMonthlyCost": 0.061
+    },
+    {
+      "evaluatedAt": "2026-03-28T08:00:00.000Z",
+      "snapshotId": "snap-2026-03-28-0800",
+      "retainedSnapshotCount": 3,
+      "retainedStoredBytes": 408944640,
+      "retainedLogicalBytes": 3120562176,
+      "estimatedMonthlyCost": 0.0952
+    },
+    {
+      "evaluatedAt": "2026-04-04T08:00:00.000Z",
+      "snapshotId": "snap-2026-04-04-0800",
+      "retainedSnapshotCount": 3,
+      "retainedStoredBytes": 408944640,
+      "retainedLogicalBytes": 3187671040,
+      "estimatedMonthlyCost": 0.0952
+    },
+    {
+      "evaluatedAt": "2026-04-11T08:00:00.000Z",
+      "snapshotId": "snap-2026-04-11-0800",
+      "retainedSnapshotCount": 3,
+      "retainedStoredBytes": 419430400,
+      "retainedLogicalBytes": 3221225472,
+      "estimatedMonthlyCost": 0.0977
+    },
+    {
+      "evaluatedAt": "2026-04-18T08:00:00.000Z",
+      "snapshotId": "snap-2026-04-18-0800",
+      "retainedSnapshotCount": 4,
+      "retainedStoredBytes": 576716800,
+      "retainedLogicalBytes": 4311744512,
+      "estimatedMonthlyCost": 0.1343
+    },
+    {
+      "evaluatedAt": "2026-04-23T08:00:00.000Z",
+      "snapshotId": "snap-2026-04-23-0800",
+      "retainedSnapshotCount": 4,
+      "retainedStoredBytes": 555745280,
+      "retainedLogicalBytes": 4336910336,
+      "estimatedMonthlyCost": 0.1294
+    },
+    {
+      "evaluatedAt": "2026-04-24T08:00:00.000Z",
+      "snapshotId": "snap-2026-04-24-0800",
+      "retainedSnapshotCount": 5,
+      "retainedStoredBytes": 650117120,
+      "retainedLogicalBytes": 5436342272,
+      "estimatedMonthlyCost": 0.1514
+    },
+    {
+      "evaluatedAt": "2026-04-25T02:00:00.000Z",
+      "snapshotId": "snap-2026-04-25-0200",
+      "retainedSnapshotCount": 5,
+      "retainedStoredBytes": 634388480,
+      "retainedLogicalBytes": 5437915136,
+      "estimatedMonthlyCost": 0.1477
+    },
+    {
+      "evaluatedAt": "2026-04-25T08:00:00.000Z",
+      "snapshotId": "snap-2026-04-25-0800",
+      "retainedSnapshotCount": 6,
+      "retainedStoredBytes": 718274560,
+      "retainedLogicalBytes": 6538919936,
+      "estimatedMonthlyCost": 0.1672
+    }
+  ],
+  "reviewNotes": [
+    "This simulator is synthetic-only and expects invented snapshot histories rather than live Grocy backups.",
+    "storedBytes models the deduplicated physical footprint attributed to each retained snapshot, while logicalBytes models the full recoverable payload size.",
+    "This history is synthetic and models deduplicated stored bytes rather than live archive contents."
+  ]
+}

@@ -77,7 +77,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:typechecked": "eslint . --config eslint.typechecked.config.mjs",
-    "verify:session": "npm run lint && npm run typecheck && npm run test && npm run check:agent-surface"
+    "verify:session": "npm run lint && npm run typecheck && npm run test && npm run check:agent-surface",
+    "grocy:backup:retention-simulate": "tsx src/cli.ts grocy:backup:retention-simulate"
   },
   "dependencies": {
     "zod": "^4.3.6"
