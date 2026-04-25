@@ -256,6 +256,46 @@ function assertInstalledPreviewScenario(params: {
 
 describe("packed npm install smoke test", () => {
   it(
+    "initializes a clean consumer workspace through the installed bin without bundled examples",
+    () => {
+      const { consumerDir, npmEnv } = setupPackedConsumer("grocy-packed-init-");
+      fs.writeFileSync(
+        path.join(consumerDir, "package.json"),
+        JSON.stringify({ private: true, type: "module", dependencies: {} }, null, 2),
+      );
+
+      run(npmCommand, ["run", "build"], repoRoot, npmEnv);
+      const tarballPath = packPackageFromCleanCheckout(path.dirname(consumerDir), npmEnv);
+      installPackedPackage(consumerDir, tarballPath, npmEnv);
+
+      const installedBinCommand = resolveInstalledBinCommand(consumerDir);
+      const stdout = run(installedBinCommand, ["grocy:init:workspace"], consumerDir, npmEnv);
+
+      expect(JSON.parse(stdout)).toMatchObject({
+        directories: [
+          { path: "config", status: "created" },
+          { path: "data", status: "created" },
+          { path: "backups", status: "created" },
+          { path: "restore", status: "created" },
+        ],
+        files: [
+          { path: "config/grocy.local.json", status: "written" },
+          { path: "config/grocy-backup.local.json", status: "written" },
+        ],
+      });
+      expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "config", "grocy.local.json"), "utf8"))).toMatchObject({
+        baseUrl: "https://grocy.example.com/api",
+        apiKey: "YOUR_GROCY_API_KEY",
+      });
+      expect(JSON.parse(fs.readFileSync(path.join(consumerDir, "config", "grocy-backup.local.json"), "utf8"))).toMatchObject({
+        sourcePath: "./path-to-local-grocy-data",
+        backupDir: "./backups/grocy",
+      });
+    },
+    60_000,
+  );
+
+  it(
     "installs the packed package and exercises the public export and installed bin commands",
     () => {
       const { consumerDir, npmEnv } = setupPackedConsumer("grocy-packed-install-");

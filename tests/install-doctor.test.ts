@@ -65,7 +65,7 @@ describe("Grocy install doctor", () => {
       status: "warn",
       code: "grocy_config_missing",
       message: "Local Grocy config is missing at config\\grocy.local.json.",
-      action: "Create config/grocy.local.json with baseUrl, apiKey, and timeoutMs before running live Grocy commands.",
+      action: "Run npm run grocy:init:workspace to create starter local config files and conventional directories. Create config/grocy.local.json with baseUrl, apiKey, and timeoutMs before running live Grocy commands.",
       evidence: [],
     });
     expect(artifact.checks).toContainEqual({

@@ -50,30 +50,36 @@ Install dependencies and verify the project:
 
 ```bash
 npm install
+npm run grocy:init:workspace
 npm run grocy:install:doctor -- --output data/install-doctor.json --force
 npm run typecheck
 npm run build
 npm test
 ```
 
-On a clean checkout, the install doctor reports first-run gaps such as missing `config/`, `data/`, `restore/`, and local config files. It exits non-zero only for blocking failures such as unsupported Node.js or invalid local config JSON.
+`npm run grocy:init:workspace` creates conventional local starter paths and starter config files:
 
-Create the conventional local directories used by the toolkit:
+- `config/`
+- `data/`
+- `backups/`
+- `restore/`
+- `config/grocy.local.json`
+- `config/grocy-backup.local.json`
+
+The starter config files are safe placeholders. Update them for your local Grocy instance before running live health, config, or backup workflows.
+
+On a clean checkout, the install doctor stays useful after workspace init: it can confirm the starter layout and still point out remaining local gaps such as a placeholder backup `sourcePath`. It exits non-zero only for blocking failures such as unsupported Node.js or invalid local config JSON.
+
+To refresh the starter files later, rerun the same command with `--force`:
 
 ```bash
-mkdir -p config data restore
+npm run grocy:init:workspace -- --force
 ```
 
 PowerShell:
 
 ```powershell
-New-Item -ItemType Directory -Force config, data, restore | Out-Null
-```
-
-Create a local Grocy config from the example:
-
-```bash
-cp examples/grocy.local.example.json config/grocy.local.json
+npm run grocy:init:workspace -- --force
 ```
 
 Then run the basic status and health checks:
@@ -115,14 +121,14 @@ Build the package edge first:
 
 ```bash
 npm install
+npm run grocy:init:workspace
 npm run build
-mkdir -p config data restore
 ```
 
 PowerShell:
 
 ```powershell
-New-Item -ItemType Directory -Force config, data, restore | Out-Null
+npm run grocy:init:workspace
 ```
 
 Preview the health example artifacts without live Grocy credentials:
@@ -769,6 +775,7 @@ For guidance on which recovery-confidence path to run for a given review questio
 
 ```bash
 npm run grocy:config:status
+npm run grocy:init:workspace
 npm run grocy:demo:lab
 npm run grocy:quickstart:proof
 npm run grocy:health

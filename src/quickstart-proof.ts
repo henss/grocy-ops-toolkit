@@ -31,6 +31,7 @@ import {
   runGrocyInstallDoctor,
   recordGrocyInstallDoctorArtifact,
 } from "./install-doctor.js";
+import { initializeGrocyWorkspace } from "./init-workspace.js";
 import {
   runGrocyMockSmokeTest,
   recordGrocyMockSmokeReport,
@@ -67,7 +68,6 @@ const QUICKSTART_REQUIRED_FILES = [
 ] as const;
 
 const QUICKSTART_COPY_BACK_PATHS = [
-  GROCY_README_QUICKSTART_INSTALL_DOCTOR_PATH,
   GROCY_README_QUICKSTART_HEALTH_DIAGNOSTICS_PATH,
   GROCY_README_QUICKSTART_MOCK_SMOKE_REPORT_PATH,
   GROCY_README_QUICKSTART_MOCK_SMOKE_RECEIPT_PATH,
@@ -175,11 +175,13 @@ export async function createGrocyReadmeQuickstartProofReceipt(
 ): Promise<GrocyReadmeQuickstartProofReceipt> {
   const generatedAt = options.generatedAt ?? new Date().toISOString();
   const workspaceDir = createScratchWorkspace(baseDir);
+  const quickStartWorkspaceDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-init-quickstart-proof-"));
 
   try {
-    const installDoctor = runGrocyInstallDoctor(workspaceDir, { generatedAt });
+    const initWorkspace = initializeGrocyWorkspace(quickStartWorkspaceDir);
+    const installDoctor = runGrocyInstallDoctor(quickStartWorkspaceDir, { generatedAt });
     recordGrocyInstallDoctorArtifact(installDoctor, {
-      baseDir: workspaceDir,
+      baseDir: quickStartWorkspaceDir,
       outputPath: GROCY_README_QUICKSTART_INSTALL_DOCTOR_PATH,
       overwrite: true,
     });
@@ -268,30 +270,53 @@ export async function createGrocyReadmeQuickstartProofReceipt(
 
     const demoEnvironment = await createGrocyDemoEnvironment(workspaceDir, { generatedAt });
 
+    copyWorkspaceArtifactToRepo(quickStartWorkspaceDir, baseDir, GROCY_README_QUICKSTART_INSTALL_DOCTOR_PATH, true);
     for (const relativePath of QUICKSTART_COPY_BACK_PATHS) {
       copyWorkspaceArtifactToRepo(workspaceDir, baseDir, relativePath, true);
     }
 
     const quickStartRecipe = createRecipe({
       id: "quick_start_preflight",
-      title: "Quick Start Preflight",
+      title: "Workspace Init Quick Start",
       checks: [
         createCheck(
-          "install_doctor_action_required",
-          installDoctor.summary.status === "action_required" ? "pass" : "fail",
-          `Install doctor reported ${installDoctor.summary.status} on a clean synthetic checkout.`,
-        ),
-        createCheck(
-          "install_doctor_missing_dirs",
-          installDoctor.checks.some((check) => check.id === "config_dir" && check.code === "directory_missing")
-            && installDoctor.checks.some((check) => check.id === "data_dir" && check.code === "directory_missing")
-            && installDoctor.checks.some((check) => check.id === "restore_dir" && check.code === "directory_missing")
+          "workspace_init_created_conventional_paths",
+          (
+            initWorkspace.directories.length === 4
+            && initWorkspace.directories.every((directory) => directory.status === "created")
+          )
             ? "pass"
             : "fail",
-          "Install doctor surfaced the expected first-run directory gaps.",
+          "Workspace init created the conventional config, data, backups, and restore paths.",
+        ),
+        createCheck(
+          "workspace_init_wrote_starter_configs",
+          (
+            initWorkspace.files.length === 2
+            && initWorkspace.files.every((file) => file.status === "written")
+          )
+            ? "pass"
+            : "fail",
+          "Workspace init wrote starter Grocy live and backup config files.",
+        ),
+        createCheck(
+          "install_doctor_after_init_action_required",
+          installDoctor.summary.status === "action_required" ? "pass" : "fail",
+          `Install doctor reported ${installDoctor.summary.status} after starter workspace setup.`,
+        ),
+        createCheck(
+          "install_doctor_only_flags_backup_source",
+          (
+            installDoctor.summary.warningCount === 1
+            && installDoctor.summary.failureCount === 0
+            && installDoctor.checks.some((check) => check.id === "backup_source" && check.code === "backup_source_missing")
+          )
+            ? "pass"
+            : "fail",
+          "Install doctor kept the starter setup public-safe and only flagged the placeholder backup source path.",
         ),
       ],
-      summary: "Proved the README quick-start preflight on a clean synthetic checkout and captured the first-run guidance artifact.",
+      summary: "Proved the README workspace-init recipe on a clean synthetic checkout and captured the post-init install-doctor artifact.",
       artifactPaths: [toPortablePath(GROCY_README_QUICKSTART_INSTALL_DOCTOR_PATH)],
     });
 
@@ -421,11 +446,13 @@ export async function createGrocyReadmeQuickstartProofReceipt(
       artifacts,
       reviewNotes: [
         "This receipt proves the README quickstart recipes with synthetic fixtures only and does not require live Grocy credentials.",
+        "The workspace-init starter configs intentionally stay placeholder-only, so install doctor still flags the backup source path until a local sourcePath is configured.",
         "The proof run copies public-safe artifacts back into conventional repo paths so the README and docs can reference stable evidence files.",
         "A failed install doctor or diagnostics artifact can still count as expected proof when the recipe is validating the clean-checkout boundary instead of live readiness.",
       ],
     });
   } finally {
     fs.rmSync(workspaceDir, { recursive: true, force: true });
+    fs.rmSync(quickStartWorkspaceDir, { recursive: true, force: true });
   }
 }

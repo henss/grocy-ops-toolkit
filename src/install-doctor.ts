@@ -134,7 +134,7 @@ function createGrocyConfigCheck(baseDir: string, configPath: string): GrocyInsta
       status: "warn",
       code: "grocy_config_missing",
       message: `Local Grocy config is missing at ${configPath}.`,
-      action: examplePath,
+      action: `Run npm run grocy:init:workspace to create starter local config files and conventional directories. ${examplePath}`,
     });
   }
   try {
@@ -169,7 +169,7 @@ function createBackupConfigCheck(baseDir: string, configPath: string): GrocyInst
       status: "warn",
       code: "backup_config_missing",
       message: `Local backup config is missing at ${configPath}.`,
-      action: examplePath,
+      action: `Run npm run grocy:init:workspace to create starter local config files and conventional directories. ${examplePath}`,
     });
   }
   try {

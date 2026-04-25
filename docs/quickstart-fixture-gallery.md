@@ -15,6 +15,7 @@ Start with the standard repo checks:
 
 ```bash
 npm install
+npm run grocy:init:workspace
 npm run grocy:quickstart:proof
 npm run grocy:install:doctor -- --output data/gallery-install-doctor.json --force
 npm run typecheck
@@ -22,21 +23,23 @@ npm run build
 npm test
 ```
 
-Create the conventional local directories used by the toolkit:
+`npm run grocy:init:workspace` creates the conventional local starter paths and starter config files used by the toolkit.
+
+To refresh the starter files later, rerun it with `--force`:
 
 ```bash
-mkdir -p config data restore
+npm run grocy:init:workspace -- --force
 ```
 
 PowerShell:
 
 ```powershell
-New-Item -ItemType Directory -Force config, data, restore | Out-Null
+npm run grocy:init:workspace -- --force
 ```
 
 Use this section when you need to confirm a clean checkout before reviewing any individual fixture family.
 
-Expected result: the install doctor records any missing first-run directories or local config files before the deeper fixture loops begin.
+Expected result: workspace init lays down public-safe starter files, and the install doctor confirms that setup while still flagging any remaining local placeholders before the deeper fixture loops begin.
 
 When you need a compact receipt that proves the README quickstart recipes still regenerate their public-safe artifacts, use `npm run grocy:quickstart:proof`. It writes `data/grocy-quickstart-proof-receipt.json` and stages the matching quickstart evidence files under conventional repo paths.
 
