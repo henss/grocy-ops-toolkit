@@ -9,6 +9,7 @@ export * from "./config-sync.js";
 export * from "./compatibility-matrix.js";
 export * from "./deprecation-canary.js";
 export * from "./desired-state-lint.js";
+export * from "./evaluator-starter-pack.js";
 export * from "./fixture-server.js";
 export * from "./grocy-live.js";
 export * from "./health-badge.js";

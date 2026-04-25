@@ -25,6 +25,8 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-quickstart-proof-receipt.example.json` shows the compact receipt emitted by `npm run grocy:quickstart:proof` when the README quickstart recipes have been reproved with synthetic fixtures.
 
+`grocy-evaluator-starter-pack.example.json` shows the evaluator-facing starter-pack receipt emitted by `npm run grocy:evaluator:starter-pack`.
+
 `grocy-mock-smoke-report.example.json` shows the public-safe report shape emitted by `npm run grocy:smoke:mock`.
 
 `grocy-mock-smoke-receipt.example.json` shows the compact run receipt emitted alongside the synthetic mock smoke report.

@@ -39,6 +39,14 @@ It can:
 
 Live credentials are not required for the synthetic demo, mock smoke test, apply dry run from an existing plan, or backup verification against synthetic files.
 
+For the shortest evaluator-facing one-command starter pack that refreshes the synthetic proof, dashboard, and support bundle surfaces together, run:
+
+```bash
+npm run grocy:evaluator:starter-pack
+```
+
+It writes `data/grocy-evaluator-starter-pack.json` as the top-level evaluator receipt and points to the main demo and proof artifacts.
+
 For a one-command synthetic evaluation environment that assembles the demo artifacts, review dashboard, and sanitized support bundle in one pass, run:
 
 ```bash
@@ -108,7 +116,11 @@ When you want the same synthetic evidence set in one pass instead of following t
 
 When you want a compact machine-readable proof that the README quickstart recipes still work end to end, run `npm run grocy:quickstart:proof`. It writes `data/grocy-quickstart-proof-receipt.json` plus the matching quickstart artifacts and demo-lab proof files under conventional `data/`, `config/`, and `backups/` paths.
 
+When you want the evaluator-facing wrapper around those proof artifacts, run `npm run grocy:evaluator:starter-pack`. It refreshes the same synthetic proof surface and writes `data/grocy-evaluator-starter-pack.json` with the recommended read order for evaluators.
+
 For the exact commands and expected outputs, see [Synthetic Grocy Demo Lab](docs/synthetic-demo-lab.md).
+
+For the shortest evaluator walkthrough, see [Synthetic Evaluator Starter Pack](docs/synthetic-evaluator-starter-pack.md).
 
 For a smaller entrypoint that maps the main synthetic example families to their commands, docs, and example artifacts, see [Quickstart Fixture Gallery](docs/quickstart-fixture-gallery.md).
 
@@ -793,6 +805,7 @@ For guidance on which recovery-confidence path to run for a given review questio
 ```bash
 npm run grocy:config:status
 npm run grocy:init:workspace
+npm run grocy:evaluator:starter-pack
 npm run grocy:demo:lab
 npm run grocy:quickstart:proof
 npm run grocy:health

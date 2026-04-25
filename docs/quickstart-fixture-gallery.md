@@ -16,6 +16,7 @@ Start with the standard repo checks:
 ```bash
 npm install
 npm run grocy:init:workspace
+npm run grocy:evaluator:starter-pack
 npm run grocy:quickstart:proof
 npm run grocy:install:doctor -- --output data/gallery-install-doctor.json --force
 npm run typecheck
@@ -40,6 +41,8 @@ npm run grocy:init:workspace -- --force
 Use this section when you need to confirm a clean checkout before reviewing any individual fixture family.
 
 Expected result: workspace init lays down public-safe starter files, and the install doctor confirms that setup while still flagging any remaining local placeholders before the deeper fixture loops begin.
+
+When you want the shortest evaluator-facing command instead of choosing fixture families manually, use `npm run grocy:evaluator:starter-pack`. It refreshes the README quickstart proof and points directly at the main dashboard, proof receipt, and support bundle artifacts.
 
 When you need a compact receipt that proves the README quickstart recipes still regenerate their public-safe artifacts, use `npm run grocy:quickstart:proof`. It writes `data/grocy-quickstart-proof-receipt.json` and stages the matching quickstart evidence files under conventional repo paths.
 

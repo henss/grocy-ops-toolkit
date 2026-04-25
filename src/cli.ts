@@ -48,6 +48,10 @@ import {
   createGrocyReadmeQuickstartProofReceipt,
   recordGrocyReadmeQuickstartProofReceipt,
 } from "./quickstart-proof.js";
+import {
+  createGrocyEvaluatorStarterPack,
+  recordGrocyEvaluatorStarterPack,
+} from "./evaluator-starter-pack.js";
 import { getGrocyConfigStatus, runGrocyHealthCheck } from "./grocy-live.js";
 import { recordGrocyHealthBadgeArtifact, runGrocyHealthBadge } from "./health-badge.js";
 import { recordGrocyHealthDiagnosticsArtifact, runGrocyHealthDiagnostics } from "./health-diagnostics.js";
@@ -173,6 +177,18 @@ async function main(): Promise<void> {
     });
     printJson({ outputPath, summary: receipt.summary, recipes: receipt.recipes });
     if (receipt.summary.status !== "pass") {
+      process.exitCode = 1;
+    }
+    return;
+  }
+  if (command === "grocy:evaluator:starter-pack") {
+    const starterPack = await createGrocyEvaluatorStarterPack(process.cwd());
+    const outputPath = recordGrocyEvaluatorStarterPack(starterPack, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: starterPack.summary, entrypoints: starterPack.entrypoints });
+    if (starterPack.summary.status !== "pass") {
       process.exitCode = 1;
     }
     return;

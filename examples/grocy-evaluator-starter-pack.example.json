@@ -1,0 +1,79 @@
+{
+  "kind": "grocy_evaluator_starter_pack",
+  "version": 1,
+  "generatedAt": "2026-04-25T12:00:00.000Z",
+  "scope": "synthetic_fixture_only",
+  "summary": {
+    "status": "pass",
+    "shareability": "ready_to_share",
+    "artifactCount": 4,
+    "recommendedReadingCount": 3
+  },
+  "command": {
+    "id": "grocy:evaluator:starter-pack",
+    "cli": "npm run grocy:evaluator:starter-pack"
+  },
+  "entrypoints": [
+    {
+      "id": "starter_pack_receipt",
+      "title": "Evaluator starter pack receipt",
+      "path": "data/grocy-evaluator-starter-pack.json",
+      "description": "Compact machine-readable map of the synthetic evaluator surface."
+    },
+    {
+      "id": "quickstart_proof",
+      "title": "README quickstart proof",
+      "path": "data/grocy-quickstart-proof-receipt.json",
+      "description": "Proof that the public quickstart recipes still regenerate synthetic artifacts end to end."
+    },
+    {
+      "id": "review_dashboard",
+      "title": "Synthetic review dashboard",
+      "path": "data/demo-review-dashboard.md",
+      "description": "Human-readable Markdown summary across diagnostics, config review, smoke, and backup evidence."
+    },
+    {
+      "id": "support_bundle",
+      "title": "Sanitized support bundle",
+      "path": "data/demo-support-bundle.json",
+      "description": "Shareability-oriented manifest with checksums and redaction-audit status for the main demo artifacts."
+    }
+  ],
+  "docs": [
+    {
+      "id": "starter_pack",
+      "title": "Synthetic Evaluator Starter Pack",
+      "path": "docs/synthetic-evaluator-starter-pack.md",
+      "purpose": "Fastest evaluator-facing walkthrough for the synthetic toolkit surface."
+    },
+    {
+      "id": "demo_lab",
+      "title": "Synthetic Grocy Demo Lab",
+      "path": "docs/synthetic-demo-lab.md",
+      "purpose": "Underlying one-command synthetic demo workflow and artifact families."
+    },
+    {
+      "id": "fixture_gallery",
+      "title": "Quickstart Fixture Gallery",
+      "path": "docs/quickstart-fixture-gallery.md",
+      "purpose": "Smaller fixture families and follow-on commands after the starter pack run."
+    }
+  ],
+  "exampleArtifacts": [
+    "examples/grocy-evaluator-starter-pack.example.json",
+    "examples/grocy-quickstart-proof-receipt.example.json",
+    "examples/grocy-support-bundle.example.json",
+    "examples/grocy-review-dashboard.example.md"
+  ],
+  "verification": [
+    "npm run typecheck",
+    "npm run build",
+    "npm test"
+  ],
+  "reviewNotes": [
+    "This starter pack stays inside the synthetic-only boundary and does not require live Grocy credentials.",
+    "The command reuses the README quickstart proof so evaluators can trust the same public recipes that the docs advertise.",
+    "Use the review dashboard first for a short human pass, then inspect the quickstart proof receipt and support bundle for machine-readable evidence.",
+    "The raw encrypted backup archive stays outside the starter-pack surface; the shareable path is the support bundle plus the referenced proof artifacts."
+  ]
+}
