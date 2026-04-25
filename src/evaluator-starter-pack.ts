@@ -6,9 +6,8 @@ import {
   GROCY_README_QUICKSTART_PROOF_RECEIPT_PATH,
   recordGrocyReadmeQuickstartProofReceipt,
 } from "./quickstart-proof.js";
-import { GrocyReadmeQuickstartProofReceiptSchema } from "./quickstart-proof-schema.js";
 import { GROCY_DEMO_ENVIRONMENT_PATH } from "./demo-lab.js";
-import { GROCY_SUPPORT_BUNDLE_PATH, GrocySupportBundleSchema } from "./support-bundle.js";
+import { GrocySupportBundleSchema } from "./support-bundle.js";
 
 export const GROCY_EVALUATOR_STARTER_PACK_COMMAND = "npm run grocy:evaluator:starter-pack";
 export const GROCY_EVALUATOR_STARTER_PACK_PATH = path.join("data", "grocy-evaluator-starter-pack.json");
