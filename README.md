@@ -14,6 +14,7 @@ It can:
 - Lint desired-state manifests offline before config diff or apply review steps.
 - Diff a reviewed desired-state manifest against a live export and emit a no-write diff preview.
 - Report config drift trends between two offline exports.
+- Diagnose GitOps upgrade migrations from previous/current exports plus desired state before any reviewed apply.
 - Apply only reviewed `repo_managed` creates and updates when explicitly confirmed.
 - Create and verify encrypted local backup bundles.
 - Simulate retention-policy storage footprint and storage cost from synthetic snapshot histories.
@@ -392,7 +393,25 @@ data/grocy-config-drift-trend-report.json
 
 Use `--output <path>` to write the report somewhere else.
 
-### 5. Apply Reviewed Writes
+### 5. Diagnose GitOps Upgrade Migrations
+
+When an upgrade changes Grocy versions or config behavior, generate an offline migration-doctor report from the desired state plus previous/current exports. The report recomputes the current sync plan unless you pass an existing `--plan <path>`.
+
+```bash
+npm run grocy:config:migration-doctor -- --manifest config/desired-state.json --previous data/grocy-config-export.previous.json --current data/grocy-config-export.json
+```
+
+By default, the report is written to:
+
+```text
+data/grocy-config-migration-doctor-report.json
+```
+
+Use `--plan <path>` when you want the report to point at an already-reviewed sync plan, and `--output <path>` to write the report somewhere else.
+
+The report stays offline and highlights migration-sensitive findings such as Grocy version changes, repo-managed items removed or changed across exports, pending creates or updates, and manual-review matches that would block a safe GitOps apply.
+
+### 6. Apply Reviewed Writes
 
 Only run this after reviewing the generated plan and dry-run report.
 
@@ -884,6 +903,7 @@ npm run grocy:fixtures:serve
 npm run grocy:export-config
 npm run grocy:diff-config
 npm run grocy:config:drift-trend -- --previous data/grocy-config-export.previous.json --current data/grocy-config-export.json
+npm run grocy:config:migration-doctor -- --manifest config/desired-state.json --previous data/grocy-config-export.previous.json --current data/grocy-config-export.json
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --dry-run
 npm run grocy:apply-config -- --plan data/grocy-config-sync-plan.json --confirm-reviewed-write
 npm run grocy:backup:snapshot

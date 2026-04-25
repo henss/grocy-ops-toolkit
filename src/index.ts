@@ -17,6 +17,22 @@ export * from "./backup-restore-failure-drill-schema.js";
 export * from "./backup-restore-drill.js";
 export * from "./backups.js";
 export * from "./config-diff-preview-schema.js";
+export {
+  createGrocyConfigMigrationDoctorReport,
+  GROCY_CONFIG_MIGRATION_DOCTOR_REPORT_PATH,
+  GrocyConfigMigrationDoctorFindingCodeSchema,
+  GrocyConfigMigrationDoctorFindingSchema,
+  GrocyConfigMigrationDoctorReportSchema,
+  GrocyConfigMigrationDoctorSeveritySchema,
+  recordGrocyConfigMigrationDoctorReport,
+  runGrocyConfigMigrationDoctor,
+} from "./config-migration-doctor.js";
+export type {
+  GrocyConfigMigrationDoctorFinding,
+  GrocyConfigMigrationDoctorFindingCode,
+  GrocyConfigMigrationDoctorReport,
+  GrocyConfigMigrationDoctorSeverity,
+} from "./config-migration-doctor.js";
 export * from "./config-sync.js";
 export * from "./compatibility-matrix.js";
 export * from "./deprecation-canary.js";

@@ -1,0 +1,70 @@
+{
+  "kind": "grocy_config_migration_doctor_report",
+  "version": 1,
+  "generatedAt": "2026-04-25T10:30:00.000Z",
+  "artifacts": {
+    "manifestPath": "examples/desired-state.example.json",
+    "previousExportPath": "examples/config-export.previous.example.json",
+    "currentExportPath": "examples/config-export.example.json"
+  },
+  "upgrade": {
+    "previousExportedAt": "2026-04-18T10:00:00.000Z",
+    "currentExportedAt": "2026-04-19T10:00:00.000Z",
+    "previousGrocyVersion": "4.0.0",
+    "currentGrocyVersion": "4.0.0"
+  },
+  "summary": {
+    "result": "review_required",
+    "infoCount": 0,
+    "warningCount": 2,
+    "errorCount": 0,
+    "repoManagedItemCount": 1,
+    "repoManagedUpgradeChangeCount": 1,
+    "createCount": 0,
+    "updateCount": 1,
+    "manualReviewCount": 0
+  },
+  "planSummary": {
+    "create": 0,
+    "update": 1,
+    "noop": 0,
+    "manualReview": 0
+  },
+  "driftSummary": {
+    "added": 0,
+    "removed": 0,
+    "changed": 1,
+    "unchanged": 0
+  },
+  "findings": [
+    {
+      "severity": "warning",
+      "code": "repo_managed_item_changed",
+      "message": "1 repo-managed item(s) changed across the compared exports.",
+      "itemKeys": [
+        "products.example-coffee"
+      ],
+      "evidence": [
+        "products.example-coffee: min_stock_amount"
+      ],
+      "recommendedAction": "Review these changed fields as migration-sensitive config before approving a follow-up sync apply."
+    },
+    {
+      "severity": "warning",
+      "code": "sync_plan_update_pending",
+      "message": "1 repo-managed item(s) still differ from the current export and would require updates.",
+      "itemKeys": [
+        "products.example-coffee"
+      ],
+      "evidence": [
+        "products.example-coffee: min_stock_amount"
+      ],
+      "recommendedAction": "Review the pending updates and confirm they still match the post-upgrade desired state before apply."
+    }
+  ],
+  "reviewNotes": [
+    "This migration doctor reads manifest, export, and sync-plan artifacts only. It does not send live Grocy write requests.",
+    "Review the computed sync plan against examples/config-export.example.json before any confirmed apply step.",
+    "Treat Grocy version changes, repo-managed drift, and manual-review items as upgrade checkpoints for the GitOps migration."
+  ]
+}

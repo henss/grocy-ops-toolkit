@@ -7,9 +7,9 @@ import {
 } from "./api-trace-harness.js";
 import {
   applyGrocyConfigSyncPlan,
+  createGrocyConfigApplyDryRunReport,
   createGrocyConfigDiffPreviewReport,
   createGrocyConfigDriftTrendReport,
-  createGrocyConfigApplyDryRunReport,
   createGrocyConfigSyncPlan,
   exportGrocyConfig,
   GROCY_CONFIG_EXPORT_PATH,
@@ -22,6 +22,10 @@ import {
   recordGrocyConfigExport,
   recordGrocyConfigSyncPlan,
 } from "./config-sync.js";
+import {
+  recordGrocyConfigMigrationDoctorReport,
+  runGrocyConfigMigrationDoctor,
+} from "./config-migration-doctor.js";
 import {
   assertGrocyDesiredStateManifestLintReady,
   lintGrocyDesiredStateManifestFile,
@@ -352,6 +356,23 @@ async function main(): Promise<void> {
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
     printJson({ outputPath, summary: report.summary, period: report.period });
+    return;
+  }
+  if (command === "grocy:config:migration-doctor") {
+    const report = runGrocyConfigMigrationDoctor(process.cwd(), {
+      manifestPath: parseFlag("--manifest"),
+      previousExportPath: parseFlag("--previous"),
+      currentExportPath: parseFlag("--current"),
+      planPath: parseFlag("--plan"),
+    });
+    const outputPath = recordGrocyConfigMigrationDoctorReport(report, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: report.summary });
+    if (report.summary.result !== "ready") {
+      process.exitCode = 1;
+    }
     return;
   }
   if (command === "grocy:apply-config") {
