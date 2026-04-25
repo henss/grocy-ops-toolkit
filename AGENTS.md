@@ -22,6 +22,7 @@ This file is the repo-local agent entrypoint. It is generated from the shared po
 - At the close of non-trivial work, note concrete efficiency waste when present and fix the root cause in the cheapest safe way, such as a clearer seam, smaller file, focused script, skill, or eval.
 - Stop and surface the blocker when work crosses trust boundaries, requires real-world or external effects, changes authority assumptions, has conflicting goals, or remains low-confidence after limited retries.
 - Before creating a local preview/no-op path for an external tool, check whether an owning portfolio repo already has an approved adapter or CLI. If it does and the packet is inside delegated bounds, bridge to that adapter and record readback instead of stopping conservatively.
+- Before stopping on a human preference or approval choice, reduce decision load by preparing a small concrete option set, tradeoffs, and a recommended default when doing so is safe, reversible, and inside the current authority boundary.
 - When a coherent increment lands, commit and push it after validation passes; stage only task-owned files unless the task intentionally overlaps already-dirty files.
 - Work on this repo's current default/shared branch unless local instructions explicitly request another flow; do not create branches, worktrees, or PR-only flows for routine work.
 - Treat dirty or untracked files outside the current task as active parallel work; do not delete, revert, format, normalize, or stage them unless explicitly authorized.
