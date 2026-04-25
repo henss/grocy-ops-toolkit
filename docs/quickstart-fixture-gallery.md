@@ -7,7 +7,7 @@ Everything linked here stays inside the public boundary:
 - synthetic Grocy API fixtures only
 - invented product and config records only
 - conventional local paths such as `config/`, `data/`, `backups/`, and `restore/`
-- no household details, shopping intent workflows, pantry-monitoring policy, calendar/task integrations, or Stefan-specific operating policy
+- no household details, shopping intent workflows, pantry-monitoring policy, calendar/task integrations, or operator-specific operating policy
 
 ## Quick Verification Loop
 

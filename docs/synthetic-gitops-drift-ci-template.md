@@ -8,7 +8,7 @@ It is intentionally narrow:
 - synthetic config exports only
 - npm-first install and command surface only
 - CI artifacts under `data/` only
-- no live Grocy credentials, household details, shopping workflows, pantry-monitoring policy, calendar/task integrations, or Stefan-specific operating policy
+- no live Grocy credentials, household details, shopping workflows, pantry-monitoring policy, calendar/task integrations, or operator-specific operating policy
 
 The committed reusable/manual workflow lives at [`.github/workflows/synthetic-gitops-drift-template.yml`](../.github/workflows/synthetic-gitops-drift-template.yml).
 

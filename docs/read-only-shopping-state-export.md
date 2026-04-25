@@ -17,7 +17,7 @@ Outside scope:
 - Shopping intent, prioritization, or execution workflows.
 - Pantry policy, replenishment thresholds, or recommendation logic.
 - Calendar, task, reminder, or personal-ops integrations.
-- Live household examples, private ledgers, or Stefan-specific operating rules.
+- Live household examples, private ledgers, or operator-specific operating rules.
 
 ## Implemented Seam
 

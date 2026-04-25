@@ -21,7 +21,7 @@ Outside scope:
 - Shopping-list prioritization, recommendations, or execution flows.
 - Pantry-monitoring automation or threshold policy extraction.
 - Calendar, task, reminder, or personal-ops integrations.
-- Live household examples, private ledgers, or Stefan-specific operating rules.
+- Live household examples, private ledgers, or operator-specific operating rules.
 
 ## Current Evidence
 

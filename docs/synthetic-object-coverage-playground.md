@@ -33,4 +33,4 @@ Use the playground when you want a quick, synthetic answer to questions like:
 
 ## Boundary Notes
 
-Keep playground inputs synthetic. Do not add live Grocy payloads, household details, shopping intent workflows, private paths, credentials, or Stefan-specific operating policy.
+Keep playground inputs synthetic. Do not add live Grocy payloads, household details, shopping intent workflows, private paths, credentials, or operator-specific operating policy.
