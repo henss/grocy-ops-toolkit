@@ -3,9 +3,13 @@ import path from "node:path";
 import {
   type GrocyApiCompatibilitySurface,
   type SyntheticGrocyFixtureMetadata,
-  getSyntheticGrocyFixture,
   listSyntheticGrocyFixtures,
 } from "./synthetic-grocy-fixtures.js";
+import {
+  createGrocySchemaFixtureCaptureFromSyntheticFixture,
+  findSchemaCaptureSurface,
+} from "./schema-fixture-capture.js";
+import type { GrocySchemaCaptureSurfaceEntry } from "./schema-fixture-capture-schema.js";
 
 export const GROCY_API_COMPATIBILITY_MATRIX_PATH = path.join("data", "grocy-api-compatibility-matrix.json");
 
@@ -96,37 +100,28 @@ const SURFACE_EXPECTATIONS: SurfaceExpectation[] = [
   },
 ];
 
-function firstRecord(value: Record<string, unknown> | Array<Record<string, unknown>> | undefined): Record<string, unknown> | undefined {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-function hasField(record: Record<string, unknown> | undefined, field: string): boolean {
-  if (!record) {
+function hasField(surface: GrocySchemaCaptureSurfaceEntry | undefined, field: string): boolean {
+  if (!surface || surface.status !== "captured") {
     return false;
   }
-  return field.split(".").reduce<unknown>((value, part) => {
-    if (value && typeof value === "object" && part in value) {
-      return (value as Record<string, unknown>)[part];
-    }
-    return undefined;
-  }, record) !== undefined;
+  return surface.fields.some((candidate) => candidate.path === field);
 }
 
-function observedFields(record: Record<string, unknown> | undefined): string[] {
-  if (!record) {
+function observedFields(surface: GrocySchemaCaptureSurfaceEntry | undefined): string[] {
+  if (!surface || surface.status !== "captured") {
     return [];
   }
-  return Object.keys(record).sort();
+  return [...new Set(surface.fields.map((field) => field.path.split(".")[0]?.replace(/\[\]$/g, "")).filter(Boolean))].sort();
 }
 
 function evaluateFixtureSurface(
   fixtureId: string,
+  capture: ReturnType<typeof createGrocySchemaFixtureCaptureFromSyntheticFixture>,
   expectation: SurfaceExpectation,
 ): GrocyApiCompatibilityMatrixEntry {
-  const fixture = getSyntheticGrocyFixture(fixtureId);
-  const record = firstRecord(fixture.responses[expectation.surface]);
-  const missingRequired = expectation.requiredFields.filter((field) => !hasField(record, field));
-  const missingPartial = (expectation.partialFields ?? []).filter((field) => !hasField(record, field));
+  const surface = findSchemaCaptureSurface(capture, expectation.surface);
+  const missingRequired = expectation.requiredFields.filter((field) => !hasField(surface, field));
+  const missingPartial = (expectation.partialFields ?? []).filter((field) => !hasField(surface, field));
   const status: GrocyApiCompatibilityStatus = missingRequired.length > 0
     ? "unsupported"
     : missingPartial.length > 0
@@ -138,12 +133,12 @@ function evaluateFixtureSurface(
   ];
 
   return {
-    fixtureId: fixture.id,
+    fixtureId,
     surface: expectation.surface,
     endpoint: expectation.endpoint,
     status,
     requiredFields: expectation.requiredFields,
-    observedFields: observedFields(record),
+    observedFields: observedFields(surface),
     notes,
   };
 }
@@ -171,8 +166,10 @@ export function createGrocyApiCompatibilityMatrix(
   options: { generatedAt?: string } = {},
 ): GrocyApiCompatibilityMatrix {
   const fixtures = listSyntheticGrocyFixtures();
-  const entries = fixtures.flatMap((fixture) =>
-    SURFACE_EXPECTATIONS.map((expectation) => evaluateFixtureSurface(fixture.id, expectation)),
+  const entries = fixtures.flatMap((fixture) => {
+    const capture = createGrocySchemaFixtureCaptureFromSyntheticFixture(fixture.id, options);
+    return SURFACE_EXPECTATIONS.map((expectation) => evaluateFixtureSurface(fixture.id, capture, expectation));
+  },
   );
 
   return {

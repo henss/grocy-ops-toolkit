@@ -23,6 +23,8 @@ export * from "./quickstart-proof-schema.js";
 export * from "./quickstart-proof.js";
 export * from "./redaction-audit.js";
 export * from "./review-dashboard.js";
+export * from "./schema-fixture-capture-schema.js";
+export * from "./schema-fixture-capture.js";
 export * from "./schemas.js";
 export * from "./secret-rotation-smoke-schema.js";
 export * from "./secret-rotation-smoke.js";

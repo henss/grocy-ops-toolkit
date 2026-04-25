@@ -44,6 +44,7 @@
     "grocy:inventory:snapshot": "tsx src/cli.ts grocy:inventory:snapshot",
     "grocy:desired-state:lint": "tsx src/cli.ts grocy:desired-state:lint",
     "grocy:compatibility:matrix": "tsx src/cli.ts grocy:compatibility:matrix",
+    "grocy:compatibility:schema-capture": "tsx src/cli.ts grocy:compatibility:schema-capture",
     "grocy:compatibility:deprecation-canary": "tsx src/cli.ts grocy:compatibility:deprecation-canary",
     "grocy:coverage:playground": "tsx src/cli.ts grocy:coverage:playground",
     "grocy:smoke:mock": "tsx src/cli.ts grocy:smoke:mock",

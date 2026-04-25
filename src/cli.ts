@@ -59,6 +59,11 @@ import { createGrocyApiDeprecationCanaryReport, recordGrocyApiDeprecationCanaryR
 import { startGrocyFixtureServer } from "./fixture-server.js";
 import { recordGrocyMockSmokeReport, runGrocyMockSmokeTest } from "./mock-smoke.js";
 import { createGrocyObjectCoveragePlayground, recordGrocyObjectCoveragePlayground } from "./object-coverage-playground.js";
+import {
+  createGrocySchemaFixtureCaptureFromLiveConfig,
+  createGrocySchemaFixtureCaptureFromSyntheticFixture,
+  recordGrocySchemaFixtureCapture,
+} from "./schema-fixture-capture.js";
 import { auditGrocyPublicArtifacts, recordGrocyPublicArtifactRedactionAudit } from "./redaction-audit.js";
 import { createGrocyReviewDashboardFromArtifacts, recordGrocyReviewDashboard } from "./review-dashboard.js";
 import { createGrocyMockSmokeRunReceipt, recordGrocyToolkitRunReceipt } from "./run-receipt.js";
@@ -228,6 +233,20 @@ async function main(): Promise<void> {
       overwrite: process.argv.includes("--force") || !parseFlag("--output"),
     });
     printJson({ outputPath, summary: matrix.summary });
+    return;
+  }
+  if (command === "grocy:compatibility:schema-capture") {
+    if (parseFlag("--fixture") && parseFlag("--config")) {
+      throw new Error("Use either --fixture <id> or --config <path>, not both.");
+    }
+    const capture = parseFlag("--config")
+      ? await createGrocySchemaFixtureCaptureFromLiveConfig(process.cwd(), { configPath: parseFlag("--config") })
+      : createGrocySchemaFixtureCaptureFromSyntheticFixture(parseFlag("--fixture"));
+    const outputPath = recordGrocySchemaFixtureCapture(capture, {
+      outputPath: parseFlag("--output"),
+      overwrite: process.argv.includes("--force") || !parseFlag("--output"),
+    });
+    printJson({ outputPath, summary: capture.summary, source: capture.source });
     return;
   }
   if (command === "grocy:compatibility:deprecation-canary") {

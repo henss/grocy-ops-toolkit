@@ -25,6 +25,7 @@ It can:
 - Audit generated public artifacts for private-path, URL, credential, and boundary-term leaks.
 - Generate an offline sanitized support bundle manifest from local generated artifacts.
 - Generate a synthetic Grocy API compatibility matrix for fixture-only API-shape review.
+- Capture schema-only Grocy endpoint shapes for upgrade tests without storing payload values.
 - Generate a synthetic Grocy API deprecation canary report for upgrade-risk review.
 - Generate a synthetic Grocy object coverage playground for fixture-only endpoint coverage review.
 - Export a stable read-only inventory snapshot artifact derived only from Grocy stock and product reads.
@@ -512,6 +513,22 @@ data/grocy-api-compatibility-matrix.json
 
 The matrix uses synthetic fixtures only. It is intended to show expected API shapes and gaps, not to make live Grocy version support claims. For details, see [Grocy API Compatibility Matrix](docs/grocy-api-compatibility-matrix.md).
 
+## Schema Fixture Capture
+
+Capture a schema-only Grocy endpoint artifact for upgrade-test review:
+
+```bash
+npm run grocy:compatibility:schema-capture
+```
+
+By default, the capture is written to:
+
+```text
+data/grocy-schema-fixture-capture.json
+```
+
+Use `--fixture <id>` to inspect a different synthetic API shape, or `--config <path>` to read a live Grocy instance through the local config while still emitting only schema metadata. The artifact stores field paths, type unions, and field presence, but it does not serialize Grocy payload values, base URLs, API keys, or private workflow context. For details, see [Grocy Schema Fixture Capture](docs/grocy-schema-fixture-capture.md).
+
 ## API Deprecation Canary Report
 
 Generate a synthetic canary report that interprets compatibility gaps as upgrade-risk signals:
@@ -784,6 +801,7 @@ npm run grocy:health:diagnostics
 npm run grocy:inventory:snapshot
 npm run grocy:desired-state:lint
 npm run grocy:compatibility:matrix
+npm run grocy:compatibility:schema-capture
 npm run grocy:compatibility:deprecation-canary
 npm run grocy:coverage:playground
 npm run grocy:smoke:mock
