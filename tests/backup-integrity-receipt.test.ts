@@ -52,6 +52,19 @@ function setupFixtureBackupBase(prefix: string): string {
   return baseDir;
 }
 
+function runReceiptCli(baseDir: string, args: string[]): unknown {
+  const stdout = execFileSync(process.execPath, [
+    path.join(process.cwd(), "node_modules", "tsx", "dist", "cli.mjs"),
+    path.join(process.cwd(), "src", "cli.ts"),
+    ...args,
+  ], {
+    cwd: baseDir,
+    encoding: "utf8",
+    env: { ...process.env, [envName]: "synthetic-passphrase" },
+  });
+  return JSON.parse(stdout) as unknown;
+}
+
 function createRestorePlanFixture(baseDir: string, createdAt: string, generatedAt: string, restoreDir: string): string {
   createGrocyBackupSnapshot(baseDir, { createdAt });
   return recordGrocyBackupRestorePlanDryRunReport(
@@ -85,17 +98,23 @@ function expectReceiptVerifierCliOutput(): void {
   createRestorePlanFixture(baseDir, "2026-04-22T17:40:00.000Z", "2026-04-22T17:41:00.000Z", path.join("restore", "cli-check"));
   recordGrocyBackupIntegrityReceipt(createGrocyBackupIntegrityReceipt(baseDir), { baseDir });
 
-  const nodeCommand = process.execPath;
-  const cliEntrypoint = path.join(process.cwd(), "src", "cli.ts");
-  const stdout = execFileSync(nodeCommand, [path.join(process.cwd(), "node_modules", "tsx", "dist", "cli.mjs"), cliEntrypoint, "grocy:backup:receipt:verify"], {
-    cwd: baseDir,
-    encoding: "utf8",
-    env: { ...process.env, [envName]: "synthetic-passphrase" },
-  });
-
-  expect(JSON.parse(stdout)).toMatchObject({
+  expect(runReceiptCli(baseDir, ["grocy:backup:receipt:verify"])).toMatchObject({
     kind: "grocy_backup_integrity_receipt_verification",
     summary: { status: "pass", checkCount: 5, passedCount: 5 },
+  });
+}
+
+function expectReceiptEmitterCliOutput(): void {
+  const baseDir = setupFixtureBackupBase("grocy-backup-receipt-emit-cli-");
+  createRestorePlanFixture(baseDir, "2026-04-22T17:38:00.000Z", "2026-04-22T17:39:00.000Z", path.join("restore", "emit-cli-check"));
+
+  expect(runReceiptCli(baseDir, ["grocy:backup:receipt"])).toMatchObject({
+    outputPath: path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_PATH),
+    summary: { status: "pass", checkCount: 3, passedCount: 3 },
+  });
+  expect(JSON.parse(fs.readFileSync(path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_PATH), "utf8"))).toMatchObject({
+    kind: "grocy_backup_integrity_receipt",
+    summary: { status: "pass", checkCount: 3, passedCount: 3 },
   });
 }
 
@@ -104,22 +123,12 @@ function expectReceiptVerifierCliOutputFile(): void {
   createRestorePlanFixture(baseDir, "2026-04-22T17:42:00.000Z", "2026-04-22T17:43:00.000Z", path.join("restore", "cli-output-check"));
   recordGrocyBackupIntegrityReceipt(createGrocyBackupIntegrityReceipt(baseDir), { baseDir });
 
-  const nodeCommand = process.execPath;
-  const cliEntrypoint = path.join(process.cwd(), "src", "cli.ts");
-  const stdout = execFileSync(nodeCommand, [
-    path.join(process.cwd(), "node_modules", "tsx", "dist", "cli.mjs"),
-    cliEntrypoint,
+  expect(runReceiptCli(baseDir, [
     "grocy:backup:receipt:verify",
     "--output",
     GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH,
     "--force",
-  ], {
-    cwd: baseDir,
-    encoding: "utf8",
-    env: { ...process.env, [envName]: "synthetic-passphrase" },
-  });
-
-  expect(JSON.parse(stdout)).toMatchObject({
+  ])).toMatchObject({
     outputPath: path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH),
     summary: { status: "pass", checkCount: 5, passedCount: 5 },
   });
@@ -224,8 +233,36 @@ describe("Grocy backup integrity receipt", () => {
     });
   });
 
+  it("returns a failing verification check when the archive is no longer readable", () => {
+    const baseDir = setupFixtureBackupBase("grocy-backup-receipt-corrupt-");
+    const report = createGrocyBackupRestoreDrillReport(baseDir, {
+      restoreDir: path.join("restore", "fixture-check"),
+      generatedAt: "2026-04-22T17:32:00.000Z",
+      createdAt: "2026-04-22T17:32:00.000Z",
+    });
+    recordGrocyBackupRestoreDrillReport(report, { baseDir });
+    const receipt = createGrocyBackupIntegrityReceipt(baseDir);
+    recordGrocyBackupIntegrityReceipt(receipt, { baseDir });
+    fs.writeFileSync(path.join(baseDir, receipt.archive.archivePath), "not valid", "utf8");
+
+    const verification = verifyGrocyBackupIntegrityReceipt(baseDir);
+
+    expect(verification.summary.status).toBe("fail");
+    expect(verification.checks).toContainEqual({
+      id: "archive_verification_passed",
+      status: "fail",
+      message: expect.stringContaining("Archive verification failed"),
+    });
+  });
+});
+
+describe("Grocy backup integrity receipt CLI and examples", () => {
   it("returns a failing verification check when referenced proof artifacts are missing", () => {
     expectMissingProofArtifactVerification();
+  });
+
+  it("emits the backup integrity receipt from the CLI", () => {
+    expectReceiptEmitterCliOutput();
   });
 
   it("emits the receipt verifier result from the CLI", () => {

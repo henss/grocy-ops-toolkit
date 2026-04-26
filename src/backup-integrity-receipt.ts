@@ -390,6 +390,34 @@ function buildVerificationCheck(
   return { id, status, message };
 }
 
+function buildArchiveVerificationCheck(params: {
+  baseDir: string;
+  configPath: string | undefined;
+  manifestPath: string;
+  record: GrocyBackupManifest["records"][number];
+  receipt: GrocyBackupIntegrityReceipt;
+}): GrocyBackupIntegrityReceiptVerification["checks"][number] {
+  let matches = false;
+  let message: string;
+  try {
+    const current = verifyGrocyBackupSnapshot(params.baseDir, {
+      archivePath: params.record.archivePath,
+      configPath: params.configPath,
+      manifestPath: params.manifestPath,
+    });
+    matches = current.checksumVerified === params.receipt.verification.checksumVerified
+      && current.fileCount === params.receipt.verification.fileCount
+      && current.totalBytes === params.receipt.verification.totalBytes
+      && params.receipt.verification.status === "pass";
+    message = matches
+      ? "Archive verification reran successfully and matched the receipt counts."
+      : "Archive verification reran, but the receipt verification section no longer matches current results.";
+  } catch (error) {
+    message = `Archive verification failed: ${error instanceof Error ? error.message : String(error)}`;
+  }
+  return buildVerificationCheck("archive_verification_passed", matches ? "pass" : "fail", message);
+}
+
 export function verifyGrocyBackupIntegrityReceipt(
   baseDir: string = process.cwd(),
   options: {
@@ -436,22 +464,7 @@ export function verifyGrocyBackupIntegrityReceipt(
       : `Manifest record ${record.id} does not match the receipt archive metadata for ${receipt.archive.recordId}.`,
   ));
 
-  const archiveVerification = verifyGrocyBackupSnapshot(baseDir, {
-    archivePath: record.archivePath,
-    configPath: options.configPath,
-    manifestPath,
-  });
-  const verificationMatches = archiveVerification.checksumVerified === receipt.verification.checksumVerified
-    && archiveVerification.fileCount === receipt.verification.fileCount
-    && archiveVerification.totalBytes === receipt.verification.totalBytes
-    && receipt.verification.status === "pass";
-  checks.push(buildVerificationCheck(
-    "archive_verification_passed",
-    verificationMatches ? "pass" : "fail",
-    verificationMatches
-      ? "Archive verification reran successfully and matched the receipt counts."
-      : "Archive verification reran, but the receipt verification section no longer matches current results.",
-  ));
+  checks.push(buildArchiveVerificationCheck({ baseDir, configPath: options.configPath, manifestPath, record, receipt }));
 
   const restorePlanPath = options.restorePlanReportPath ?? receipt.artifacts.restorePlanReportPath;
   if (restorePlanPath) {
