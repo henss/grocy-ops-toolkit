@@ -369,7 +369,12 @@ export const GrocyMultiInstanceNamespacePrototypeNamespaceSchema = z.object({
 });
 
 export const GrocyMultiInstanceNamespacePrototypeValidationSchema = z.object({
-  id: z.enum(["namespace_roots_unique", "conventional_local_paths", "namespace_paths_non_overlapping"]),
+  id: z.enum([
+    "namespace_roots_unique",
+    "conventional_local_paths",
+    "namespace_ids_safe_for_paths",
+    "namespace_paths_non_overlapping",
+  ]),
   status: z.enum(["pass", "fail"]),
   message: z.string().min(1),
   evidence: z.array(z.string().min(1)).default([]),

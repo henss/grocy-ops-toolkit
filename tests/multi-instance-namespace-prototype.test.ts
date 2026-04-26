@@ -18,8 +18,8 @@ describe("Grocy multi-instance namespace prototype", () => {
     expect(artifact.summary).toEqual({
       namespaceCount: 2,
       validationStatus: "pass",
-      validationCount: 3,
-      passCount: 3,
+      validationCount: 4,
+      passCount: 4,
       failCount: 0,
       overlappingPathCount: 0,
     });
@@ -41,6 +41,12 @@ describe("Grocy multi-instance namespace prototype", () => {
         restoreDir: "instances/demo-beta/restore",
       }),
     ]);
+    expect(artifact.validations).toContainEqual(
+      expect.objectContaining({
+        id: "namespace_ids_safe_for_paths",
+        status: "pass",
+      }),
+    );
     expect(artifact.validations).toContainEqual(
       expect.objectContaining({
         id: "namespace_paths_non_overlapping",
@@ -65,6 +71,31 @@ describe("Grocy multi-instance namespace prototype", () => {
     });
   });
 
+  it("fails validation when a namespace id would create nested or non-portable paths", () => {
+    const artifact = createGrocyMultiInstanceNamespacePrototype({
+      generatedAt: "2026-04-25T14:00:00.000Z",
+      namespaceIds: ["demo-alpha", "demo-alpha/config"],
+    });
+
+    expect(artifact.summary.validationStatus).toBe("fail");
+    expect(artifact.summary.failCount).toBe(2);
+    expect(artifact.validations).toContainEqual(
+      expect.objectContaining({
+        id: "namespace_ids_safe_for_paths",
+        status: "fail",
+        evidence: [
+          "demo-alpha/config must use lowercase letters, numbers, and hyphens only so generated paths stay portable and cannot nest.",
+        ],
+      }),
+    );
+    expect(artifact.validations).toContainEqual(
+      expect.objectContaining({
+        id: "namespace_paths_non_overlapping",
+        status: "fail",
+      }),
+    );
+  });
+
   it("keeps the public example fixture schema-valid", () => {
     const examplePath = path.resolve("examples", "grocy-multi-instance-namespace-prototype.example.json");
     const parsed = JSON.parse(fs.readFileSync(examplePath, "utf8"));
@@ -72,7 +103,7 @@ describe("Grocy multi-instance namespace prototype", () => {
     expect(GrocyMultiInstanceNamespacePrototypeSchema.parse(parsed)).toMatchObject({
       kind: "grocy_multi_instance_namespace_prototype",
       scope: "synthetic_namespace_example",
-      summary: { namespaceCount: 2, validationStatus: "pass" },
+      summary: { namespaceCount: 2, validationStatus: "pass", validationCount: 4 },
     });
   });
 

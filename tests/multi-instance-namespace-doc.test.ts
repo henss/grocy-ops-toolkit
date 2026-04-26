@@ -33,6 +33,7 @@ describe("Multi-instance namespace prototype doc", () => {
     expect(doc).toContain("data/grocy-multi-instance-namespace-prototype.json");
     expect(doc).toContain("instances/demo-alpha");
     expect(doc).toContain("instances/demo-beta");
+    expect(doc).toContain("lowercase letters, numbers, and hyphens");
     expect(doc).toContain("public-safe");
     expect(doc).toContain("multi-tenant product commitment");
     expect(packageJson.scripts?.["grocy:namespace:prototype"]).toBeTruthy();

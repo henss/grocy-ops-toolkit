@@ -1,13 +1,13 @@
 {
   "kind": "grocy_multi_instance_namespace_prototype",
   "version": 1,
-  "generatedAt": "2026-04-25T12:32:20.883Z",
+  "generatedAt": "2026-04-26T13:17:49.253Z",
   "scope": "synthetic_namespace_example",
   "summary": {
     "namespaceCount": 2,
     "validationStatus": "pass",
-    "validationCount": 3,
-    "passCount": 3,
+    "validationCount": 4,
+    "passCount": 4,
     "failCount": 0,
     "overlappingPathCount": 0
   },
@@ -55,9 +55,15 @@
       "evidence": []
     },
     {
+      "id": "namespace_ids_safe_for_paths",
+      "status": "pass",
+      "message": "Each namespace id stays portable and safe for direct path composition.",
+      "evidence": []
+    },
+    {
       "id": "namespace_paths_non_overlapping",
       "status": "pass",
-      "message": "Each namespace keeps distinct config, data, backup, restore, and local config file paths.",
+      "message": "Each namespace keeps distinct config, data, backup, restore, and local config file paths without nesting into another namespace.",
       "evidence": []
     }
   ],

@@ -19,7 +19,11 @@ export interface GrocyMultiInstanceNamespacePrototypeNamespace {
 }
 
 export interface GrocyMultiInstanceNamespacePrototypeValidation {
-  id: "namespace_roots_unique" | "conventional_local_paths" | "namespace_paths_non_overlapping";
+  id:
+    | "namespace_roots_unique"
+    | "conventional_local_paths"
+    | "namespace_ids_safe_for_paths"
+    | "namespace_paths_non_overlapping";
   status: "pass" | "fail";
   message: string;
   evidence: string[];
@@ -74,10 +78,35 @@ function createNamespaceEntry(namespaceId: string): GrocyMultiInstanceNamespaceP
   };
 }
 
+function isSafeNamespaceId(namespaceId: string): boolean {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(namespaceId);
+}
+
+function createNamespaceIdValidation(
+  namespaces: GrocyMultiInstanceNamespacePrototypeNamespace[],
+): GrocyMultiInstanceNamespacePrototypeValidation {
+  const invalidNamespaceIds = namespaces.flatMap((namespace) =>
+    isSafeNamespaceId(namespace.namespaceId)
+      ? []
+      : [
+        `${namespace.namespaceId} must use lowercase letters, numbers, and hyphens only so generated paths stay portable and cannot nest.`,
+      ],
+  );
+
+  return {
+    id: "namespace_ids_safe_for_paths",
+    status: invalidNamespaceIds.length === 0 ? "pass" : "fail",
+    message: invalidNamespaceIds.length === 0
+      ? "Each namespace id stays portable and safe for direct path composition."
+      : "One or more namespace ids would create ambiguous or nested local paths.",
+    evidence: invalidNamespaceIds,
+  };
+}
+
 function createOverlapValidation(
   namespaces: GrocyMultiInstanceNamespacePrototypeNamespace[],
 ): GrocyMultiInstanceNamespacePrototypeValidation {
-  const seen = new Map<string, string>();
+  const seen: Array<{ path: string; owner: string }> = [];
   const overlaps: string[] = [];
 
   for (const namespace of namespaces) {
@@ -90,12 +119,25 @@ function createOverlapValidation(
       namespace.grocyConfigPath,
       namespace.backupConfigPath,
     ]) {
-      const existingOwner = seen.get(candidatePath);
-      if (existingOwner) {
-        overlaps.push(`${candidatePath} is shared by ${existingOwner} and ${namespace.namespaceId}.`);
-        continue;
+      for (const existingPath of seen) {
+        if (existingPath.owner === namespace.namespaceId) {
+          continue;
+        }
+        if (existingPath.path === candidatePath) {
+          overlaps.push(`${candidatePath} is shared by ${existingPath.owner} and ${namespace.namespaceId}.`);
+          continue;
+        }
+        if (
+          candidatePath.startsWith(`${existingPath.path}/`) ||
+          existingPath.path.startsWith(`${candidatePath}/`)
+        ) {
+          overlaps.push(
+            `${candidatePath} from ${namespace.namespaceId} nests inside ${existingPath.path} from ${existingPath.owner}.`,
+          );
+          continue;
+        }
       }
-      seen.set(candidatePath, namespace.namespaceId);
+      seen.push({ path: candidatePath, owner: namespace.namespaceId });
     }
   }
 
@@ -103,7 +145,7 @@ function createOverlapValidation(
     id: "namespace_paths_non_overlapping",
     status: overlaps.length === 0 ? "pass" : "fail",
     message: overlaps.length === 0
-      ? "Each namespace keeps distinct config, data, backup, restore, and local config file paths."
+      ? "Each namespace keeps distinct config, data, backup, restore, and local config file paths without nesting into another namespace."
       : "One or more namespace paths overlap and would collapse the isolation prototype.",
     evidence: overlaps,
   };
@@ -175,6 +217,7 @@ export function createGrocyMultiInstanceNamespacePrototype(
   const validations = [
     createRootValidation(namespaces),
     createConventionalPathValidation(namespaces),
+    createNamespaceIdValidation(namespaces),
     createOverlapValidation(namespaces),
   ];
   const failCount = validations.filter((validation) => validation.status === "fail").length;

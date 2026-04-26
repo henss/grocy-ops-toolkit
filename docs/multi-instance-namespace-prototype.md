@@ -2,11 +2,12 @@
 
 This prototype is a fixture-only proof that the toolkit's public defaults do not need to collapse into a single Grocy instance root.
 
-The command emits a synthetic layout artifact for two example namespaces, then validates three invariants:
+The command emits a synthetic layout artifact for two example namespaces, then validates four invariants:
 
 - each namespace resolves to a unique workspace root
 - each namespace keeps the conventional `config/`, `data/`, `backups/`, and `restore/` directory names
-- none of the namespace paths overlap
+- each namespace id uses lowercase letters, numbers, and hyphens so generated paths stay portable
+- none of the namespace paths overlap or nest into another namespace
 
 ## Command
 
@@ -24,7 +25,7 @@ data/grocy-multi-instance-namespace-prototype.json
 
 - Synthetic namespace roots such as `instances/demo-alpha` and `instances/demo-beta`
 - Conventional local directories and config filenames inside each namespace root
-- Machine-checkable validation results for root uniqueness, conventional path naming, and path separation
+- Machine-checkable validation results for root uniqueness, conventional path naming, namespace-id safety, and path separation
 - Review notes that keep the artifact inside the public-safe support-infrastructure boundary
 
 ## Intended Use
@@ -38,3 +39,5 @@ Use this prototype when you need bounded evidence that:
 ## Boundary Notes
 
 Keep the prototype synthetic. Do not add live Grocy URLs, credentials, household details, shopping intent workflows, pantry-monitoring policy, calendar/task integrations, or operator-specific operating policy.
+
+Namespace ids in this prototype should stay slug-like: use lowercase letters, numbers, and hyphens only. Do not use path separators, traversal segments, or hostnames.
