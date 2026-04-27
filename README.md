@@ -888,7 +888,7 @@ The demo combines:
 - Mock smoke.
 - Config diff.
 - Apply dry run.
-- Backup verification.
+- Backup verification and offline integrity-receipt verification.
 - Dashboard rendering.
 
 For the one-command variant that assembles the same synthetic evaluation surface and a sanitized support bundle in one pass, run:

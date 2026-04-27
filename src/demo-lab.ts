@@ -3,6 +3,8 @@ import path from "node:path";
 import {
   createGrocyBackupIntegrityReceipt,
   recordGrocyBackupIntegrityReceipt,
+  recordGrocyBackupIntegrityReceiptVerification,
+  verifyGrocyBackupIntegrityReceipt,
 } from "./backup-integrity-receipt.js";
 import {
   createGrocyBackupRestoreDrillReport,
@@ -61,6 +63,10 @@ export const GROCY_DEMO_APPLY_DRY_RUN_PATH = path.join("data", "demo-apply-dry-r
 export const GROCY_DEMO_BACKUP_RESTORE_PLAN_PATH = path.join("data", "demo-backup-restore-plan-dry-run-report.json");
 export const GROCY_DEMO_BACKUP_RESTORE_DRILL_PATH = path.join("data", "demo-backup-restore-drill-report.json");
 export const GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_PATH = path.join("data", "demo-backup-integrity-receipt.json");
+export const GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH = path.join(
+  "data",
+  "demo-backup-integrity-receipt-verification.json",
+);
 export const GROCY_DEMO_REVIEW_DASHBOARD_PATH = path.join("data", "demo-review-dashboard.md");
 export const GROCY_DEMO_REDACTION_AUDIT_PATH = path.join("data", "demo-public-artifact-redaction-audit.json");
 export const GROCY_DEMO_SUPPORT_BUNDLE_PATH = path.join("data", "demo-support-bundle.json");
@@ -82,6 +88,7 @@ const GROCY_DEMO_ARTIFACT_PATHS = [
   GROCY_DEMO_BACKUP_RESTORE_PLAN_PATH,
   GROCY_DEMO_BACKUP_RESTORE_DRILL_PATH,
   GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_PATH,
+  GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH,
   GROCY_DEMO_REVIEW_DASHBOARD_PATH,
 ] as const;
 
@@ -115,6 +122,7 @@ export interface GrocyDemoEnvironmentReport {
     backupRestorePlanReportPath: string;
     backupRestoreDrillReportPath: string;
     backupIntegrityReceiptPath: string;
+    backupIntegrityReceiptVerificationPath: string;
     reviewDashboardPath: string;
     redactionAuditPath: string;
     supportBundlePath: string;
@@ -272,6 +280,18 @@ export async function createGrocyDemoEnvironment(
     outputPath: GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_PATH,
     overwrite: true,
   });
+  const backupIntegrityReceiptVerification = verifyGrocyBackupIntegrityReceipt(baseDir, {
+    receiptPath: GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_PATH,
+    manifestPath: GROCY_DEMO_BACKUP_MANIFEST_PATH,
+    restorePlanReportPath: GROCY_DEMO_BACKUP_RESTORE_PLAN_PATH,
+    restoreDrillReportPath: GROCY_DEMO_BACKUP_RESTORE_DRILL_PATH,
+    configPath: GROCY_DEMO_BACKUP_CONFIG_PATH,
+  });
+  recordGrocyBackupIntegrityReceiptVerification(backupIntegrityReceiptVerification, {
+    baseDir,
+    outputPath: GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH,
+    overwrite: true,
+  });
 
   const dashboard = createGrocyReviewDashboardFromArtifacts(baseDir, {
     planPath: GROCY_DEMO_CONFIG_SYNC_PLAN_PATH,
@@ -329,6 +349,7 @@ export async function createGrocyDemoEnvironment(
       backupRestorePlanReportPath: toPortablePath(GROCY_DEMO_BACKUP_RESTORE_PLAN_PATH),
       backupRestoreDrillReportPath: toPortablePath(GROCY_DEMO_BACKUP_RESTORE_DRILL_PATH),
       backupIntegrityReceiptPath: toPortablePath(GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_PATH),
+      backupIntegrityReceiptVerificationPath: toPortablePath(GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH),
       reviewDashboardPath: toPortablePath(GROCY_DEMO_REVIEW_DASHBOARD_PATH),
       redactionAuditPath: toPortablePath(GROCY_DEMO_REDACTION_AUDIT_PATH),
       supportBundlePath: toPortablePath(GROCY_DEMO_SUPPORT_BUNDLE_PATH),

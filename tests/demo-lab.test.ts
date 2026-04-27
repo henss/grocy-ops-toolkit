@@ -7,6 +7,7 @@ import {
   createGrocyDemoEnvironment,
   GROCY_DEMO_APPLY_DRY_RUN_PATH,
   GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_PATH,
+  GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH,
   GROCY_DEMO_BACKUP_MANIFEST_PATH,
   GROCY_DEMO_BACKUP_RESTORE_DRILL_PATH,
   GROCY_DEMO_CONFIG_DRIFT_TREND_PATH,
@@ -61,7 +62,7 @@ describe("Grocy demo lab", () => {
     expect(report.summary).toEqual({
       result: "pass",
       shareability: "ready_to_share",
-      artifactCount: 14,
+      artifactCount: 15,
     });
     expect(report.command.cli).toBe("npm run grocy:demo:lab");
     expect(report.environment).toMatchObject({
@@ -81,6 +82,7 @@ describe("Grocy demo lab", () => {
       GROCY_DEMO_APPLY_DRY_RUN_PATH,
       GROCY_DEMO_BACKUP_RESTORE_DRILL_PATH,
       GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_PATH,
+      GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH,
       GROCY_DEMO_REVIEW_DASHBOARD_PATH,
       GROCY_DEMO_REDACTION_AUDIT_PATH,
       GROCY_DEMO_SUPPORT_BUNDLE_PATH,
@@ -104,6 +106,11 @@ describe("Grocy demo lab", () => {
       artifacts: {
         manifestPath: "backups/demo/grocy-backup-manifest.json",
       },
+    });
+    expect(JSON.parse(fs.readFileSync(path.join(baseDir, GROCY_DEMO_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH), "utf8"))).toMatchObject({
+      kind: "grocy_backup_integrity_receipt_verification",
+      summary: { status: "pass" },
+      receiptPath: "data/demo-backup-integrity-receipt.json",
     });
   });
 

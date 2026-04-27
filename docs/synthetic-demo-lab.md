@@ -7,7 +7,7 @@ Use this lab as the canonical fresh-agent cold-start loop for the public toolkit
 - a `fail` diagnostics artifact that only reports the missing local live config
 - a passing mock smoke report
 - an offline lint report, sync plan, diff preview report, drift trend report, and apply dry-run report built from synthetic examples
-- a synthetic encrypted backup, restore-plan dry run, restore verification result, and Markdown review dashboard
+- a synthetic encrypted backup, restore-plan dry run, restore verification result, signed integrity receipt, offline receipt-verification result, and Markdown review dashboard
 - a sanitized support bundle that stays ready to share across the generated demo artifact set
 
 The loop should finish without live Grocy credentials, household data, or private local paths in the generated artifacts.
@@ -29,7 +29,7 @@ When you want the fake Grocy evaluation environment and docs-capture artifacts i
 npm run grocy:demo:lab
 ```
 
-Expected result: the command writes `data/grocy-demo-environment.json`, `data/demo-review-dashboard.md`, and `data/demo-support-bundle.json`, plus the underlying synthetic diagnostics, config-review, backup-proof, and redaction-audit artifacts. The raw backup manifest stays under `backups/demo/` so the shareable `data/` artifacts remain public-safe.
+Expected result: the command writes `data/grocy-demo-environment.json`, `data/demo-review-dashboard.md`, and `data/demo-support-bundle.json`, plus the underlying synthetic diagnostics, config-review, backup-proof, receipt-verification, and redaction-audit artifacts. The raw backup manifest stays under `backups/demo/` so the shareable `data/` artifacts remain public-safe.
 
 ## Setup
 
@@ -134,10 +134,12 @@ Create an encrypted backup bundle from `examples/synthetic-grocy-backup-source`,
 npm run grocy:backup:snapshot
 npm run grocy:backup:restore-plan -- --restore-dir restore/demo-grocy-backup-check --output data/demo-backup-restore-plan-dry-run-report.json --force
 npm run grocy:backup:verify
+npm run grocy:backup:receipt -- --output data/demo-backup-integrity-receipt.json --force
+npm run grocy:backup:receipt:verify -- --receipt data/demo-backup-integrity-receipt.json --output data/demo-backup-integrity-receipt-verification.json --force
 npm run grocy:backup:verify -- --restore-dir restore/demo-grocy-backup-check --confirm-restore-write
 ```
 
-Expected result: the dry-run report shows which synthetic files would be created or overwritten, verification reports `checksumVerified: true`, and the restore check writes only the synthetic fixture files.
+Expected result: the dry-run report shows which synthetic files would be created or overwritten, verification reports `checksumVerified: true`, the signed receipt verifies against the current manifest and proof artifacts, and the restore check writes only the synthetic fixture files.
 
 For the synthetic passphrase-rotation failure rehearsal, see [Synthetic Backup Passphrase Rotation Rehearsal](synthetic-backup-passphrase-rotation-rehearsal.md).
 
