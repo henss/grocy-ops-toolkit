@@ -15,6 +15,11 @@ import {
   type GrocyBackupManifest,
 } from "./schemas.js";
 import {
+  buildArchiveVerificationCheck,
+  buildRestoreDrillVerificationCheck,
+  buildRestorePlanVerificationCheck,
+} from "./backup-integrity-receipt-verification.js";
+import {
   GrocyBackupIntegrityReceiptSchema,
   GrocyBackupIntegrityReceiptVerificationSchema,
   type GrocyBackupIntegrityReceipt,
@@ -82,32 +87,6 @@ function toPublicSafePath(baseDir: string, targetPath: string): string {
 function resolveExistingPath(baseDir: string, targetPath: string): string | undefined {
   const absolutePath = path.resolve(baseDir, targetPath);
   return fs.existsSync(absolutePath) ? absolutePath : undefined;
-}
-
-function readOptionalArtifact(
-  baseDir: string,
-  targetPath: string,
-): { ok: true; absolutePath: string; value: unknown } | { ok: false; message: string } {
-  const absolutePath = path.resolve(baseDir, targetPath);
-  if (!fs.existsSync(absolutePath)) {
-    return {
-      ok: false,
-      message: `Expected proof artifact is missing at ${toPublicSafePath(baseDir, absolutePath)}.`,
-    };
-  }
-
-  try {
-    return {
-      ok: true,
-      absolutePath,
-      value: readJsonFile(absolutePath),
-    };
-  } catch (error) {
-    return {
-      ok: false,
-      message: `Proof artifact at ${toPublicSafePath(baseDir, absolutePath)} could not be read as JSON: ${error instanceof Error ? error.message : String(error)}`,
-    };
-  }
 }
 
 function loadBackupManifest(baseDir: string, manifestPath: string): GrocyBackupManifest {
@@ -390,32 +369,59 @@ function buildVerificationCheck(
   return { id, status, message };
 }
 
-function buildArchiveVerificationCheck(params: {
-  baseDir: string;
-  configPath: string | undefined;
-  manifestPath: string;
-  record: GrocyBackupManifest["records"][number];
-  receipt: GrocyBackupIntegrityReceipt;
-}): GrocyBackupIntegrityReceiptVerification["checks"][number] {
-  let matches = false;
-  let message: string;
-  try {
-    const current = verifyGrocyBackupSnapshot(params.baseDir, {
-      archivePath: params.record.archivePath,
-      configPath: params.configPath,
-      manifestPath: params.manifestPath,
-    });
-    matches = current.checksumVerified === params.receipt.verification.checksumVerified
-      && current.fileCount === params.receipt.verification.fileCount
-      && current.totalBytes === params.receipt.verification.totalBytes
-      && params.receipt.verification.status === "pass";
-    message = matches
-      ? "Archive verification reran successfully and matched the receipt counts."
-      : "Archive verification reran, but the receipt verification section no longer matches current results.";
-  } catch (error) {
-    message = `Archive verification failed: ${error instanceof Error ? error.message : String(error)}`;
+function buildSignatureVerificationCheck(
+  receipt: GrocyBackupIntegrityReceipt,
+  signingContext: { keyName: string; passphrase: string },
+): GrocyBackupIntegrityReceiptVerification["checks"][number] {
+  const { signature, ...unsignedReceipt } = receipt;
+  const matches = signature.keyName === signingContext.keyName
+    && signReceiptPayload(unsignedReceipt, signingContext.passphrase) === signature.value;
+  return buildVerificationCheck(
+    "receipt_signature_valid",
+    matches ? "pass" : "fail",
+    matches
+      ? `Receipt signature still matches ${signature.keyName}.`
+      : `Receipt signature no longer matches ${signature.keyName}.`,
+  );
+}
+
+function buildArchiveRecordPresentCheck(
+  record: GrocyBackupManifest["records"][number],
+  receipt: GrocyBackupIntegrityReceipt,
+): GrocyBackupIntegrityReceiptVerification["checks"][number] {
+  const matches = record.id === receipt.archive.recordId
+    && record.createdAt === receipt.archive.createdAt
+    && record.locationLabel === receipt.archive.locationLabel
+    && record.checksumSha256 === receipt.archive.checksumSha256
+    && record.fileCount === receipt.archive.fileCount
+    && record.totalBytes === receipt.archive.totalBytes;
+  return buildVerificationCheck(
+    "archive_record_present",
+    matches ? "pass" : "fail",
+    matches
+      ? `Manifest record ${record.id} still matches the receipt metadata.`
+      : `Manifest record ${record.id} does not match the receipt archive metadata for ${receipt.archive.recordId}.`,
+  );
+}
+
+function appendOptionalEvidenceVerificationChecks(
+  checks: GrocyBackupIntegrityReceiptVerification["checks"],
+  baseDir: string,
+  receipt: GrocyBackupIntegrityReceipt,
+  options: {
+    restorePlanReportPath?: string;
+    restoreDrillReportPath?: string;
+  },
+): void {
+  const restorePlanPath = options.restorePlanReportPath ?? receipt.artifacts.restorePlanReportPath;
+  if (restorePlanPath) {
+    checks.push(buildRestorePlanVerificationCheck(baseDir, restorePlanPath, receipt));
   }
-  return buildVerificationCheck("archive_verification_passed", matches ? "pass" : "fail", message);
+
+  const restoreDrillPath = options.restoreDrillReportPath ?? receipt.artifacts.restoreDrillReportPath;
+  if (restoreDrillPath) {
+    checks.push(buildRestoreDrillVerificationCheck(baseDir, restoreDrillPath, receipt));
+  }
 }
 
 export function verifyGrocyBackupIntegrityReceipt(
@@ -436,78 +442,14 @@ export function verifyGrocyBackupIntegrityReceipt(
     buildVerificationCheck("receipt_schema_valid", "pass", "Receipt parsed successfully against the published schema."),
   ];
   const signingContext = requireBackupPassphrase(baseDir, configPath);
-  const { signature, ...unsignedReceipt } = receipt;
-  const signatureMatches = signature.keyName === signingContext.keyName
-    && signReceiptPayload(unsignedReceipt, signingContext.passphrase) === signature.value;
-  checks.push(buildVerificationCheck(
-    "receipt_signature_valid",
-    signatureMatches ? "pass" : "fail",
-    signatureMatches
-      ? `Receipt signature still matches ${signature.keyName}.`
-      : `Receipt signature no longer matches ${signature.keyName}.`,
-  ));
+  checks.push(buildSignatureVerificationCheck(receipt, signingContext));
 
   const manifestPath = options.manifestPath ?? receipt.artifacts.manifestPath;
   const manifest = loadBackupManifest(baseDir, manifestPath);
   const record = findBackupRecordById(manifest, receipt.archive.recordId);
-  const manifestMatches = record.id === receipt.archive.recordId
-    && record.createdAt === receipt.archive.createdAt
-    && record.locationLabel === receipt.archive.locationLabel
-    && record.checksumSha256 === receipt.archive.checksumSha256
-    && record.fileCount === receipt.archive.fileCount
-    && record.totalBytes === receipt.archive.totalBytes;
-  checks.push(buildVerificationCheck(
-    "archive_record_present",
-    manifestMatches ? "pass" : "fail",
-    manifestMatches
-      ? `Manifest record ${record.id} still matches the receipt metadata.`
-      : `Manifest record ${record.id} does not match the receipt archive metadata for ${receipt.archive.recordId}.`,
-  ));
-
+  checks.push(buildArchiveRecordPresentCheck(record, receipt));
   checks.push(buildArchiveVerificationCheck({ baseDir, configPath: options.configPath, manifestPath, record, receipt }));
-
-  const restorePlanPath = options.restorePlanReportPath ?? receipt.artifacts.restorePlanReportPath;
-  if (restorePlanPath) {
-    const restorePlanArtifact = readOptionalArtifact(baseDir, restorePlanPath);
-    if (!restorePlanArtifact.ok) {
-      checks.push(buildVerificationCheck("restore_plan_reviewed", "fail", restorePlanArtifact.message));
-    } else {
-      const restorePlan = GrocyBackupRestorePlanDryRunReportSchema.parse(restorePlanArtifact.value);
-      const restorePlanMatches = restorePlan.summary.result === "ready"
-        && restorePlan.summary.checksumVerified
-        && restorePlan.archiveRecordId === receipt.archive.recordId
-        && restorePlan.summary.fileCount === receipt.archive.fileCount
-        && restorePlan.summary.totalBytes === receipt.archive.totalBytes;
-      checks.push(buildVerificationCheck(
-        "restore_plan_reviewed",
-        restorePlanMatches ? "pass" : "fail",
-        restorePlanMatches
-          ? "Restore-plan dry-run evidence still matches the receipt archive record and summary."
-          : "Restore-plan dry-run evidence no longer matches the receipt archive record or summary.",
-      ));
-    }
-  }
-
-  const restoreDrillPath = options.restoreDrillReportPath ?? receipt.artifacts.restoreDrillReportPath;
-  if (restoreDrillPath) {
-    const restoreDrillArtifact = readOptionalArtifact(baseDir, restoreDrillPath);
-    if (!restoreDrillArtifact.ok) {
-      checks.push(buildVerificationCheck("restore_drill_verified", "fail", restoreDrillArtifact.message));
-    } else {
-      const restoreDrill = GrocyBackupRestoreDrillReportSchema.parse(restoreDrillArtifact.value);
-      const restoreDrillMatches = restoreDrill.summary.result === "pass"
-        && restoreDrill.summary.fileCount === receipt.archive.fileCount
-        && restoreDrill.summary.totalBytes === receipt.archive.totalBytes
-        && restoreDrill.checkpoints.every((checkpoint) => checkpoint.status === "pass");
-      checks.push(buildVerificationCheck(
-        "restore_drill_verified",
-        restoreDrillMatches ? "pass" : "fail",
-        restoreDrillMatches
-          ? "Restore-drill evidence still confirms the recorded backup through passing checkpoints."
-          : "Restore-drill evidence no longer confirms the recorded backup through passing checkpoints.",
-      ));
-    }
-  }
+  appendOptionalEvidenceVerificationChecks(checks, baseDir, receipt, options);
 
   const passedCount = checks.filter((check) => check.status === "pass").length;
   return GrocyBackupIntegrityReceiptVerificationSchema.parse({

@@ -65,6 +65,14 @@ function runReceiptCli(baseDir: string, args: string[]): unknown {
   return JSON.parse(stdout) as unknown;
 }
 
+function readReceiptJson(filePath: string): unknown {
+  return GrocyBackupIntegrityReceiptSchema.parse(JSON.parse(fs.readFileSync(filePath, "utf8")) as unknown);
+}
+
+function readReceiptVerificationJson(filePath: string): unknown {
+  return GrocyBackupIntegrityReceiptVerificationSchema.parse(JSON.parse(fs.readFileSync(filePath, "utf8")) as unknown);
+}
+
 function createRestorePlanFixture(baseDir: string, createdAt: string, generatedAt: string, restoreDir: string): string {
   createGrocyBackupSnapshot(baseDir, { createdAt });
   return recordGrocyBackupRestorePlanDryRunReport(
@@ -88,9 +96,11 @@ function expectMissingProofArtifactVerification(): void {
   fs.rmSync(restorePlanPath);
 
   const verification = verifyGrocyBackupIntegrityReceipt(baseDir);
+  const missingArtifactCheck = verification.checks.find((check) => check.id === "restore_plan_reviewed");
 
   expect(verification.summary.status).toBe("fail");
-  expect(verification.checks).toContainEqual({ id: "restore_plan_reviewed", status: "fail", message: expect.stringContaining("Expected proof artifact is missing") });
+  expect(missingArtifactCheck?.status).toBe("fail");
+  expect(missingArtifactCheck?.message).toContain("Expected proof artifact is missing");
 }
 
 function expectReceiptVerifierCliOutput(): void {
@@ -112,7 +122,7 @@ function expectReceiptEmitterCliOutput(): void {
     outputPath: path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_PATH),
     summary: { status: "pass", checkCount: 3, passedCount: 3 },
   });
-  expect(JSON.parse(fs.readFileSync(path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_PATH), "utf8"))).toMatchObject({
+  expect(readReceiptJson(path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_PATH))).toMatchObject({
     kind: "grocy_backup_integrity_receipt",
     summary: { status: "pass", checkCount: 3, passedCount: 3 },
   });
@@ -132,7 +142,7 @@ function expectReceiptVerifierCliOutputFile(): void {
     outputPath: path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH),
     summary: { status: "pass", checkCount: 5, passedCount: 5 },
   });
-  expect(JSON.parse(fs.readFileSync(path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH), "utf8"))).toMatchObject({
+  expect(readReceiptVerificationJson(path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH))).toMatchObject({
     kind: "grocy_backup_integrity_receipt_verification",
     summary: { status: "pass", checkCount: 5, passedCount: 5 },
   });
@@ -175,7 +185,7 @@ describe("Grocy backup integrity receipt", () => {
       restorePlanReportPath: "data/grocy-backup-restore-plan-dry-run-report.json",
       restoreDrillReportPath: "data/grocy-backup-restore-drill-report.json",
     });
-    expect(JSON.parse(fs.readFileSync(outputPath, "utf8"))).toMatchObject({
+    expect(readReceiptJson(outputPath)).toMatchObject({
       kind: "grocy_backup_integrity_receipt",
       summary: { status: "pass", checkCount: 4, passedCount: 4 },
     });
@@ -217,20 +227,16 @@ describe("Grocy backup integrity receipt", () => {
     });
     recordGrocyBackupRestoreDrillReport(report, { baseDir });
     const receiptPath = recordGrocyBackupIntegrityReceipt(createGrocyBackupIntegrityReceipt(baseDir), { baseDir });
-    const staleReceipt = JSON.parse(fs.readFileSync(receiptPath, "utf8")) as {
-      archive: { checksumSha256: string };
-    };
+    const staleReceipt = GrocyBackupIntegrityReceiptSchema.parse(JSON.parse(fs.readFileSync(receiptPath, "utf8")) as unknown);
     staleReceipt.archive.checksumSha256 = "0".repeat(64);
     fs.writeFileSync(receiptPath, `${JSON.stringify(staleReceipt, null, 2)}\n`, "utf8");
 
     const verification = verifyGrocyBackupIntegrityReceipt(baseDir);
+    const archiveRecordCheck = verification.checks.find((check) => check.id === "archive_record_present");
 
     expect(verification.summary.status).toBe("fail");
-    expect(verification.checks).toContainEqual({
-      id: "archive_record_present",
-      status: "fail",
-      message: expect.stringContaining("does not match"),
-    });
+    expect(archiveRecordCheck?.status).toBe("fail");
+    expect(archiveRecordCheck?.message).toContain("does not match");
   });
 
   it("returns a failing verification check when the archive is no longer readable", () => {
@@ -246,13 +252,11 @@ describe("Grocy backup integrity receipt", () => {
     fs.writeFileSync(path.join(baseDir, receipt.archive.archivePath), "not valid", "utf8");
 
     const verification = verifyGrocyBackupIntegrityReceipt(baseDir);
+    const archiveVerificationCheck = verification.checks.find((check) => check.id === "archive_verification_passed");
 
     expect(verification.summary.status).toBe("fail");
-    expect(verification.checks).toContainEqual({
-      id: "archive_verification_passed",
-      status: "fail",
-      message: expect.stringContaining("Archive verification failed"),
-    });
+    expect(archiveVerificationCheck?.status).toBe("fail");
+    expect(archiveVerificationCheck?.message).toContain("Archive verification failed");
   });
 });
 
