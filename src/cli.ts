@@ -456,6 +456,7 @@ async function main(): Promise<void> {
     const bundle = createGrocySupportBundle({
       baseDir: process.cwd(),
       artifactPaths: parseFlags("--artifact").length > 0 ? parseFlags("--artifact") : undefined,
+      auditPaths: parseFlags("--audit-path").length > 0 ? parseFlags("--audit-path") : undefined,
     });
     const outputPath = recordGrocySupportBundle(bundle, {
       outputPath: parseFlag("--output"),

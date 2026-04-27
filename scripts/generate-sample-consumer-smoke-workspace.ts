@@ -16,12 +16,17 @@ type WorkspaceSummary = {
   smokeReceiptPath: string;
   healthBadgePath: string;
   healthDiagnosticsPath: string;
+  supportBundlePath: string;
   backupRestorePlanPath: string;
   backupRestoreDrillPath: string;
+  backupVerificationPath: string;
+  backupRestoreFailureDrillPath: string;
   buildCommand: string;
   smokeCommand: string;
   contractResult: string;
   mockSmokeResult: string;
+  supportBundleReadiness: string;
+  supportBundleIssueTitle: string;
 };
 
 function createChildEnv(overrides: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -300,37 +305,12 @@ function resolveInstalledBinCommand(workspacePath: string): string {
     : path.join(workspacePath, "node_modules", ".bin", "grocy-ops-toolkit");
 }
 
-function generateWorkspace(): WorkspaceSummary {
-  const outputDir = parseFlag("--output-dir");
-  const { tempDir, workspacePath } = createWorkspaceRoot(outputDir);
-  const npmEnv = createNpmEnv(tempDir);
-  const backupPassphraseEnv = "GROCY_SAMPLE_CONSUMER_PASSPHRASE";
-
-  ensureDir(npmEnv.TMP);
-  writeConsumerFiles(workspacePath);
-
-  run(npmCommand, ["run", "build"], repoRoot, npmEnv);
-  const { tarballPath, packageName } = packPackageFromCleanCheckout(tempDir, npmEnv);
-  run(npmCommand, ["install", "--no-audit", "--no-fund", "--no-package-lock", tarballPath], workspacePath, npmEnv);
-  run(
-    npmCommand,
-    [
-      "install",
-      "--no-audit",
-      "--no-fund",
-      "--no-package-lock",
-      "--save-dev",
-      path.join(repoRoot, "node_modules", "typescript"),
-    ],
-    workspacePath,
-    npmEnv,
-  );
-
-  writeSyntheticBackupFixture(workspacePath, backupPassphraseEnv);
-
-  const installedBinCommand = resolveInstalledBinCommand(workspacePath);
-  const backupEnv = { ...npmEnv, [backupPassphraseEnv]: "synthetic-package-preview-passphrase" };
-
+function runInstalledToolkitArtifacts(
+  workspacePath: string,
+  installedBinCommand: string,
+  npmEnv: NodeJS.ProcessEnv,
+  backupEnv: NodeJS.ProcessEnv,
+): void {
   run(
     installedBinCommand,
     ["grocy:install:doctor", "--output", "data/install-doctor.json", "--force"],
@@ -377,6 +357,86 @@ function generateWorkspace(): WorkspaceSummary {
     workspacePath,
     backupEnv,
   );
+  run(
+    installedBinCommand,
+    ["grocy:backup:verify", "--output", "data/grocy-backup-verification-report.json", "--force"],
+    workspacePath,
+    backupEnv,
+  );
+  run(
+    installedBinCommand,
+    [
+      "grocy:backup:restore-failure-drill",
+      "--restore-dir",
+      "restore/package-restore-failure-drill",
+      "--output",
+      "data/grocy-backup-restore-failure-drill-report.json",
+      "--force",
+    ],
+    workspacePath,
+    backupEnv,
+  );
+  run(
+    installedBinCommand,
+    [
+      "grocy:support:bundle",
+      "--output",
+      "data/grocy-support-bundle.json",
+      "--artifact",
+      "data/health-diagnostics.json",
+      "--artifact",
+      "data/smoke.json",
+      "--artifact",
+      "data/grocy-backup-verification-report.json",
+      "--artifact",
+      "data/grocy-backup-restore-failure-drill-report.json",
+      "--audit-path",
+      "data/health-diagnostics.json",
+      "--audit-path",
+      "data/smoke.json",
+      "--audit-path",
+      "data/grocy-backup-verification-report.json",
+      "--audit-path",
+      "data/grocy-backup-restore-failure-drill-report.json",
+      "--force",
+    ],
+    workspacePath,
+    backupEnv,
+  );
+}
+
+function generateWorkspace(): WorkspaceSummary {
+  const outputDir = parseFlag("--output-dir");
+  const { tempDir, workspacePath } = createWorkspaceRoot(outputDir);
+  const npmEnv = createNpmEnv(tempDir);
+  const backupPassphraseEnv = "GROCY_SAMPLE_CONSUMER_PASSPHRASE";
+
+  ensureDir(npmEnv.TMP);
+  writeConsumerFiles(workspacePath);
+
+  run(npmCommand, ["run", "build"], repoRoot, npmEnv);
+  const { tarballPath, packageName } = packPackageFromCleanCheckout(tempDir, npmEnv);
+  run(npmCommand, ["install", "--no-audit", "--no-fund", "--no-package-lock", tarballPath], workspacePath, npmEnv);
+  run(
+    npmCommand,
+    [
+      "install",
+      "--no-audit",
+      "--no-fund",
+      "--no-package-lock",
+      "--save-dev",
+      path.join(repoRoot, "node_modules", "typescript"),
+    ],
+    workspacePath,
+    npmEnv,
+  );
+
+  writeSyntheticBackupFixture(workspacePath, backupPassphraseEnv);
+
+  const installedBinCommand = resolveInstalledBinCommand(workspacePath);
+  const backupEnv = { ...npmEnv, [backupPassphraseEnv]: "synthetic-package-preview-passphrase" };
+
+  runInstalledToolkitArtifacts(workspacePath, installedBinCommand, npmEnv, backupEnv);
 
   const buildCommand = "npm run build";
   const smokeCommand = "npm run smoke";
@@ -384,6 +444,12 @@ function generateWorkspace(): WorkspaceSummary {
   const contractResult = run(npmCommand, ["run", "smoke"], workspacePath, npmEnv).trim();
   const mockSmokeResult = JSON.parse(fs.readFileSync(path.join(workspacePath, "data", "smoke.json"), "utf8")) as {
     summary?: { result?: string };
+  };
+  const supportBundle = JSON.parse(
+    fs.readFileSync(path.join(workspacePath, "data", "grocy-support-bundle.json"), "utf8"),
+  ) as {
+    summary?: { readiness?: string };
+    issueReport?: { title?: string };
   };
 
   return {
@@ -395,12 +461,17 @@ function generateWorkspace(): WorkspaceSummary {
     smokeReceiptPath: path.join(workspacePath, "data", "grocy-mock-smoke-receipt.json"),
     healthBadgePath: path.join(workspacePath, "data", "health-badge.json"),
     healthDiagnosticsPath: path.join(workspacePath, "data", "health-diagnostics.json"),
+    supportBundlePath: path.join(workspacePath, "data", "grocy-support-bundle.json"),
     backupRestorePlanPath: path.join(workspacePath, "data", "backup-restore-plan.json"),
     backupRestoreDrillPath: path.join(workspacePath, "data", "backup-restore-drill.json"),
+    backupVerificationPath: path.join(workspacePath, "data", "grocy-backup-verification-report.json"),
+    backupRestoreFailureDrillPath: path.join(workspacePath, "data", "grocy-backup-restore-failure-drill-report.json"),
     buildCommand,
     smokeCommand,
     contractResult,
     mockSmokeResult: mockSmokeResult.summary?.result ?? "unknown",
+    supportBundleReadiness: supportBundle.summary?.readiness ?? "unknown",
+    supportBundleIssueTitle: supportBundle.issueReport?.title ?? "unknown",
   };
 }
 

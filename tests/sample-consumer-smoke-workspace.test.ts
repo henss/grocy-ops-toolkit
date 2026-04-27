@@ -13,8 +13,11 @@ type WorkspaceSummary = {
   packageName: string;
   smokeReportPath: string;
   smokeReceiptPath: string;
+  supportBundlePath: string;
   contractResult: string;
   mockSmokeResult: string;
+  supportBundleReadiness: string;
+  supportBundleIssueTitle: string;
 };
 
 function run(command: string, args: string[], cwd: string): string {
@@ -47,6 +50,8 @@ describe("sample consumer smoke workspace generator", () => {
       expect(summary.packageName).toMatch(/^grocy-ops-toolkit-.*\.tgz$/);
       expect(summary.contractResult).toContain("contract-ok");
       expect(summary.mockSmokeResult).toBe("pass");
+      expect(summary.supportBundleReadiness).toBe("ready_to_share");
+      expect(summary.supportBundleIssueTitle).toBe("Grocy health or backup debugging support request");
       expect(fs.existsSync(path.join(outputDir, "package-lock.json"))).toBe(false);
       expect(fs.existsSync(path.join(outputDir, "config", "grocy-backup.local.json"))).toBe(true);
       expect(fs.existsSync(path.join(outputDir, "source", "data", "grocy-demo.json"))).toBe(true);
@@ -63,6 +68,31 @@ describe("sample consumer smoke workspace generator", () => {
         kind: "grocy_backup_restore_drill_report",
         restoreDir: "restore/package-restore-drill",
         summary: { result: "pass" },
+      });
+      expect(JSON.parse(fs.readFileSync(summary.supportBundlePath, "utf8"))).toMatchObject({
+        kind: "grocy_support_bundle",
+        summary: { readiness: "ready_to_share", redactionFindingCount: 0 },
+        issueReport: {
+          labels: ["support", "grocy", "redacted-bundle"],
+          evidenceGroups: expect.arrayContaining([
+            expect.objectContaining({
+              id: "backup_verification",
+              evidencePaths: ["data/grocy-backup-verification-report.json"],
+              replayCommandIds: ["backup_verification"],
+            }),
+            expect.objectContaining({
+              id: "backup_failure_drill",
+              evidencePaths: ["data/grocy-backup-restore-failure-drill-report.json"],
+              replayCommandIds: ["backup_failure_drill"],
+            }),
+          ]),
+          attachmentChecklist: expect.arrayContaining([
+            "data/health-diagnostics.json",
+            "data/smoke.json",
+            "data/grocy-backup-verification-report.json",
+            "data/grocy-backup-restore-failure-drill-report.json",
+          ]),
+        },
       });
     },
     120_000,

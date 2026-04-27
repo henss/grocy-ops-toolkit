@@ -745,7 +745,7 @@ The bundle records repo-relative artifact paths, file checksums, file sizes, saf
 
 Use `issueReport.bodyMarkdown` when opening a health or backup debugging issue. It gives a public-safe title, labels, body sections, evidence groups, attachment checklist, and replay commands such as `npm run grocy:health:diagnostics`, `npm run grocy:backup:verify -- --output data/grocy-backup-verification-report.json --force`, and `npm run grocy:backup:restore-failure-drill -- --restore-dir restore/grocy-restore-failure-drill`. Attach only the support bundle and referenced public-safe artifacts; keep live exports, decrypted backup files, credentials, and unreviewed local logs out of the issue.
 
-Use `--artifact <path>` one or more times to include specific repo-local generated artifacts, and `--output <path>` to write the bundle somewhere else.
+Use `--artifact <path>` one or more times to include specific repo-local generated artifacts, `--audit-path <path>` one or more times to limit the redaction scan to the intended attachment set, and `--output <path>` to write the bundle somewhere else.
 
 ## Backup Workflow
 
