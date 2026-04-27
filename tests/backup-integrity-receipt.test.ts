@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   createGrocyBackupIntegrityReceipt,
@@ -63,6 +63,23 @@ function runReceiptCli(baseDir: string, args: string[]): unknown {
     env: { ...process.env, [envName]: "synthetic-passphrase" },
   });
   return JSON.parse(stdout) as unknown;
+}
+
+function runReceiptCliProcess(baseDir: string, args: string[]): { status: number | null; stdout: string; stderr: string } {
+  const result = spawnSync(process.execPath, [
+    path.join(process.cwd(), "node_modules", "tsx", "dist", "cli.mjs"),
+    path.join(process.cwd(), "src", "cli.ts"),
+    ...args,
+  ], {
+    cwd: baseDir,
+    encoding: "utf8",
+    env: { ...process.env, [envName]: "synthetic-passphrase" },
+  });
+  return {
+    status: result.status,
+    stdout: result.stdout,
+    stderr: result.stderr,
+  };
 }
 
 function readReceiptJson(filePath: string): unknown {
@@ -300,6 +317,34 @@ describe("Grocy backup integrity receipt CLI and examples", () => {
 
   it("emits the receipt verifier result from the CLI", () => {
     expectReceiptVerifierCliOutput();
+  });
+
+  it("keeps failing receipt verifier CLI output machine-readable without stderr noise", () => {
+    const baseDir = setupFixtureBackupBase("grocy-backup-receipt-cli-missing-proof-");
+    const restorePlanPath = createRestorePlanFixture(
+      baseDir,
+      "2026-04-22T17:45:00.000Z",
+      "2026-04-22T17:46:00.000Z",
+      path.join("restore", "cli-missing-proof-check"),
+    );
+    recordGrocyBackupIntegrityReceipt(createGrocyBackupIntegrityReceipt(baseDir), { baseDir });
+    fs.rmSync(restorePlanPath);
+
+    const result = runReceiptCliProcess(baseDir, ["grocy:backup:receipt:verify"]);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toBe("");
+    expect(JSON.parse(result.stdout) as unknown).toMatchObject({
+      kind: "grocy_backup_integrity_receipt_verification",
+      summary: { status: "fail", checkCount: 5, passedCount: 4 },
+      checks: [
+        { id: "receipt_schema_valid", status: "pass" },
+        { id: "receipt_signature_valid", status: "pass" },
+        { id: "archive_record_present", status: "pass" },
+        { id: "archive_verification_passed", status: "pass" },
+        { id: "restore_plan_reviewed", status: "fail" },
+      ],
+    });
   });
 
   it("writes the receipt verifier result to an output artifact when requested", () => {
