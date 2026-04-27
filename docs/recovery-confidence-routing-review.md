@@ -57,8 +57,8 @@ Run:
 cp examples/grocy-backup.local.example.json config/grocy-backup.local.json
 export GROCY_BACKUP_PASSPHRASE="synthetic-routing-review-passphrase"
 npm run grocy:backup:snapshot
-npm run grocy:backup:receipt
 npm run grocy:backup:restore-plan -- --restore-dir restore/routing-review-check --output data/review-backup-restore-plan.json --force
+npm run grocy:backup:receipt
 npm run grocy:backup:verify
 npm run grocy:backup:receipt:verify
 npm run grocy:backup:verify -- --restore-dir restore/routing-review-check --confirm-restore-write
@@ -70,8 +70,8 @@ PowerShell:
 Copy-Item examples/grocy-backup.local.example.json config/grocy-backup.local.json
 $env:GROCY_BACKUP_PASSPHRASE = "synthetic-routing-review-passphrase"
 npm run grocy:backup:snapshot
-npm run grocy:backup:receipt
 npm run grocy:backup:restore-plan -- --restore-dir restore/routing-review-check --output data/review-backup-restore-plan.json --force
+npm run grocy:backup:receipt
 npm run grocy:backup:verify
 npm run grocy:backup:receipt:verify
 npm run grocy:backup:verify -- --restore-dir restore/routing-review-check --confirm-restore-write
