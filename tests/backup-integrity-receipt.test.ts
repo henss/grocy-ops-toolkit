@@ -30,10 +30,10 @@ afterEach(() => {
   delete process.env[envName];
 });
 
-function writeBackupConfig(baseDir: string): void {
-  fs.mkdirSync(path.join(baseDir, "config"), { recursive: true });
+function writeBackupConfig(baseDir: string, configPath = path.join("config", "grocy-backup.local.json")): void {
+  fs.mkdirSync(path.dirname(path.join(baseDir, configPath)), { recursive: true });
   fs.writeFileSync(
-    path.join(baseDir, "config", "grocy-backup.local.json"),
+    path.join(baseDir, configPath),
     JSON.stringify({
       sourcePath: "source",
       backupDir: "backups",
@@ -45,10 +45,10 @@ function writeBackupConfig(baseDir: string): void {
   process.env[envName] = "synthetic-passphrase";
 }
 
-function setupFixtureBackupBase(prefix: string): string {
+function setupFixtureBackupBase(prefix: string, configPath?: string): string {
   const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), prefix));
   fs.cpSync(fixtureSourcePath, path.join(baseDir, "source"), { recursive: true });
-  writeBackupConfig(baseDir);
+  writeBackupConfig(baseDir, configPath);
   return baseDir;
 }
 
@@ -145,6 +145,35 @@ function expectReceiptVerifierCliOutputFile(): void {
   expect(readReceiptVerificationJson(path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH))).toMatchObject({
     kind: "grocy_backup_integrity_receipt_verification",
     summary: { status: "pass", checkCount: 5, passedCount: 5 },
+  });
+}
+
+function expectCustomConfigReceiptCliOutput(): void {
+  const configPath = path.join("config", "synthetic-backup.local.json");
+  const baseDir = setupFixtureBackupBase("grocy-backup-receipt-custom-config-", configPath);
+  createGrocyBackupSnapshot(baseDir, {
+    configPath,
+    createdAt: "2026-04-22T17:44:00.000Z",
+  });
+
+  expect(runReceiptCli(baseDir, [
+    "grocy:backup:receipt",
+    "--config",
+    configPath,
+    "--output",
+    GROCY_BACKUP_INTEGRITY_RECEIPT_PATH,
+    "--force",
+  ])).toMatchObject({
+    outputPath: path.join(baseDir, GROCY_BACKUP_INTEGRITY_RECEIPT_PATH),
+    summary: { status: "pass", checkCount: 2, passedCount: 2 },
+  });
+  expect(runReceiptCli(baseDir, [
+    "grocy:backup:receipt:verify",
+    "--config",
+    configPath,
+  ])).toMatchObject({
+    kind: "grocy_backup_integrity_receipt_verification",
+    summary: { status: "pass", checkCount: 4, passedCount: 4 },
   });
 }
 
@@ -275,6 +304,10 @@ describe("Grocy backup integrity receipt CLI and examples", () => {
 
   it("writes the receipt verifier result to an output artifact when requested", () => {
     expectReceiptVerifierCliOutputFile();
+  });
+
+  it("emits and verifies receipts from a non-default backup config path", () => {
+    expectCustomConfigReceiptCliOutput();
   });
 
   it("keeps the public example receipt fixtures schema-valid", () => {

@@ -101,6 +101,7 @@ function handleGrocyBackupReceiptCommands(command: string | undefined, context: 
   if (command === "grocy:backup:receipt") {
     const receipt = createGrocyBackupIntegrityReceipt(baseDir, {
       archivePath: parseFlag("--archive"),
+      configPath: parseFlag("--config"),
       manifestPath: parseFlag("--manifest"),
       restorePlanReportPath: parseFlag("--restore-plan-report"),
       restoreDrillReportPath: parseFlag("--restore-drill-report"),
@@ -119,6 +120,7 @@ function handleGrocyBackupReceiptCommands(command: string | undefined, context: 
   if (command === "grocy:backup:receipt:verify") {
     const verification = verifyGrocyBackupIntegrityReceipt(baseDir, {
       receiptPath: parseFlag("--receipt"),
+      configPath: parseFlag("--config"),
       manifestPath: parseFlag("--manifest"),
       restorePlanReportPath: parseFlag("--restore-plan-report"),
       restoreDrillReportPath: parseFlag("--restore-drill-report"),

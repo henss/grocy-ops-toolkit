@@ -802,7 +802,7 @@ By default, the receipt is written to:
 data/grocy-backup-integrity-receipt.json
 ```
 
-The receipt records public-safe metadata about the latest backup record, reruns archive verification without restore writes, signs the receipt body with an HMAC derived from the configured backup passphrase environment variable, and links any conventional restore-plan or restore-drill artifacts that are already present. Use `--output <path>` to write the receipt somewhere else, `--archive <path>` to target a specific manifest record, and `--restore-plan-report` or `--restore-drill-report` to point at non-default evidence files.
+The receipt records public-safe metadata about the latest backup record, reruns archive verification without restore writes, signs the receipt body with an HMAC derived from the configured backup passphrase environment variable, and links any conventional restore-plan or restore-drill artifacts that are already present. Use `--output <path>` to write the receipt somewhere else, `--config <path>` to read a non-default backup config, `--archive <path>` to target a specific manifest record, and `--restore-plan-report` or `--restore-drill-report` to point at non-default evidence files.
 
 Verify an existing receipt against the current manifest and proof artifacts:
 
@@ -810,7 +810,7 @@ Verify an existing receipt against the current manifest and proof artifacts:
 npm run grocy:backup:receipt:verify
 ```
 
-Use `--output <path>` to persist the verification result as a public-safe JSON artifact.
+Use `--config <path>` when the receipt was generated from a non-default backup config. Use `--output <path>` to persist the verification result as a public-safe JSON artifact.
 
 The verifier reruns schema validation, validates the receipt signature against the configured backup passphrase environment variable, checks the manifest record, reruns `grocy:backup:verify` without restore writes, and compares any referenced restore-plan or restore-drill artifacts. It exits non-zero when the receipt no longer matches current evidence.
 
