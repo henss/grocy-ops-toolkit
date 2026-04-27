@@ -53,7 +53,7 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-public-artifact-redaction-audit.example.json` shows a passing public-boundary audit report for generated JSON and Markdown artifacts.
 
-`grocy-support-bundle.example.json` shows the offline sanitized support bundle manifest emitted by `npm run grocy:support:bundle`.
+`grocy-support-bundle.example.json` shows the offline sanitized support bundle manifest emitted by `npm run grocy:support:bundle`, including the sample support issue report and replay commands for health and backup debugging.
 
 `grocy-backup-restore-plan-dry-run-report.example.json` shows the no-write restore planning report emitted by `npm run grocy:backup:restore-plan`.
 

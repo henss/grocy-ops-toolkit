@@ -4,7 +4,7 @@
   "generatedAt": "2026-04-20T10:02:00.000Z",
   "summary": {
     "readiness": "ready_to_share",
-    "artifactCount": 2,
+    "artifactCount": 3,
     "redactionFindingCount": 0
   },
   "artifacts": [
@@ -35,13 +35,95 @@
         "checkCount": 4,
         "failureCount": 0
       }
+    },
+    {
+      "path": "data/grocy-backup-restore-failure-drill-report.json",
+      "type": "json",
+      "bytes": 1800,
+      "sha256": "example-backup-failure-drill-checksum",
+      "kind": "grocy_backup_restore_failure_drill_report",
+      "version": 1,
+      "generatedAt": "2026-04-20T10:01:30.000Z",
+      "summary": {
+        "result": "pass",
+        "scenarioCount": 3,
+        "passedCount": 3
+      }
     }
   ],
   "redactionAudit": {
     "result": "pass",
-    "scannedFileCount": 2,
+    "scannedFileCount": 3,
     "findingCount": 0,
     "findingCodes": []
+  },
+  "issueReport": {
+    "title": "Grocy health or backup debugging support request",
+    "labels": [
+      "support",
+      "grocy",
+      "redacted-bundle"
+    ],
+    "bodySections": [
+      {
+        "heading": "Problem summary",
+        "content": [
+          "Describe the failing command, observed status, and whether the issue affects health checks, backup verification, restore planning, or restore drills."
+        ]
+      },
+      {
+        "heading": "Attached evidence",
+        "content": [
+          "Attach the generated support bundle JSON and any referenced public-safe artifacts listed in the bundle.",
+          "Do not attach live Grocy exports, credentials, decrypted backup files, or unreviewed local logs."
+        ]
+      },
+      {
+        "heading": "Replay expectation",
+        "content": [
+          "A maintainer should be able to rerun the listed npm commands against synthetic fixtures or reviewed redacted artifacts and compare the referenced checksums."
+        ]
+      }
+    ],
+    "attachmentChecklist": [
+      "data/grocy-support-bundle.json",
+      "data/grocy-health-diagnostics.json",
+      "data/grocy-mock-smoke-report.json",
+      "data/grocy-backup-restore-failure-drill-report.json"
+    ],
+    "replayCommands": [
+      {
+        "id": "health_diagnostics",
+        "command": "npm run grocy:health:diagnostics",
+        "purpose": "Refresh the public-safe health diagnostics artifact.",
+        "evidencePaths": [
+          "data/grocy-health-diagnostics.json",
+          "data/grocy-mock-smoke-report.json"
+        ]
+      },
+      {
+        "id": "backup_verification",
+        "command": "npm run grocy:backup:verify -- --output data/grocy-backup-verification-report.json --force",
+        "purpose": "Refresh the public-safe encrypted-backup verification report without embedding decrypted file contents.",
+        "evidencePaths": []
+      },
+      {
+        "id": "backup_failure_drill",
+        "command": "npm run grocy:backup:restore-failure-drill -- --restore-dir restore/grocy-restore-failure-drill",
+        "purpose": "Replay synthetic corruption, wrong-passphrase, and path-escape rejection evidence.",
+        "evidencePaths": [
+          "data/grocy-backup-restore-failure-drill-report.json"
+        ]
+      },
+      {
+        "id": "support_bundle",
+        "command": "npm run grocy:support:bundle",
+        "purpose": "Regenerate the redacted manifest after refreshing diagnostics or backup evidence.",
+        "evidencePaths": [
+          "data/grocy-support-bundle.json"
+        ]
+      }
+    ]
   },
   "omitted": [
     "Live Grocy credentials.",

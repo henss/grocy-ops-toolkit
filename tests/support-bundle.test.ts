@@ -3,12 +3,42 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { createGrocySupportBundle, recordGrocySupportBundle } from "../src/support-bundle.js";
+import { createGrocySupportBundle, type GrocySupportBundle, recordGrocySupportBundle } from "../src/support-bundle.js";
+
+const HEALTH_ATTACHMENT_CHECKLIST = [
+  "data/grocy-support-bundle.json",
+  "data/grocy-health-diagnostics.json",
+  "data/grocy-mock-smoke-report.json",
+] as const;
+
+const REPLAY_COMMAND_IDS = [
+  "health_diagnostics",
+  "backup_verification",
+  "backup_failure_drill",
+  "support_bundle",
+] as const;
 
 function writeJson(baseDir: string, filePath: string, value: unknown): void {
   const absolutePath = path.join(baseDir, filePath);
   fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
   fs.writeFileSync(absolutePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
+function expectHealthIssueReport(bundle: GrocySupportBundle): void {
+  expect(bundle.issueReport).toMatchObject({
+    title: "Grocy health or backup debugging support request",
+    labels: ["support", "grocy", "redacted-bundle"],
+  });
+  expect(bundle.issueReport.attachmentChecklist).toEqual(HEALTH_ATTACHMENT_CHECKLIST);
+  expect(bundle.issueReport.replayCommands.map((command) => command.id)).toEqual(REPLAY_COMMAND_IDS);
+}
+
+function expectBackupFailureReplay(bundle: GrocySupportBundle): void {
+  expect(bundle.issueReport.attachmentChecklist).toContain("data/grocy-backup-restore-failure-drill-report.json");
+  expect(bundle.issueReport.replayCommands.find((command) => command.id === "backup_failure_drill")).toMatchObject({
+    command: "npm run grocy:backup:restore-failure-drill -- --restore-dir restore/grocy-restore-failure-drill",
+    evidencePaths: ["data/grocy-backup-restore-failure-drill-report.json"],
+  });
 }
 
 describe("Grocy support bundle", () => {
@@ -47,6 +77,7 @@ describe("Grocy support bundle", () => {
       kind: "grocy_health_diagnostics",
       summary: { result: "pass", failureCount: 0, warningCount: 0 },
     });
+    expectHealthIssueReport(bundle);
     expect(bundle.omitted).toContain("Raw Grocy record payloads.");
     expect(path.relative(baseDir, outputPath)).toBe(path.join("data", "grocy-support-bundle.json"));
   });
@@ -125,5 +156,24 @@ describe("Grocy support bundle", () => {
       kind: "grocy_support_bundle",
       summary: { readiness: "ready_to_share" },
     });
+  });
+});
+
+describe("Grocy support bundle issue report", () => {
+  it("attaches backup failure evidence to the sample issue report", () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-support-bundle-backup-"));
+    writeJson(baseDir, path.join("data", "grocy-backup-restore-failure-drill-report.json"), {
+      kind: "grocy_backup_restore_failure_drill_report",
+      version: 1,
+      generatedAt: "2026-04-20T10:00:00.000Z",
+      summary: { result: "pass", scenarioCount: 3, passedCount: 3 },
+    });
+
+    const bundle = createGrocySupportBundle({
+      baseDir,
+      generatedAt: "2026-04-20T10:02:00.000Z",
+    });
+
+    expectBackupFailureReplay(bundle);
   });
 });

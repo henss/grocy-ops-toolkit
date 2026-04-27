@@ -3,6 +3,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { z } from "zod";
 import { GROCY_BACKUP_MANIFEST_PATH } from "./backups.js";
+import { GROCY_BACKUP_INTEGRITY_RECEIPT_PATH, GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH } from "./backup-integrity-receipt.js";
+import { GROCY_BACKUP_RESTORE_DRILL_REPORT_PATH } from "./backup-restore-drill.js";
+import { GROCY_BACKUP_RESTORE_FAILURE_DRILL_REPORT_PATH } from "./backup-restore-failure-drill.js";
+import { GROCY_BACKUP_VERIFICATION_REPORT_PATH } from "./backup-verification-report.js";
 import {
   GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH,
   GROCY_CONFIG_DRIFT_TREND_REPORT_PATH,
@@ -22,6 +26,11 @@ const DEFAULT_SUPPORT_ARTIFACT_PATHS = [
   GROCY_MOCK_SMOKE_REPORT_PATH,
   GROCY_API_COMPATIBILITY_MATRIX_PATH,
   GROCY_BACKUP_MANIFEST_PATH,
+  GROCY_BACKUP_VERIFICATION_REPORT_PATH,
+  GROCY_BACKUP_RESTORE_DRILL_REPORT_PATH,
+  GROCY_BACKUP_RESTORE_FAILURE_DRILL_REPORT_PATH,
+  GROCY_BACKUP_INTEGRITY_RECEIPT_PATH,
+  GROCY_BACKUP_INTEGRITY_RECEIPT_VERIFICATION_PATH,
   GROCY_CONFIG_PLAN_PATH,
   GROCY_CONFIG_APPLY_DRY_RUN_REPORT_PATH,
   GROCY_CONFIG_DRIFT_TREND_REPORT_PATH,
@@ -41,6 +50,22 @@ export const GrocySupportBundleArtifactSchema = z.object({
   summary: GrocyJsonValueSchema.optional(),
 });
 
+export const GrocySupportBundleIssueReportSchema = z.object({
+  title: z.string().min(1),
+  labels: z.array(z.string().min(1)).default([]),
+  bodySections: z.array(z.object({
+    heading: z.string().min(1),
+    content: z.array(z.string().min(1)).default([]),
+  })).default([]),
+  attachmentChecklist: z.array(z.string().min(1)).default([]),
+  replayCommands: z.array(z.object({
+    id: z.string().min(1),
+    command: z.string().min(1),
+    purpose: z.string().min(1),
+    evidencePaths: z.array(z.string().min(1)).default([]),
+  })).default([]),
+});
+
 export const GrocySupportBundleSchema = z.object({
   kind: z.literal("grocy_support_bundle"),
   version: z.literal(1),
@@ -57,11 +82,13 @@ export const GrocySupportBundleSchema = z.object({
     findingCount: z.number().int().nonnegative(),
     findingCodes: z.array(z.string().min(1)).default([]),
   }),
+  issueReport: GrocySupportBundleIssueReportSchema,
   omitted: z.array(z.string().min(1)).default([]),
 });
 
 export type GrocySupportBundle = z.infer<typeof GrocySupportBundleSchema>;
 export type GrocySupportBundleArtifact = z.infer<typeof GrocySupportBundleArtifactSchema>;
+export type GrocySupportBundleIssueReport = z.infer<typeof GrocySupportBundleIssueReportSchema>;
 
 export interface GrocySupportBundleOptions {
   baseDir?: string;
@@ -169,6 +196,81 @@ function collectSupportArtifacts(baseDir: string, artifactPaths: string[]): Groc
   return artifacts;
 }
 
+function matchingArtifactPaths(artifacts: GrocySupportBundleArtifact[], kinds: string[]): string[] {
+  const kindSet = new Set(kinds);
+  return artifacts
+    .filter((artifact) => artifact.kind && kindSet.has(artifact.kind))
+    .map((artifact) => artifact.path);
+}
+
+function createSupportIssueReport(artifacts: GrocySupportBundleArtifact[]): GrocySupportBundleIssueReport {
+  const healthPaths = matchingArtifactPaths(artifacts, ["grocy_health_diagnostics", "grocy_mock_smoke_report"]);
+  const backupPaths = matchingArtifactPaths(artifacts, [
+    "grocy_backup_manifest",
+    "grocy_backup_verification_report",
+    "grocy_backup_restore_drill_report",
+    "grocy_backup_restore_failure_drill_report",
+    "grocy_backup_integrity_receipt",
+    "grocy_backup_integrity_receipt_verification",
+  ]);
+  return GrocySupportBundleIssueReportSchema.parse({
+    title: "Grocy health or backup debugging support request",
+    labels: ["support", "grocy", "redacted-bundle"],
+    bodySections: [
+      {
+        heading: "Problem summary",
+        content: [
+          "Describe the failing command, observed status, and whether the issue affects health checks, backup verification, restore planning, or restore drills.",
+        ],
+      },
+      {
+        heading: "Attached evidence",
+        content: [
+          "Attach the generated support bundle JSON and any referenced public-safe artifacts listed in the bundle.",
+          "Do not attach live Grocy exports, credentials, decrypted backup files, or unreviewed local logs.",
+        ],
+      },
+      {
+        heading: "Replay expectation",
+        content: [
+          "A maintainer should be able to rerun the listed npm commands against synthetic fixtures or reviewed redacted artifacts and compare the referenced checksums.",
+        ],
+      },
+    ],
+    attachmentChecklist: [
+      "data/grocy-support-bundle.json",
+      ...healthPaths,
+      ...backupPaths,
+    ],
+    replayCommands: [
+      {
+        id: "health_diagnostics",
+        command: "npm run grocy:health:diagnostics",
+        purpose: "Refresh the public-safe health diagnostics artifact.",
+        evidencePaths: healthPaths,
+      },
+      {
+        id: "backup_verification",
+        command: "npm run grocy:backup:verify -- --output data/grocy-backup-verification-report.json --force",
+        purpose: "Refresh the public-safe encrypted-backup verification report without embedding decrypted file contents.",
+        evidencePaths: matchingArtifactPaths(artifacts, ["grocy_backup_verification_report", "grocy_backup_manifest"]),
+      },
+      {
+        id: "backup_failure_drill",
+        command: "npm run grocy:backup:restore-failure-drill -- --restore-dir restore/grocy-restore-failure-drill",
+        purpose: "Replay synthetic corruption, wrong-passphrase, and path-escape rejection evidence.",
+        evidencePaths: matchingArtifactPaths(artifacts, ["grocy_backup_restore_failure_drill_report"]),
+      },
+      {
+        id: "support_bundle",
+        command: "npm run grocy:support:bundle",
+        purpose: "Regenerate the redacted manifest after refreshing diagnostics or backup evidence.",
+        evidencePaths: ["data/grocy-support-bundle.json"],
+      },
+    ],
+  });
+}
+
 export function createGrocySupportBundle(options: GrocySupportBundleOptions = {}): GrocySupportBundle {
   const baseDir = path.resolve(options.baseDir ?? process.cwd());
   const redactionAudit = auditGrocyPublicArtifacts({
@@ -194,6 +296,7 @@ export function createGrocySupportBundle(options: GrocySupportBundleOptions = {}
       findingCount: redactionAudit.summary.findingCount,
       findingCodes,
     },
+    issueReport: createSupportIssueReport(artifacts),
     omitted: [
       "Live Grocy credentials.",
       "Raw Grocy record payloads.",
