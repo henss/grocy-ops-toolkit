@@ -31,6 +31,9 @@ function expectHealthIssueReport(bundle: GrocySupportBundle): void {
   });
   expect(bundle.issueReport.attachmentChecklist).toEqual(HEALTH_ATTACHMENT_CHECKLIST);
   expect(bundle.issueReport.replayCommands.map((command) => command.id)).toEqual(REPLAY_COMMAND_IDS);
+  expect(bundle.issueReport.bodyMarkdown).toContain("# Grocy health or backup debugging support request");
+  expect(bundle.issueReport.bodyMarkdown).toContain("- [ ] data/grocy-support-bundle.json");
+  expect(bundle.issueReport.bodyMarkdown).toContain("`npm run grocy:support:bundle`");
 }
 
 function expectBackupFailureReplay(bundle: GrocySupportBundle): void {
@@ -39,6 +42,8 @@ function expectBackupFailureReplay(bundle: GrocySupportBundle): void {
     command: "npm run grocy:backup:restore-failure-drill -- --restore-dir restore/grocy-restore-failure-drill",
     evidencePaths: ["data/grocy-backup-restore-failure-drill-report.json"],
   });
+  expect(bundle.issueReport.bodyMarkdown).toContain("- [ ] data/grocy-backup-restore-failure-drill-report.json");
+  expect(bundle.issueReport.bodyMarkdown).toContain("backup_failure_drill");
 }
 
 describe("Grocy support bundle", () => {

@@ -53,6 +53,7 @@ export const GrocySupportBundleArtifactSchema = z.object({
 export const GrocySupportBundleIssueReportSchema = z.object({
   title: z.string().min(1),
   labels: z.array(z.string().min(1)).default([]),
+  bodyMarkdown: z.string().min(1),
   bodySections: z.array(z.object({
     heading: z.string().min(1),
     content: z.array(z.string().min(1)).default([]),
@@ -203,6 +204,32 @@ function matchingArtifactPaths(artifacts: GrocySupportBundleArtifact[], kinds: s
     .map((artifact) => artifact.path);
 }
 
+function renderIssueReportMarkdown(input: Omit<GrocySupportBundleIssueReport, "bodyMarkdown">): string {
+  const lines = [
+    `# ${input.title}`,
+    "",
+    `Labels: ${input.labels.join(", ") || "support"}`,
+    "",
+  ];
+  for (const section of input.bodySections) {
+    lines.push(`## ${section.heading}`, "");
+    for (const item of section.content) {
+      lines.push(item, "");
+    }
+  }
+  lines.push("## Attachment checklist", "");
+  for (const item of input.attachmentChecklist) {
+    lines.push(`- [ ] ${item}`);
+  }
+  lines.push("", "## Replay commands", "");
+  for (const command of input.replayCommands) {
+    lines.push(`- ${command.id}: \`${command.command}\``);
+    lines.push(`  Purpose: ${command.purpose}`);
+    lines.push(`  Evidence: ${command.evidencePaths.join(", ") || "generated when this artifact is present"}`);
+  }
+  return `${lines.join("\n")}\n`;
+}
+
 function createSupportIssueReport(artifacts: GrocySupportBundleArtifact[]): GrocySupportBundleIssueReport {
   const healthPaths = matchingArtifactPaths(artifacts, ["grocy_health_diagnostics", "grocy_mock_smoke_report"]);
   const backupPaths = matchingArtifactPaths(artifacts, [
@@ -213,7 +240,7 @@ function createSupportIssueReport(artifacts: GrocySupportBundleArtifact[]): Groc
     "grocy_backup_integrity_receipt",
     "grocy_backup_integrity_receipt_verification",
   ]);
-  return GrocySupportBundleIssueReportSchema.parse({
+  const issueReport = {
     title: "Grocy health or backup debugging support request",
     labels: ["support", "grocy", "redacted-bundle"],
     bodySections: [
@@ -268,6 +295,10 @@ function createSupportIssueReport(artifacts: GrocySupportBundleArtifact[]): Groc
         evidencePaths: ["data/grocy-support-bundle.json"],
       },
     ],
+  } satisfies Omit<GrocySupportBundleIssueReport, "bodyMarkdown">;
+  return GrocySupportBundleIssueReportSchema.parse({
+    ...issueReport,
+    bodyMarkdown: renderIssueReportMarkdown(issueReport),
   });
 }
 
