@@ -18,10 +18,46 @@ const REPLAY_COMMAND_IDS = [
   "support_bundle",
 ] as const;
 
+const PRIVATE_TEMPLATE_STRINGS = [
+  "actual-token-value",
+  "demo.invalid",
+  "synthetic\\grocy.sqlite",
+  "household",
+  "personal-ops",
+] as const;
+
 function writeJson(baseDir: string, filePath: string, value: unknown): void {
   const absolutePath = path.join(baseDir, filePath);
   fs.mkdirSync(path.dirname(absolutePath), { recursive: true });
   fs.writeFileSync(absolutePath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+}
+
+function expectRenderedIssueReportMatchesStructuredTemplate(bundle: GrocySupportBundle): void {
+  const markdown = bundle.issueReport.bodyMarkdown;
+  expect(markdown).toContain(`# ${bundle.issueReport.title}`);
+  expect(markdown).toContain(`Labels: ${bundle.issueReport.labels.join(", ")}`);
+  for (const section of bundle.issueReport.bodySections) {
+    expect(markdown).toContain(`## ${section.heading}`);
+    for (const content of section.content) {
+      expect(markdown).toContain(content);
+    }
+  }
+  for (const checklistItem of bundle.issueReport.attachmentChecklist) {
+    expect(markdown).toContain(`- [ ] ${checklistItem}`);
+  }
+  for (const command of bundle.issueReport.replayCommands) {
+    expect(markdown).toContain(`- ${command.id}: \`${command.command}\``);
+    expect(markdown).toContain(`Purpose: ${command.purpose}`);
+    expect(markdown).toContain(
+      `Evidence: ${command.evidencePaths.join(", ") || "generated when this artifact is present"}`,
+    );
+  }
+}
+
+function expectNoPrivateTemplateStrings(markdown: string): void {
+  for (const value of PRIVATE_TEMPLATE_STRINGS) {
+    expect(markdown).not.toContain(value);
+  }
 }
 
 function expectHealthIssueReport(bundle: GrocySupportBundle): void {
@@ -34,6 +70,8 @@ function expectHealthIssueReport(bundle: GrocySupportBundle): void {
   expect(bundle.issueReport.bodyMarkdown).toContain("# Grocy health or backup debugging support request");
   expect(bundle.issueReport.bodyMarkdown).toContain("- [ ] data/grocy-support-bundle.json");
   expect(bundle.issueReport.bodyMarkdown).toContain("`npm run grocy:support:bundle`");
+  expectRenderedIssueReportMatchesStructuredTemplate(bundle);
+  expectNoPrivateTemplateStrings(bundle.issueReport.bodyMarkdown);
 }
 
 function expectBackupFailureReplay(bundle: GrocySupportBundle): void {
@@ -118,6 +156,7 @@ describe("Grocy support bundle", () => {
     expect(serializedBundle).not.toContain("actual-token-value");
     expect(serializedBundle).not.toContain("demo.invalid");
     expect(serializedBundle).not.toContain("synthetic\\grocy.sqlite");
+    expectNoPrivateTemplateStrings(bundle.issueReport.bodyMarkdown);
   });
 
   it("rejects artifact paths outside the repository boundary", () => {
@@ -180,5 +219,53 @@ describe("Grocy support bundle issue report", () => {
     });
 
     expectBackupFailureReplay(bundle);
+  });
+
+  it("renders a complete redacted issue template for health and backup evidence", () => {
+    const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-support-bundle-template-"));
+    writeJson(baseDir, path.join("data", "grocy-health-diagnostics.json"), {
+      kind: "grocy_health_diagnostics",
+      version: 1,
+      generatedAt: "2026-04-20T10:00:00.000Z",
+      summary: {
+        result: "fail",
+        failureCount: 1,
+        warningCount: 0,
+        sourcePath: "C:\\synthetic\\grocy.sqlite",
+      },
+    });
+    writeJson(baseDir, path.join("data", "grocy-backup-verification-report.json"), {
+      kind: "grocy_backup_verification_report",
+      version: 1,
+      generatedAt: "2026-04-20T10:01:00.000Z",
+      summary: { result: "fail", archiveUrl: "https://demo.invalid/archive.zip" },
+    });
+    writeJson(baseDir, path.join("data", "grocy-backup-restore-failure-drill-report.json"), {
+      kind: "grocy_backup_restore_failure_drill_report",
+      version: 1,
+      generatedAt: "2026-04-20T10:01:30.000Z",
+      summary: { result: "pass", scenarioCount: 3, passedCount: 3 },
+    });
+
+    const bundle = createGrocySupportBundle({
+      baseDir,
+      generatedAt: "2026-04-20T10:02:00.000Z",
+    });
+
+    expect(bundle.issueReport.attachmentChecklist).toEqual([
+      "data/grocy-support-bundle.json",
+      "data/grocy-health-diagnostics.json",
+      "data/grocy-backup-verification-report.json",
+      "data/grocy-backup-restore-failure-drill-report.json",
+    ]);
+    expect(bundle.issueReport.replayCommands.find((command) => command.id === "backup_verification")).toMatchObject({
+      evidencePaths: [
+        "data/grocy-backup-verification-report.json",
+      ],
+    });
+    expectRenderedIssueReportMatchesStructuredTemplate(bundle);
+    expectNoPrivateTemplateStrings(bundle.issueReport.bodyMarkdown);
+    expect(JSON.stringify(bundle.artifacts)).not.toContain("demo.invalid");
+    expect(JSON.stringify(bundle.artifacts)).not.toContain("synthetic\\grocy.sqlite");
   });
 });
