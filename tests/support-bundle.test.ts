@@ -18,6 +18,13 @@ const REPLAY_COMMAND_IDS = [
   "support_bundle",
 ] as const;
 
+const EVIDENCE_GROUP_IDS = [
+  "health",
+  "backup_verification",
+  "backup_failure_drill",
+  "support_bundle",
+] as const;
+
 const PRIVATE_TEMPLATE_STRINGS = [
   "actual-token-value",
   "demo.invalid",
@@ -41,6 +48,13 @@ function expectRenderedIssueReportMatchesStructuredTemplate(bundle: GrocySupport
     for (const content of section.content) {
       expect(markdown).toContain(content);
     }
+  }
+  for (const group of bundle.issueReport.evidenceGroups) {
+    expect(markdown).toContain(`- ${group.title}`);
+    expect(markdown).toContain(
+      `Evidence: ${group.evidencePaths.join(", ") || "generated when this artifact family is present"}`,
+    );
+    expect(markdown).toContain(`Replay commands: ${group.replayCommandIds.join(", ") || "none"}`);
   }
   for (const checklistItem of bundle.issueReport.attachmentChecklist) {
     expect(markdown).toContain(`- [ ] ${checklistItem}`);
@@ -67,7 +81,17 @@ function expectHealthIssueReport(bundle: GrocySupportBundle): void {
   });
   expect(bundle.issueReport.attachmentChecklist).toEqual(HEALTH_ATTACHMENT_CHECKLIST);
   expect(bundle.issueReport.replayCommands.map((command) => command.id)).toEqual(REPLAY_COMMAND_IDS);
+  expect(bundle.issueReport.evidenceGroups.map((group) => group.id)).toEqual(EVIDENCE_GROUP_IDS);
+  expect(bundle.issueReport.evidenceGroups.find((group) => group.id === "health")).toMatchObject({
+    title: "Health diagnostics evidence",
+    evidencePaths: [
+      "data/grocy-health-diagnostics.json",
+      "data/grocy-mock-smoke-report.json",
+    ],
+    replayCommandIds: ["health_diagnostics"],
+  });
   expect(bundle.issueReport.bodyMarkdown).toContain("# Grocy health or backup debugging support request");
+  expect(bundle.issueReport.bodyMarkdown).toContain("## Evidence groups");
   expect(bundle.issueReport.bodyMarkdown).toContain("- [ ] data/grocy-support-bundle.json");
   expect(bundle.issueReport.bodyMarkdown).toContain("`npm run grocy:support:bundle`");
   expectRenderedIssueReportMatchesStructuredTemplate(bundle);
@@ -76,6 +100,11 @@ function expectHealthIssueReport(bundle: GrocySupportBundle): void {
 
 function expectBackupFailureReplay(bundle: GrocySupportBundle): void {
   expect(bundle.issueReport.attachmentChecklist).toContain("data/grocy-backup-restore-failure-drill-report.json");
+  expect(bundle.issueReport.evidenceGroups.find((group) => group.id === "backup_failure_drill")).toMatchObject({
+    title: "Backup failure replay evidence",
+    evidencePaths: ["data/grocy-backup-restore-failure-drill-report.json"],
+    replayCommandIds: ["backup_failure_drill"],
+  });
   expect(bundle.issueReport.replayCommands.find((command) => command.id === "backup_failure_drill")).toMatchObject({
     command: "npm run grocy:backup:restore-failure-drill -- --restore-dir restore/grocy-restore-failure-drill",
     evidencePaths: ["data/grocy-backup-restore-failure-drill-report.json"],
@@ -262,6 +291,12 @@ describe("Grocy support bundle issue report", () => {
       evidencePaths: [
         "data/grocy-backup-verification-report.json",
       ],
+    });
+    expect(bundle.issueReport.evidenceGroups.find((group) => group.id === "backup_verification")).toMatchObject({
+      evidencePaths: [
+        "data/grocy-backup-verification-report.json",
+      ],
+      replayCommandIds: ["backup_verification"],
     });
     expectRenderedIssueReportMatchesStructuredTemplate(bundle);
     expectNoPrivateTemplateStrings(bundle.issueReport.bodyMarkdown);

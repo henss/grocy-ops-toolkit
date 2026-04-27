@@ -64,7 +64,48 @@
       "grocy",
       "redacted-bundle"
     ],
-    "bodyMarkdown": "# Grocy health or backup debugging support request\n\nLabels: support, grocy, redacted-bundle\n\n## Problem summary\n\nDescribe the failing command, observed status, and whether the issue affects health checks, backup verification, restore planning, or restore drills.\n\n## Attached evidence\n\nAttach the generated support bundle JSON and any referenced public-safe artifacts listed in the bundle.\n\nDo not attach live Grocy exports, credentials, decrypted backup files, or unreviewed local logs.\n\n## Replay expectation\n\nA maintainer should be able to rerun the listed npm commands against synthetic fixtures or reviewed redacted artifacts and compare the referenced checksums.\n\n## Attachment checklist\n\n- [ ] data/grocy-support-bundle.json\n- [ ] data/grocy-health-diagnostics.json\n- [ ] data/grocy-mock-smoke-report.json\n- [ ] data/grocy-backup-restore-failure-drill-report.json\n\n## Replay commands\n\n- health_diagnostics: `npm run grocy:health:diagnostics`\n  Purpose: Refresh the public-safe health diagnostics artifact.\n  Evidence: data/grocy-health-diagnostics.json, data/grocy-mock-smoke-report.json\n- backup_verification: `npm run grocy:backup:verify -- --output data/grocy-backup-verification-report.json --force`\n  Purpose: Refresh the public-safe encrypted-backup verification report without embedding decrypted file contents.\n  Evidence: generated when this artifact is present\n- backup_failure_drill: `npm run grocy:backup:restore-failure-drill -- --restore-dir restore/grocy-restore-failure-drill`\n  Purpose: Replay synthetic corruption, wrong-passphrase, and path-escape rejection evidence.\n  Evidence: data/grocy-backup-restore-failure-drill-report.json\n- support_bundle: `npm run grocy:support:bundle`\n  Purpose: Regenerate the redacted manifest after refreshing diagnostics or backup evidence.\n  Evidence: data/grocy-support-bundle.json\n",
+    "evidenceGroups": [
+      {
+        "id": "health",
+        "title": "Health diagnostics evidence",
+        "evidencePaths": [
+          "data/grocy-health-diagnostics.json",
+          "data/grocy-mock-smoke-report.json"
+        ],
+        "replayCommandIds": [
+          "health_diagnostics"
+        ]
+      },
+      {
+        "id": "backup_verification",
+        "title": "Encrypted backup verification evidence",
+        "evidencePaths": [],
+        "replayCommandIds": [
+          "backup_verification"
+        ]
+      },
+      {
+        "id": "backup_failure_drill",
+        "title": "Backup failure replay evidence",
+        "evidencePaths": [
+          "data/grocy-backup-restore-failure-drill-report.json"
+        ],
+        "replayCommandIds": [
+          "backup_failure_drill"
+        ]
+      },
+      {
+        "id": "support_bundle",
+        "title": "Support bundle manifest",
+        "evidencePaths": [
+          "data/grocy-support-bundle.json"
+        ],
+        "replayCommandIds": [
+          "support_bundle"
+        ]
+      }
+    ],
+    "bodyMarkdown": "# Grocy health or backup debugging support request\n\nLabels: support, grocy, redacted-bundle\n\n## Problem summary\n\nDescribe the failing command, observed status, and whether the issue affects health checks, backup verification, restore planning, or restore drills.\n\n## Attached evidence\n\nAttach the generated support bundle JSON and any referenced public-safe artifacts listed in the bundle.\n\nDo not attach live Grocy exports, credentials, decrypted backup files, or unreviewed local logs.\n\n## Replay expectation\n\nA maintainer should be able to rerun the listed npm commands against synthetic fixtures or reviewed redacted artifacts and compare the referenced checksums.\n\n## Evidence groups\n\n- Health diagnostics evidence\n  Evidence: data/grocy-health-diagnostics.json, data/grocy-mock-smoke-report.json\n  Replay commands: health_diagnostics\n- Encrypted backup verification evidence\n  Evidence: generated when this artifact family is present\n  Replay commands: backup_verification\n- Backup failure replay evidence\n  Evidence: data/grocy-backup-restore-failure-drill-report.json\n  Replay commands: backup_failure_drill\n- Support bundle manifest\n  Evidence: data/grocy-support-bundle.json\n  Replay commands: support_bundle\n\n## Attachment checklist\n\n- [ ] data/grocy-support-bundle.json\n- [ ] data/grocy-health-diagnostics.json\n- [ ] data/grocy-mock-smoke-report.json\n- [ ] data/grocy-backup-restore-failure-drill-report.json\n\n## Replay commands\n\n- health_diagnostics: `npm run grocy:health:diagnostics`\n  Purpose: Refresh the public-safe health diagnostics artifact.\n  Evidence: data/grocy-health-diagnostics.json, data/grocy-mock-smoke-report.json\n- backup_verification: `npm run grocy:backup:verify -- --output data/grocy-backup-verification-report.json --force`\n  Purpose: Refresh the public-safe encrypted-backup verification report without embedding decrypted file contents.\n  Evidence: generated when this artifact is present\n- backup_failure_drill: `npm run grocy:backup:restore-failure-drill -- --restore-dir restore/grocy-restore-failure-drill`\n  Purpose: Replay synthetic corruption, wrong-passphrase, and path-escape rejection evidence.\n  Evidence: data/grocy-backup-restore-failure-drill-report.json\n- support_bundle: `npm run grocy:support:bundle`\n  Purpose: Regenerate the redacted manifest after refreshing diagnostics or backup evidence.\n  Evidence: data/grocy-support-bundle.json\n",
     "bodySections": [
       {
         "heading": "Problem summary",

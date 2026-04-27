@@ -53,6 +53,12 @@ export const GrocySupportBundleArtifactSchema = z.object({
 export const GrocySupportBundleIssueReportSchema = z.object({
   title: z.string().min(1),
   labels: z.array(z.string().min(1)).default([]),
+  evidenceGroups: z.array(z.object({
+    id: z.string().min(1),
+    title: z.string().min(1),
+    evidencePaths: z.array(z.string().min(1)).default([]),
+    replayCommandIds: z.array(z.string().min(1)).default([]),
+  })).default([]),
   bodyMarkdown: z.string().min(1),
   bodySections: z.array(z.object({
     heading: z.string().min(1),
@@ -217,6 +223,13 @@ function renderIssueReportMarkdown(input: Omit<GrocySupportBundleIssueReport, "b
       lines.push(item, "");
     }
   }
+  lines.push("## Evidence groups", "");
+  for (const group of input.evidenceGroups) {
+    lines.push(`- ${group.title}`);
+    lines.push(`  Evidence: ${group.evidencePaths.join(", ") || "generated when this artifact family is present"}`);
+    lines.push(`  Replay commands: ${group.replayCommandIds.join(", ") || "none"}`);
+  }
+  lines.push("");
   lines.push("## Attachment checklist", "");
   for (const item of input.attachmentChecklist) {
     lines.push(`- [ ] ${item}`);
@@ -240,9 +253,40 @@ function createSupportIssueReport(artifacts: GrocySupportBundleArtifact[]): Groc
     "grocy_backup_integrity_receipt",
     "grocy_backup_integrity_receipt_verification",
   ]);
+  const backupVerificationPaths = matchingArtifactPaths(artifacts, [
+    "grocy_backup_verification_report",
+    "grocy_backup_manifest",
+  ]);
+  const backupFailurePaths = matchingArtifactPaths(artifacts, ["grocy_backup_restore_failure_drill_report"]);
   const issueReport = {
     title: "Grocy health or backup debugging support request",
     labels: ["support", "grocy", "redacted-bundle"],
+    evidenceGroups: [
+      {
+        id: "health",
+        title: "Health diagnostics evidence",
+        evidencePaths: healthPaths,
+        replayCommandIds: ["health_diagnostics"],
+      },
+      {
+        id: "backup_verification",
+        title: "Encrypted backup verification evidence",
+        evidencePaths: backupVerificationPaths,
+        replayCommandIds: ["backup_verification"],
+      },
+      {
+        id: "backup_failure_drill",
+        title: "Backup failure replay evidence",
+        evidencePaths: backupFailurePaths,
+        replayCommandIds: ["backup_failure_drill"],
+      },
+      {
+        id: "support_bundle",
+        title: "Support bundle manifest",
+        evidencePaths: ["data/grocy-support-bundle.json"],
+        replayCommandIds: ["support_bundle"],
+      },
+    ],
     bodySections: [
       {
         heading: "Problem summary",
@@ -280,13 +324,13 @@ function createSupportIssueReport(artifacts: GrocySupportBundleArtifact[]): Groc
         id: "backup_verification",
         command: "npm run grocy:backup:verify -- --output data/grocy-backup-verification-report.json --force",
         purpose: "Refresh the public-safe encrypted-backup verification report without embedding decrypted file contents.",
-        evidencePaths: matchingArtifactPaths(artifacts, ["grocy_backup_verification_report", "grocy_backup_manifest"]),
+        evidencePaths: backupVerificationPaths,
       },
       {
         id: "backup_failure_drill",
         command: "npm run grocy:backup:restore-failure-drill -- --restore-dir restore/grocy-restore-failure-drill",
         purpose: "Replay synthetic corruption, wrong-passphrase, and path-escape rejection evidence.",
-        evidencePaths: matchingArtifactPaths(artifacts, ["grocy_backup_restore_failure_drill_report"]),
+        evidencePaths: backupFailurePaths,
       },
       {
         id: "support_bundle",
