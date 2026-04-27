@@ -96,7 +96,15 @@ export function buildRestorePlanVerificationCheck(
   if (!restorePlanArtifact.ok) {
     return buildVerificationCheck("restore_plan_reviewed", "fail", restorePlanArtifact.message);
   }
-  const restorePlan = GrocyBackupRestorePlanDryRunReportSchema.parse(restorePlanArtifact.value);
+  const restorePlanResult = GrocyBackupRestorePlanDryRunReportSchema.safeParse(restorePlanArtifact.value);
+  if (!restorePlanResult.success) {
+    return buildVerificationCheck(
+      "restore_plan_reviewed",
+      "fail",
+      `Restore-plan dry-run evidence is not schema-valid: ${restorePlanResult.error.message}`,
+    );
+  }
+  const restorePlan = restorePlanResult.data;
   const matches = restorePlan.summary.result === "ready"
     && restorePlan.summary.checksumVerified
     && restorePlan.archiveRecordId === receipt.archive.recordId
@@ -120,7 +128,15 @@ export function buildRestoreDrillVerificationCheck(
   if (!restoreDrillArtifact.ok) {
     return buildVerificationCheck("restore_drill_verified", "fail", restoreDrillArtifact.message);
   }
-  const restoreDrill = GrocyBackupRestoreDrillReportSchema.parse(restoreDrillArtifact.value);
+  const restoreDrillResult = GrocyBackupRestoreDrillReportSchema.safeParse(restoreDrillArtifact.value);
+  if (!restoreDrillResult.success) {
+    return buildVerificationCheck(
+      "restore_drill_verified",
+      "fail",
+      `Restore-drill evidence is not schema-valid: ${restoreDrillResult.error.message}`,
+    );
+  }
+  const restoreDrill = restoreDrillResult.data;
   const matches = restoreDrill.summary.result === "pass"
     && restoreDrill.summary.fileCount === receipt.archive.fileCount
     && restoreDrill.summary.totalBytes === receipt.archive.totalBytes

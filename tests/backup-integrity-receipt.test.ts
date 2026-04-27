@@ -347,6 +347,38 @@ describe("Grocy backup integrity receipt CLI and examples", () => {
     });
   });
 
+  it("keeps malformed proof artifact failures machine-readable without stderr noise", () => {
+    const baseDir = setupFixtureBackupBase("grocy-backup-receipt-cli-malformed-proof-");
+    const restorePlanPath = createRestorePlanFixture(
+      baseDir,
+      "2026-04-22T17:47:00.000Z",
+      "2026-04-22T17:48:00.000Z",
+      path.join("restore", "cli-malformed-proof-check"),
+    );
+    recordGrocyBackupIntegrityReceipt(createGrocyBackupIntegrityReceipt(baseDir), { baseDir });
+    fs.writeFileSync(restorePlanPath, `${JSON.stringify({ kind: "not_a_restore_plan_report" })}\n`, "utf8");
+
+    const result = runReceiptCliProcess(baseDir, ["grocy:backup:receipt:verify"]);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toBe("");
+    expect(JSON.parse(result.stdout) as unknown).toMatchObject({
+      kind: "grocy_backup_integrity_receipt_verification",
+      summary: { status: "fail", checkCount: 5, passedCount: 4 },
+      checks: [
+        { id: "receipt_schema_valid", status: "pass" },
+        { id: "receipt_signature_valid", status: "pass" },
+        { id: "archive_record_present", status: "pass" },
+        { id: "archive_verification_passed", status: "pass" },
+        {
+          id: "restore_plan_reviewed",
+          status: "fail",
+          message: expect.stringContaining("Restore-plan dry-run evidence is not schema-valid"),
+        },
+      ],
+    });
+  });
+
   it("writes the receipt verifier result to an output artifact when requested", () => {
     expectReceiptVerifierCliOutputFile();
   });
