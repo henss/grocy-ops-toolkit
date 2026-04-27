@@ -74,6 +74,42 @@ function expectNoPrivateTemplateStrings(markdown: string): void {
   }
 }
 
+function expectRedactionRuleTrace(bundle: GrocySupportBundle): void {
+  expect(bundle.redactionAudit).toMatchObject({
+    scannedPaths: ["data", "examples"],
+    snippetPolicy: "finding_locations_only_no_matched_snippets",
+  });
+  expect(bundle.redactionAudit.ruleSet.map((rule) => rule.code)).toEqual([
+    "absolute_local_path",
+    "private_url",
+    "credential_value",
+    "private_boundary_term",
+  ]);
+}
+
+function expectSensitiveFindingLocations(bundle: GrocySupportBundle): void {
+  expect(bundle.redactionAudit.findingLocations).toEqual([
+    {
+      filePath: "data/generated-report.json",
+      line: 7,
+      code: "absolute_local_path",
+      message: "Artifact includes an absolute local path.",
+    },
+    {
+      filePath: "data/generated-report.json",
+      line: 8,
+      code: "private_url",
+      message: "Artifact includes a non-example URL.",
+    },
+    {
+      filePath: "data/generated-report.json",
+      line: 10,
+      code: "credential_value",
+      message: "Artifact includes a credential-shaped value.",
+    },
+  ]);
+}
+
 function expectHealthIssueReport(bundle: GrocySupportBundle): void {
   expect(bundle.issueReport).toMatchObject({
     title: "Grocy health or backup debugging support request",
@@ -149,6 +185,8 @@ describe("Grocy support bundle", () => {
       kind: "grocy_health_diagnostics",
       summary: { result: "pass", failureCount: 0, warningCount: 0 },
     });
+    expectRedactionRuleTrace(bundle);
+    expect(bundle.redactionAudit.findingLocations).toEqual([]);
     expectHealthIssueReport(bundle);
     expect(bundle.omitted).toContain("Raw Grocy record payloads.");
     expect(path.relative(baseDir, outputPath)).toBe(path.join("data", "grocy-support-bundle.json"));
@@ -177,6 +215,8 @@ describe("Grocy support bundle", () => {
 
     expect(bundle.summary.readiness).toBe("needs_redaction_review");
     expect(bundle.redactionAudit.findingCodes).toEqual(["absolute_local_path", "credential_value", "private_url"]);
+    expectSensitiveFindingLocations(bundle);
+    expectRedactionRuleTrace(bundle);
     expect(bundle.artifacts[0].summary).toEqual({
       result: "fail",
       sourcePath: "<redacted-summary-value>",

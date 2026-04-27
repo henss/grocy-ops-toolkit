@@ -50,6 +50,18 @@ export const GrocySupportBundleArtifactSchema = z.object({
   summary: GrocyJsonValueSchema.optional(),
 });
 
+export const GrocySupportBundleRedactionRuleSchema = z.object({
+  code: z.string().min(1),
+  checkedFor: z.string().min(1),
+});
+
+export const GrocySupportBundleRedactionFindingSchema = z.object({
+  filePath: z.string().min(1),
+  line: z.number().int().positive(),
+  code: z.string().min(1),
+  message: z.string().min(1),
+});
+
 export const GrocySupportBundleIssueReportSchema = z.object({
   title: z.string().min(1),
   labels: z.array(z.string().min(1)).default([]),
@@ -85,9 +97,13 @@ export const GrocySupportBundleSchema = z.object({
   artifacts: z.array(GrocySupportBundleArtifactSchema).default([]),
   redactionAudit: z.object({
     result: z.enum(["pass", "fail"]),
+    scannedPaths: z.array(z.string().min(1)).default([]),
     scannedFileCount: z.number().int().nonnegative(),
     findingCount: z.number().int().nonnegative(),
     findingCodes: z.array(z.string().min(1)).default([]),
+    findingLocations: z.array(GrocySupportBundleRedactionFindingSchema).default([]),
+    ruleSet: z.array(GrocySupportBundleRedactionRuleSchema).default([]),
+    snippetPolicy: z.literal("finding_locations_only_no_matched_snippets"),
   }),
   issueReport: GrocySupportBundleIssueReportSchema,
   omitted: z.array(z.string().min(1)).default([]),
@@ -96,6 +112,25 @@ export const GrocySupportBundleSchema = z.object({
 export type GrocySupportBundle = z.infer<typeof GrocySupportBundleSchema>;
 export type GrocySupportBundleArtifact = z.infer<typeof GrocySupportBundleArtifactSchema>;
 export type GrocySupportBundleIssueReport = z.infer<typeof GrocySupportBundleIssueReportSchema>;
+
+const REDACTION_RULE_SET = [
+  {
+    code: "absolute_local_path",
+    checkedFor: "Windows, POSIX, workspace, home, webroot, and system absolute path shapes.",
+  },
+  {
+    code: "private_url",
+    checkedFor: "HTTP(S) URLs outside example, localhost, and loopback hosts.",
+  },
+  {
+    code: "credential_value",
+    checkedFor: "Credential-shaped JSON fields and environment assignments unless they use placeholder values.",
+  },
+  {
+    code: "private_boundary_term",
+    checkedFor: "Private-boundary terms for household, personal workflow, orchestrator, shopping, calendar, and task context.",
+  },
+] as const;
 
 export interface GrocySupportBundleOptions {
   baseDir?: string;
@@ -367,9 +402,18 @@ export function createGrocySupportBundle(options: GrocySupportBundleOptions = {}
     artifacts,
     redactionAudit: {
       result: redactionAudit.summary.result,
+      scannedPaths: redactionAudit.scannedPaths,
       scannedFileCount: redactionAudit.summary.scannedFileCount,
       findingCount: redactionAudit.summary.findingCount,
       findingCodes,
+      findingLocations: redactionAudit.findings.map((finding) => ({
+        filePath: finding.filePath,
+        line: finding.line,
+        code: finding.code,
+        message: finding.message,
+      })),
+      ruleSet: REDACTION_RULE_SET,
+      snippetPolicy: "finding_locations_only_no_matched_snippets",
     },
     issueReport: createSupportIssueReport(artifacts),
     omitted: [

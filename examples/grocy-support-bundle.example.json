@@ -53,9 +53,33 @@
   ],
   "redactionAudit": {
     "result": "pass",
+    "scannedPaths": [
+      "data",
+      "examples"
+    ],
     "scannedFileCount": 3,
     "findingCount": 0,
-    "findingCodes": []
+    "findingCodes": [],
+    "findingLocations": [],
+    "ruleSet": [
+      {
+        "code": "absolute_local_path",
+        "checkedFor": "Windows, POSIX, workspace, home, webroot, and system absolute path shapes."
+      },
+      {
+        "code": "private_url",
+        "checkedFor": "HTTP(S) URLs outside example, localhost, and loopback hosts."
+      },
+      {
+        "code": "credential_value",
+        "checkedFor": "Credential-shaped JSON fields and environment assignments unless they use placeholder values."
+      },
+      {
+        "code": "private_boundary_term",
+        "checkedFor": "Private-boundary terms for household, personal workflow, orchestrator, shopping, calendar, and task context."
+      }
+    ],
+    "snippetPolicy": "finding_locations_only_no_matched_snippets"
   },
   "issueReport": {
     "title": "Grocy health or backup debugging support request",
