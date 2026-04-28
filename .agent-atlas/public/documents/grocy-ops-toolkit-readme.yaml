@@ -1,0 +1,12 @@
+id: document:grocy-ops-toolkit-readme
+kind: document
+title: grocy-ops-toolkit README
+summary: Primary repo entrypoint for setup, usage, architecture, and maintenance notes.
+status: active
+visibility: public
+document:
+  paths:
+    - README.md
+relations:
+  - type: documents
+    target: component:grocy-ops-toolkit-source

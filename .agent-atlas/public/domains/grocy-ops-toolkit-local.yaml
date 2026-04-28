@@ -1,0 +1,9 @@
+id: domain:grocy-ops-toolkit-local
+kind: domain
+title: grocy-ops-toolkit Local Surface
+summary: Repo-local architecture, docs, and verification surfaces for grocy-ops-toolkit.
+status: active
+visibility: public
+relations:
+  - type: contains
+    target: repository:grocy-ops-toolkit
