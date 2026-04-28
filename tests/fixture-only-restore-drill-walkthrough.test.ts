@@ -5,7 +5,7 @@ import { execFileSync } from "node:child_process";
 import { afterEach, describe, expect, it } from "vitest";
 
 const repoRoot = process.cwd();
-const walkthroughPath = path.join(repoRoot, "docs", "fixture-only-restore-drill-walkthrough.md");
+const walkthroughPath = path.join(repoRoot, "docs", "evaluation", "fixture-only-restore-drill-walkthrough.md");
 const fixtureSourcePath = path.join(repoRoot, "examples", "synthetic-grocy-backup-source");
 const backupConfigExamplePath = path.join(repoRoot, "examples", "grocy-backup.local.example.json");
 

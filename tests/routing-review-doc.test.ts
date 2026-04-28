@@ -7,10 +7,10 @@ type PackageJson = {
 };
 
 const repoRoot = process.cwd();
-const readmePath = path.join(repoRoot, "README.md");
-const routingReviewPath = path.join(repoRoot, "docs", "recovery-confidence-routing-review.md");
-const quickstartFixtureGalleryPath = path.join(repoRoot, "docs", "quickstart-fixture-gallery.md");
-const syntheticGitopsDriftTemplatePath = path.join(repoRoot, "docs", "synthetic-gitops-drift-ci-template.md");
+const docsIndexPath = path.join(repoRoot, "docs", "README.md");
+const routingReviewPath = path.join(repoRoot, "docs", "evaluation", "recovery-confidence-routing-review.md");
+const quickstartFixtureGalleryPath = path.join(repoRoot, "docs", "evaluation", "quickstart-fixture-gallery.md");
+const syntheticGitopsDriftTemplatePath = path.join(repoRoot, "docs", "evaluation", "synthetic-gitops-drift-ci-template.md");
 const syntheticGitopsDriftWorkflowPath = path.join(
   repoRoot,
   ".github",
@@ -29,9 +29,9 @@ function parsePackageJson(): PackageJson {
 
 describe("Recovery confidence routing review doc", () => {
   it("is linked from the public README surface", () => {
-    const readme = readText(readmePath);
+    const docsIndex = readText(docsIndexPath);
 
-    expect(readme).toContain("[Recovery Confidence Routing Review](docs/recovery-confidence-routing-review.md)");
+    expect(docsIndex).toContain("[Recovery Confidence Routing Review](./evaluation/recovery-confidence-routing-review.md)");
   });
 
   it("routes readers through real public commands and existing docs", () => {
@@ -45,9 +45,9 @@ describe("Recovery confidence routing review doc", () => {
     expect(routingReview).toContain("## Route 3: Backup Snapshot, Integrity Receipt, Restore Plan, And Restore Verification");
     expect(routingReview).toContain("npm run grocy:review:dashboard");
     expect(routingReview).toContain("The dashboard is the aggregation surface.");
-    expect(routingReview).toContain("[Fixture-Only Restore Drill Walkthrough](fixture-only-restore-drill-walkthrough.md)");
+    expect(routingReview).toContain("[Fixture-Only Restore Drill Walkthrough](./fixture-only-restore-drill-walkthrough.md)");
     expect(routingReview).toContain(
-      "[Synthetic Backup Passphrase Rotation Rehearsal](synthetic-backup-passphrase-rotation-rehearsal.md)",
+      "[Synthetic Backup Passphrase Rotation Rehearsal](./synthetic-backup-passphrase-rotation-rehearsal.md)",
     );
 
     for (const scriptName of [
@@ -85,11 +85,11 @@ describe("Recovery confidence routing review doc", () => {
 
 describe("Quickstart fixture gallery doc", () => {
   it("is linked from the public README and examples index", () => {
-    const readme = readText(readmePath);
+    const docsIndex = readText(docsIndexPath);
     const examplesReadme = readText(path.join(repoRoot, "examples", "README.md"));
 
-    expect(readme).toContain("[Quickstart Fixture Gallery](docs/quickstart-fixture-gallery.md)");
-    expect(examplesReadme).toContain("[Quickstart Fixture Gallery](../docs/quickstart-fixture-gallery.md)");
+    expect(docsIndex).toContain("[Quickstart Fixture Gallery](./evaluation/quickstart-fixture-gallery.md)");
+    expect(examplesReadme).toContain("[Quickstart Fixture Gallery](../docs/evaluation/quickstart-fixture-gallery.md)");
   });
 
   it("maps existing fixture families to real commands, docs, and example artifacts", () => {
@@ -104,10 +104,10 @@ describe("Quickstart fixture gallery doc", () => {
     expect(gallery).toContain("### 3. Fixture API Shapes");
     expect(gallery).toContain("### 4. Backup And Recovery Fixtures");
     expect(gallery).toContain("### 5. Review And Boundary Fixtures");
-    expect(gallery).toContain("[Synthetic Grocy Demo Lab](synthetic-demo-lab.md)");
-    expect(gallery).toContain("[Synthetic Examples For grocy-ops-toolkit](../examples/README.md)");
-    expect(gallery).toContain("[Synthetic Grocy Fixture Server](synthetic-fixture-server.md)");
-    expect(gallery).toContain("[Fixture-Only Restore Drill Walkthrough](fixture-only-restore-drill-walkthrough.md)");
+    expect(gallery).toContain("[Synthetic Grocy Demo Lab](./synthetic-demo-lab.md)");
+    expect(gallery).toContain("[Synthetic Examples For grocy-ops-toolkit](../../examples/README.md)");
+    expect(gallery).toContain("[Synthetic Grocy Fixture Server](../compatibility/synthetic-fixture-server.md)");
+    expect(gallery).toContain("[Fixture-Only Restore Drill Walkthrough](./fixture-only-restore-drill-walkthrough.md)");
 
     for (const scriptName of [
       "grocy:quickstart:proof",
@@ -166,9 +166,9 @@ describe("Quickstart fixture gallery doc", () => {
 
 describe("Synthetic GitOps drift CI template", () => {
   it("is linked from the public README surface", () => {
-    const readme = readText(readmePath);
+    const docsIndex = readText(docsIndexPath);
 
-    expect(readme).toContain("[Synthetic GitOps Drift CI Template](docs/synthetic-gitops-drift-ci-template.md)");
+    expect(docsIndex).toContain("[Synthetic GitOps Drift CI Template](./evaluation/synthetic-gitops-drift-ci-template.md)");
   });
 
   it("documents and ships a real workflow that stays on the synthetic desired-state path", () => {
@@ -180,12 +180,12 @@ describe("Synthetic GitOps drift CI template", () => {
     expect(fs.existsSync(syntheticGitopsDriftTemplatePath)).toBe(true);
     expect(fs.existsSync(syntheticGitopsDriftWorkflowPath)).toBe(true);
     expect(templateDoc).toContain(
-      "[`.github/workflows/synthetic-gitops-drift-template.yml`](../.github/workflows/synthetic-gitops-drift-template.yml)",
+      "[`.github/workflows/synthetic-gitops-drift-template.yml`](../../.github/workflows/synthetic-gitops-drift-template.yml)",
     );
     expect(templateDoc).toContain("workflow_dispatch");
     expect(templateDoc).toContain("workflow_call");
     expect(templateDoc).toContain("data/ci-gitops-drift-review-dashboard.md");
-    expect(templateDoc).toContain("[Recovery Confidence Routing Review](recovery-confidence-routing-review.md)");
+    expect(templateDoc).toContain("[Recovery Confidence Routing Review](./recovery-confidence-routing-review.md)");
 
     for (const scriptName of [
       "grocy:desired-state:lint",

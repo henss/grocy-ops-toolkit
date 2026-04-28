@@ -16,19 +16,19 @@ const GROCY_EVALUATOR_STARTER_PACK_DOCS = [
   {
     id: "starter_pack",
     title: "Synthetic Evaluator Starter Pack",
-    path: "docs/synthetic-evaluator-starter-pack.md",
+    path: "docs/evaluation/synthetic-evaluator-starter-pack.md",
     purpose: "Fastest evaluator-facing walkthrough for the synthetic toolkit surface.",
   },
   {
     id: "demo_lab",
     title: "Synthetic Grocy Demo Lab",
-    path: "docs/synthetic-demo-lab.md",
+    path: "docs/evaluation/synthetic-demo-lab.md",
     purpose: "Underlying one-command synthetic demo workflow and artifact families.",
   },
   {
     id: "fixture_gallery",
     title: "Quickstart Fixture Gallery",
-    path: "docs/quickstart-fixture-gallery.md",
+    path: "docs/evaluation/quickstart-fixture-gallery.md",
     purpose: "Smaller fixture families and follow-on commands after the starter pack run.",
   },
 ] as const;

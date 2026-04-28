@@ -35,8 +35,8 @@ The current health check also treats all three surfaces as one reachability bund
 
 The fixture-only public review surfaces already show the same coupling:
 
-- [`docs/synthetic-object-coverage-playground.md`](/abs/path/D:/workspace/grocy-ops-toolkit/docs/synthetic-object-coverage-playground.md:1) frames coverage in terms of stock plus Grocy object endpoints.
-- [`docs/grocy-api-compatibility-matrix.md`](/abs/path/D:/workspace/grocy-ops-toolkit/docs/grocy-api-compatibility-matrix.md:1) documents `/stock` and `/objects/*` compatibility using synthetic fixtures only.
+- [`docs/compatibility/synthetic-object-coverage-playground.md`](/abs/path/D:/workspace/grocy-ops-toolkit/docs/compatibility/synthetic-object-coverage-playground.md:1) frames coverage in terms of stock plus Grocy object endpoints.
+- [`docs/compatibility/grocy-api-compatibility-matrix.md`](/abs/path/D:/workspace/grocy-ops-toolkit/docs/compatibility/grocy-api-compatibility-matrix.md:1) documents `/stock` and `/objects/*` compatibility using synthetic fixtures only.
 
 The repo now also contains a prototype inventory artifact seam in [`src/inventory-snapshot.ts`](/abs/path/D:/workspace/grocy-ops-toolkit/src/inventory-snapshot.ts:1). That seam consumes only stock and product reads and emits a stable `grocy_inventory_snapshot` artifact.
 

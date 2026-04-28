@@ -10,7 +10,7 @@ Use it to:
 
 - Manage Grocy configuration as reviewed desired state.
 - Export and compare live Grocy config before applying changes.
-- Inspect health and diagnostics without leaking credentials or private record contents.
+- Inspect health and diagnostics.
 - Export read-only inventory and shopping-state snapshots.
 - Create encrypted local backup bundles, verify them, and plan restores before writing files.
 - Generate synthetic demo artifacts when you need public-safe evaluation without live Grocy credentials.
@@ -20,8 +20,6 @@ Use it to:
 - Node.js 20 or newer.
 - npm.
 - Grocy credentials for live health, export, diff, and apply workflows.
-
-Live credentials are not required for synthetic demos, fixture-only checks, backup verification against synthetic files, or apply dry runs from an existing plan.
 
 ## Quick Start
 
@@ -63,7 +61,7 @@ No live Grocy instance yet? Run the public-safe synthetic demo instead:
 npm run grocy:demo:lab
 ```
 
-See [Synthetic Grocy Demo Lab](docs/synthetic-demo-lab.md) for the generated artifacts and expected results.
+See [Synthetic Grocy Demo Lab](docs/evaluation/synthetic-demo-lab.md) for the generated artifacts and expected results.
 
 ## Core Workflows
 
@@ -156,12 +154,12 @@ See [Health And Diagnostics](docs/health-and-diagnostics.md) for artifact shapes
 - [Configuration workflow](docs/configuration-workflow.md)
 - [Backup workflow](docs/backup-workflow.md)
 - [Health and diagnostics](docs/health-and-diagnostics.md)
-- [Synthetic demo lab](docs/synthetic-demo-lab.md)
-- [Quickstart fixture gallery](docs/quickstart-fixture-gallery.md)
+- [Synthetic demo lab](docs/evaluation/synthetic-demo-lab.md)
+- [Quickstart fixture gallery](docs/evaluation/quickstart-fixture-gallery.md)
 - [Synthetic examples](examples/README.md)
 
 ## Contributing / Security
 
 Contributions should keep examples generic and safe to share. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Do not file public issues containing secrets, personal data, customer data, or production configuration. See [SECURITY.md](SECURITY.md).
+Do not file public issues containing secrets, personal data, customer data, or production configuration.

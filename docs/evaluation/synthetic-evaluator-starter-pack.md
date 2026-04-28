@@ -46,6 +46,6 @@ Because the command stays synthetic-only, it does not require a live Grocy insta
 
 Use the starter pack when the goal is fast evaluation. Move to the other docs only when you need more detail:
 
-- [Synthetic Grocy Demo Lab](synthetic-demo-lab.md) for the underlying one-command evidence flow
-- [Quickstart Fixture Gallery](quickstart-fixture-gallery.md) for smaller fixture families and targeted follow-up commands
-- [Synthetic Examples For grocy-ops-toolkit](../examples/README.md) for the committed public-safe example shapes
+- [Synthetic Grocy Demo Lab](./synthetic-demo-lab.md) for the underlying one-command evidence flow
+- [Quickstart Fixture Gallery](./quickstart-fixture-gallery.md) for smaller fixture families and targeted follow-up commands
+- [Synthetic Examples For grocy-ops-toolkit](../../examples/README.md) for the committed public-safe example shapes

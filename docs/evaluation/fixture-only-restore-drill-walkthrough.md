@@ -90,7 +90,7 @@ Treat these fields as the machine-checkable signoff surface:
 - `artifacts.manifestPath` must be `data/grocy-backup-manifest.json`
 - `artifacts.restorePlanReportPath` must be `data/grocy-backup-restore-plan-dry-run-report.json`
 
-For a representative public-safe shape, see [`examples/grocy-backup-restore-drill-report.example.json`](../examples/grocy-backup-restore-drill-report.example.json).
+For a representative public-safe shape, see [`examples/grocy-backup-restore-drill-report.example.json`](../../examples/grocy-backup-restore-drill-report.example.json).
 
 ## Why This Matters
 

@@ -10,7 +10,7 @@ It is intentionally narrow:
 - CI artifacts under `data/` only
 - no live Grocy credentials, household details, shopping workflows, pantry-monitoring policy, calendar/task integrations, or operator-specific operating policy
 
-The committed reusable/manual workflow lives at [`.github/workflows/synthetic-gitops-drift-template.yml`](../.github/workflows/synthetic-gitops-drift-template.yml).
+The committed reusable/manual workflow lives at [`.github/workflows/synthetic-gitops-drift-template.yml`](../../.github/workflows/synthetic-gitops-drift-template.yml).
 
 ## What It Runs
 
@@ -67,4 +67,4 @@ Use this template when:
 - you want a stable synthetic artifact bundle for code review
 - you need a CI proof that drift analysis still works without live credentials
 
-Use [Recovery Confidence Routing Review](recovery-confidence-routing-review.md) when you need to choose between config review, mock smoke, and backup/recovery evidence paths.
+Use [Recovery Confidence Routing Review](./recovery-confidence-routing-review.md) when you need to choose between config review, mock smoke, and backup/recovery evidence paths.

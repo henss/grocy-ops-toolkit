@@ -90,8 +90,8 @@ Use these when you need Grocy-like HTTP reads or synthetic API-shape review with
 - Example artifact: `examples/grocy-api-compatibility-matrix.example.json`
 - Example artifact: `examples/grocy-api-deprecation-canary-report.example.json`
 - Example artifact: `examples/grocy-object-coverage-playground.example.json`
-- Reference doc: [Synthetic Grocy Fixture Server](synthetic-fixture-server.md)
-- Reference doc: [Synthetic Object Coverage Playground](synthetic-object-coverage-playground.md)
+- Reference doc: [Synthetic Grocy Fixture Server](../compatibility/synthetic-fixture-server.md)
+- Reference doc: [Synthetic Object Coverage Playground](../compatibility/synthetic-object-coverage-playground.md)
 
 Expected result: you can inspect supported and degraded synthetic API shapes without implying live Grocy certification or support guarantees.
 
@@ -110,7 +110,7 @@ Use these when you need synthetic encrypted backup evidence, restore planning, o
 - Example artifact: `examples/grocy-backup-restore-drill-report.example.json`
 - Example artifact: `examples/grocy-backup-integrity-receipt.example.json`
 - Example artifact: `examples/grocy-backup-integrity-receipt-verification.example.json`
-- Reference doc: [Fixture-Only Restore Drill Walkthrough](fixture-only-restore-drill-walkthrough.md)
+- Reference doc: [Fixture-Only Restore Drill Walkthrough](./fixture-only-restore-drill-walkthrough.md)
 
 Before running the backup commands, copy `examples/grocy-backup.local.example.json` to `config/grocy-backup.local.json` and set `GROCY_BACKUP_PASSPHRASE` to a synthetic value for the current shell.
 
@@ -138,9 +138,9 @@ Pick the smallest slice that answers the current question:
 - For a first public-safe run, use the health failure fixtures and config review fixtures.
 - For HTTP prototyping or API-shape checks, use the fixture API shapes.
 - For recovery confidence, use the backup and recovery fixtures.
-- For one command sequence that combines multiple fixture families, use [Synthetic Grocy Demo Lab](synthetic-demo-lab.md).
+- For one command sequence that combines multiple fixture families, use [Synthetic Grocy Demo Lab](./synthetic-demo-lab.md).
 - For a compact machine-readable proof that the README quickstart recipes still work, use `npm run grocy:quickstart:proof`.
-- For the full example file inventory, use [Synthetic Examples For grocy-ops-toolkit](../examples/README.md).
+- For the full example file inventory, use [Synthetic Examples For grocy-ops-toolkit](../../examples/README.md).
 
 ## Public Boundary Reminder
 

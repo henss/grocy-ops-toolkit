@@ -89,8 +89,8 @@ Use this route when you need recovery confidence, not just config preview confid
 
 When you need a more guided rehearsal after Route 3, use the existing backup walkthroughs instead of inventing a new flow:
 
-- [Fixture-Only Restore Drill Walkthrough](fixture-only-restore-drill-walkthrough.md) for the shortest checkpoint-driven recovery rehearsal.
-- [Synthetic Backup Passphrase Rotation Rehearsal](synthetic-backup-passphrase-rotation-rehearsal.md) when the review question is specifically about wrong-passphrase failure evidence and re-verification under a rotated passphrase.
+- [Fixture-Only Restore Drill Walkthrough](./fixture-only-restore-drill-walkthrough.md) for the shortest checkpoint-driven recovery rehearsal.
+- [Synthetic Backup Passphrase Rotation Rehearsal](./synthetic-backup-passphrase-rotation-rehearsal.md) when the review question is specifically about wrong-passphrase failure evidence and re-verification under a rotated passphrase.
 
 ## Recommended Review Routing
 

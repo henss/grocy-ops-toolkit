@@ -17,16 +17,16 @@ function parsePackageJson(): PackageJson {
 }
 
 describe("Multi-instance namespace prototype doc", () => {
-  it("is linked from the public README and examples index", () => {
-    const readme = readText(path.join(repoRoot, "README.md"));
+  it("is linked from the docs index and examples index", () => {
+    const docsIndex = readText(path.join(repoRoot, "docs", "README.md"));
     const examplesReadme = readText(path.join(repoRoot, "examples", "README.md"));
 
-    expect(readme).toContain("[Multi-Instance Namespace Prototype](docs/multi-instance-namespace-prototype.md)");
-    expect(examplesReadme).toContain("[Multi-Instance Namespace Prototype](../docs/multi-instance-namespace-prototype.md)");
+    expect(docsIndex).toContain("[Multi-Instance Namespace Prototype](./evaluation/multi-instance-namespace-prototype.md)");
+    expect(examplesReadme).toContain("[Multi-Instance Namespace Prototype](../docs/evaluation/multi-instance-namespace-prototype.md)");
   });
 
   it("documents a real script, output artifact, and synthetic boundary", () => {
-    const doc = readText(path.join(repoRoot, "docs", "multi-instance-namespace-prototype.md"));
+    const doc = readText(path.join(repoRoot, "docs", "evaluation", "multi-instance-namespace-prototype.md"));
     const packageJson = parsePackageJson();
 
     expect(doc).toContain("npm run grocy:namespace:prototype");

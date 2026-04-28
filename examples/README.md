@@ -69,10 +69,10 @@ Config sync examples use synthetic product names and IDs. `config-apply-dry-run-
 
 `grocy-backup-integrity-receipt-verification.example.json` shows the public-safe verifier result emitted by `npm run grocy:backup:receipt:verify` when the stored receipt still matches the manifest and proof artifacts.
 
-For the quickest map from these example files to their matching commands and docs, see [Quickstart Fixture Gallery](../docs/quickstart-fixture-gallery.md).
+For the quickest map from these example files to their matching commands and docs, see [Quickstart Fixture Gallery](../docs/evaluation/quickstart-fixture-gallery.md).
 
-For the namespace layout proof that validates synthetic instance roots such as `instances/demo-alpha`, see [Multi-Instance Namespace Prototype](../docs/multi-instance-namespace-prototype.md).
+For the namespace layout proof that validates synthetic instance roots such as `instances/demo-alpha`, see [Multi-Instance Namespace Prototype](../docs/evaluation/multi-instance-namespace-prototype.md).
 
-For a built-checkout preview that uses `npx --no-install grocy-ops-toolkit` to regenerate the health and backup example shapes without a global install step, see [Package Consumer Smoke](../docs/package-consumer-smoke.md#no-install-example-preview) and [Health And Diagnostics](../docs/health-and-diagnostics.md#synthetic-preview).
+For a built-checkout preview that uses `npx --no-install grocy-ops-toolkit` to regenerate the health and backup example shapes without a global install step, see [Package Consumer Smoke](../docs/maintainers/package-consumer-smoke.md#no-install-example-preview) and [Health And Diagnostics](../docs/health-and-diagnostics.md#synthetic-preview).
 
-The repository-level [Synthetic Grocy Demo Lab](../docs/synthetic-demo-lab.md) shows how to combine these examples with generated local artifacts from a clean checkout.
+The repository-level [Synthetic Grocy Demo Lab](../docs/evaluation/synthetic-demo-lab.md) shows how to combine these examples with generated local artifacts from a clean checkout.

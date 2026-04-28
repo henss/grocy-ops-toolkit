@@ -93,11 +93,11 @@ The verifier reruns schema validation, validates the receipt signature against t
 
 The example backup source under `examples/synthetic-grocy-backup-source` is intentionally synthetic. Use it to test the snapshot, encrypted archive, verification, and restore loop before pointing a local config at private Grocy files.
 
-For a synthetic passphrase-rotation rehearsal that intentionally verifies the wrong-passphrase failure mode before creating a fresh archive, see [Synthetic Backup Passphrase Rotation Rehearsal](synthetic-backup-passphrase-rotation-rehearsal.md).
+For a synthetic passphrase-rotation rehearsal that intentionally verifies the wrong-passphrase failure mode before creating a fresh archive, see [Synthetic Backup Passphrase Rotation Rehearsal](evaluation/synthetic-backup-passphrase-rotation-rehearsal.md).
 
-For a single command walkthrough that records explicit recovery checkpoints, see [Fixture-Only Restore Drill Walkthrough](fixture-only-restore-drill-walkthrough.md).
+For a single command walkthrough that records explicit recovery checkpoints, see [Fixture-Only Restore Drill Walkthrough](evaluation/fixture-only-restore-drill-walkthrough.md).
 
-For route selection guidance across config preview, mock smoke, and backup recovery evidence, see [Recovery Confidence Routing Review](recovery-confidence-routing-review.md).
+For route selection guidance across config preview, mock smoke, and backup recovery evidence, see [Recovery Confidence Routing Review](evaluation/recovery-confidence-routing-review.md).
 
 Run the drill with:
 
