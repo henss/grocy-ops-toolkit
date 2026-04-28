@@ -73,6 +73,6 @@ For the quickest map from these example files to their matching commands and doc
 
 For the namespace layout proof that validates synthetic instance roots such as `instances/demo-alpha`, see [Multi-Instance Namespace Prototype](../docs/multi-instance-namespace-prototype.md).
 
-For a built-checkout preview that uses `npx --no-install grocy-ops-toolkit` to regenerate the health and backup example shapes without a global install step, see the repository-level [No-Install Example Preview](../README.md#no-install-example-preview).
+For a built-checkout preview that uses `npx --no-install grocy-ops-toolkit` to regenerate the health and backup example shapes without a global install step, see [Package Consumer Smoke](../docs/package-consumer-smoke.md#no-install-example-preview) and [Health And Diagnostics](../docs/health-and-diagnostics.md#synthetic-preview).
 
 The repository-level [Synthetic Grocy Demo Lab](../docs/synthetic-demo-lab.md) shows how to combine these examples with generated local artifacts from a clean checkout.
