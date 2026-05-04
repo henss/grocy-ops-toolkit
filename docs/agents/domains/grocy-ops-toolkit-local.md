@@ -13,6 +13,13 @@ Repo-local architecture, docs, and verification surfaces for grocy-ops-toolkit.
 - status: `active`
 - visibility: `public`
 
+## Drill Down
+
+### Components
+
+- `component:grocy-ops-toolkit-source`
+
+
 ## Relations
 
 ### `contains`
