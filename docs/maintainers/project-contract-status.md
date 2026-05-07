@@ -2,6 +2,8 @@
 
 This repository does not currently record a separate project contract beyond the public package surfaces already committed here.
 
+For an active agent or maintainer execution, a runtime launch packet may still be the authoritative execution contract for that bounded session. The absence of a separate recorded contract artifact does not override that packet; use the packet for session scope, deliverables, review gates, and continuation handling, while keeping this repository's public contract limited to the committed surfaces below.
+
 Use these surfaces as the current public contract:
 
 - `README.md` for the project purpose, default setup paths, npm-first commands, and routine validation commands.
@@ -31,4 +33,3 @@ Stop for explicit review before:
 - expanding package exports or making broader API commitments
 - claiming support for a real Grocy release without reviewed evidence
 - adding examples or workflows that could expose private household, shopping, planning, account, or operations data
-
