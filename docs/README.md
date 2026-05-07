@@ -33,6 +33,7 @@ Use this index to find the right `grocy-ops-toolkit` workflow. The docs root kee
 ## Maintainer / Contributor Workflows
 
 - [Package Consumer Smoke](./maintainers/package-consumer-smoke.md) documents the npm-first sample consumer check and no-install preview path.
+- [Project Contract Status](./maintainers/project-contract-status.md) clarifies the current public contract surfaces and review gates.
 - [Public Artifacts And Support](./maintainers/public-artifacts-and-support.md) covers review dashboards, redaction audits, and sanitized support bundles.
 - [Agent-Surface Pre-Edit Check](./maintainers/agent-surface-preedit.md) documents the repo-local surface guard.
 - [Contributing](../CONTRIBUTING.md) covers public-safe contribution expectations.
