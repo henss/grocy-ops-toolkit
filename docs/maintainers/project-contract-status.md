@@ -1,8 +1,8 @@
 # Project Contract Status
 
-This repository does not currently record a separate project contract beyond the public package surfaces already committed here.
+This repository does not currently record a separate project contract beyond the public package surfaces already committed here. If a private tracker, ledger, or orchestration lookup reports that no contract artifact was found under `ledgers/contracts`, treat that as an absence of an additional recorded contract, not as evidence that an active execution has no contract.
 
-For an active agent or maintainer execution, a runtime launch packet may still be the authoritative execution contract for that bounded session. The absence of a separate recorded contract artifact does not override that packet; use the packet for session scope, deliverables, review gates, and continuation handling, while keeping this repository's public contract limited to the committed surfaces below.
+For an active agent or maintainer execution, a runtime launch packet may still be the authoritative execution contract for that bounded session. The absence of a separate recorded contract artifact, including a missing `ledgers/contracts` entry, does not override that packet; use the packet for session scope, deliverables, review gates, and continuation handling, while keeping this repository's public contract limited to the committed surfaces below.
 
 Use these surfaces as the current public contract:
 
