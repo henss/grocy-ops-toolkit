@@ -46,5 +46,5 @@ The replay fetch adapter returns the recorded JSON body and status code for know
 
 ## Public Boundary
 
-Keep trace artifacts redacted and read-only. Do not extend this prototype to store live base URLs, API keys, household identifiers, shopping intent workflows, pantry policy, calendar/task integrations, or other Stefan-specific operating context.
+Keep trace artifacts redacted and read-only. Do not extend this prototype to store live base URLs, API keys, household identifiers, shopping intent workflows, pantry policy, calendar/task integrations, or other private operating context.
 
