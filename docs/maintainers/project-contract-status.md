@@ -4,6 +4,8 @@ This repository does not currently record a separate project contract beyond the
 
 For an active agent or maintainer execution, a runtime launch packet may still be the authoritative execution contract for that bounded session. The absence of a separate recorded contract artifact, including a missing `ledgers/contracts` entry, does not override that packet; use the packet for session scope, deliverables, review gates, and continuation handling, while keeping this repository's public contract limited to the committed surfaces below.
 
+External synthesized summaries from a project registry, synced tracker cache, or local-probe automation can help with discovery, but they are secondary to the committed repo surfaces when they drift. If a synthesized summary conflicts with `README.md`, `package.json`, or the maintained docs index, treat the committed repo content as the public-safe source of truth and update the synthesized source separately.
+
 Use these surfaces as the current public contract:
 
 - `README.md` for the project purpose, default setup paths, npm-first commands, and routine validation commands.
@@ -15,6 +17,8 @@ Use these surfaces as the current public contract:
 ## Current Scope
 
 `grocy-ops-toolkit` is a TypeScript utility toolkit for safe Grocy GitOps, health checks, synthetic evaluation, and encrypted local backups. Public defaults should stay conventional for that role: npm-first commands, no committed package-manager lockfile, simple `config/`, `data/`, `backups/`, and `restore/` paths, and CI-defended `typecheck`, `build`, and `test` checks.
+
+Generated agent-facing verification notes should mirror that npm-first surface instead of introducing a separate package-manager default.
 
 The repository should be treated as support infrastructure for Grocy operations and related tooling, not as a standalone product roadmap. New docs or examples should explain the existing toolkit surfaces without implying package publication, release automation, broader compatibility promises, or new public API commitments unless those decisions are reviewed explicitly.
 

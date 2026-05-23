@@ -5,16 +5,16 @@ summary: Narrow default verification commands for repo-local changes; prefer mor
 status: active
 visibility: public
 commands:
-  - command: pnpm verify:session
+  - command: npm run verify:session
     cwd: .
     purpose: Repo-local verification candidate.
-  - command: pnpm test
+  - command: npm test
     cwd: .
     purpose: Repo-local verification candidate.
-  - command: pnpm build
+  - command: npm run build
     cwd: .
     purpose: Repo-local verification candidate.
-  - command: pnpm typecheck
+  - command: npm run typecheck
     cwd: .
     purpose: Repo-local verification candidate.
 relations:

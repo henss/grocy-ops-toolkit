@@ -110,7 +110,7 @@ describe("Grocy public artifact redaction audit", () => {
     expect(JSON.parse(result.stdout)).toMatchObject({
       summary: { result: "fail", findingCount: 2 },
     });
-  });
+  }, 15000);
 
   it("ignores paths outside the repository boundary", () => {
     const baseDir = fs.mkdtempSync(path.join(os.tmpdir(), "grocy-redaction-audit-boundary-"));

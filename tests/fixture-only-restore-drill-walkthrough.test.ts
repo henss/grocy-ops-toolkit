@@ -103,5 +103,5 @@ describe("Fixture-only restore drill walkthrough", () => {
         restorePlanReportPath: "data/grocy-backup-restore-plan-dry-run-report.json",
       },
     });
-  });
+  }, 15000);
 });

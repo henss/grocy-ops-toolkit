@@ -14,16 +14,16 @@ ID: `test-scope:grocy-ops-toolkit-verification`
 
 Narrow default verification commands for repo-local changes; prefer more specific tests when the task identifies them.
 
-- command: `pnpm verify:session`
+- command: `npm run verify:session`
   purpose: Repo-local verification candidate.
 
-- command: `pnpm test`
+- command: `npm test`
   purpose: Repo-local verification candidate.
 
-- command: `pnpm build`
+- command: `npm run build`
   purpose: Repo-local verification candidate.
 
-- command: `pnpm typecheck`
+- command: `npm run typecheck`
   purpose: Repo-local verification candidate.
 
 Verifies:
